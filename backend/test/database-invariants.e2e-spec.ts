@@ -233,10 +233,41 @@ describe('Database Invariants & Constraints (Integration)', () => {
       });
       expect(user.employeeId).toBe(emp.id);
 
-      // Verify deleting User sets employeeId to null on user and does NOT delete the Employee
+      // Verify deleting User does NOT delete Employee
       await prisma.user.delete({ where: { id: user.id } });
       const empAfter = await prisma.employee.findUnique({ where: { id: emp.id } });
       expect(empAfter).not.toBeNull();
+    });
+
+    it('should set users.employee_id to NULL when referenced Employee is deleted (ON DELETE SET NULL)', async () => {
+      const emp = await prisma.employee.create({
+        data: {
+          organizationId: orgAId,
+          employeeCode: `EMP-DEL-${Date.now()}`,
+          fullName: 'Staff to Delete',
+          email: `emp-del-${Date.now()}@test.com`,
+          hireDate: new Date(),
+        },
+      });
+
+      const user = await prisma.user.create({
+        data: {
+          organizationId: orgAId,
+          fullName: 'User Account Attached',
+          email: `user-attached-${Date.now()}@test.com`,
+          passwordHash: 'hash',
+          employeeId: emp.id,
+        },
+      });
+      expect(user.employeeId).toBe(emp.id);
+
+      // Delete the Employee directly from PostgreSQL
+      await prisma.employee.delete({ where: { id: emp.id } });
+
+      // Verify User still exists but employeeId has been set to NULL by PostgreSQL ON DELETE SET NULL
+      const userAfter = await prisma.user.findUnique({ where: { id: user.id } });
+      expect(userAfter).not.toBeNull();
+      expect(userAfter?.employeeId).toBeNull();
     });
 
     it('should reject linking two users to the same Employee (@@unique on employee_id)', async () => {
