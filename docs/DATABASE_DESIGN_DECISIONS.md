@@ -1,17 +1,18 @@
 # QUYẾT ĐỊNH THIẾT KẾ CƠ SỞ DỮ LIỆU (DATABASE DESIGN DECISIONS)
 **Dự án:** BizPro+ Integrated Modular Business Management System  
-**Phiên bản:** 1.1 — Final Pre-Migration Baseline  
-**Trạng thái:** Hoàn thiện thiết kế chi tiết — Chờ phê duyệt Gate Phase 1C-B trước khi vào Phase 1C-C  
+**Phiên bản:** 1.2 — Technical Review & Pre-Migration Gate  
+**Trạng thái:** Hoàn thiện toàn diện theo yêu cầu thẩm định của Tech Lead / Architect — Dừng tại Gate Phase 1C-B  
 
 ---
 
 ## 1. MỤC ĐÍCH TÀI LIỆU
 Tài liệu này chuẩn hóa và chốt dứt điểm các quyết định thiết kế cơ sở dữ liệu vật lý cho BizPro+ trước khi can thiệp vào `prisma/schema.prisma` và khởi tạo migration PostgreSQL đầu tiên.
 
-Mọi quyết định tuân thủ nghiêm ngặt 3 nguyên tắc kỹ thuật cốt lõi:
+Mọi quyết định tuân thủ nghiêm ngặt 4 nguyên tắc kỹ thuật cốt lõi:
 1. **Toàn vẹn quan hệ (Referential & Relational Integrity) là tối thượng:** Không dựa vào niềm tin rằng tầng ứng dụng luôn chạy đúng; cơ sở dữ liệu PostgreSQL phải là tầng chốt chặn phòng thủ cuối cùng.
-2. **Không đa nghĩa dữ liệu (Single Source of Truth):** Không lưu hai khóa ngoại hoặc hai trường biểu diễn cùng một sự kiện nếu không có mục đích nghiệp vụ riêng biệt.
-3. **Phù hợp với phạm vi MVP và sẵn sàng mở rộng (No Over-engineering):** Thiết kế tinh gọn, có khả năng mở rộng không gây phá vỡ cấu trúc (zero-breaking upgrade) khi dự án tiến sang các giai đoạn tiếp theo.
+2. **Không đa nghĩa dữ liệu (Single Source of Truth):** Một sự kiện chỉ có một nguồn dữ liệu gốc duy nhất. Dữ liệu tổng hợp (materialized aggregate) phải được đồng bộ nguyên khối (atomic) trong cùng một database transaction.
+3. **Phòng thủ đa tầng (Defense in Depth):** Ràng buộc dữ liệu được bảo vệ đồng thời ở 3 tầng: Tầng Database (NOT NULL, CHECK, UNIQUE, Composite FK, Trigger), Tầng Application (Zod Pipes, Guards, Transactions `SELECT ... FOR UPDATE`), và Tầng UI (Validation, Feedback).
+4. **Phù hợp với phạm vi MVP và sẵn sàng mở rộng (No Over-engineering):** Thiết kế tinh gọn, có khả năng mở rộng không gây phá vỡ cấu trúc (zero-breaking upgrade) khi dự án tiến sang các giai đoạn tiếp theo.
 
 ---
 
@@ -32,16 +33,33 @@ Mọi quyết định tuân thủ nghiêm ngặt 3 nguyên tắc kỹ thuật c�
 
 ### QUYẾT ĐỊNH 02: BẢO VỆ BẤT BIẾN TỒN KHO BẰNG CHECK CONSTRAINTS TẠI POSTGRESQL
 - **Hiện trạng:** Prisma ORM không hỗ trợ native directive cho SQL `CHECK`. Nếu chỉ kiểm tra ở Application Service, trong các kịch bản đua tranh truy cập (high-concurrency race condition) khi nhiều giao dịch bán hàng diễn ra cùng lúc, tồn kho có thể bị ghi nhận âm hoặc số lượng giữ vượt quá tồn kho.
+- **Lưu ý kỹ thuật về NULLability:** Trong PostgreSQL, điều kiện `CHECK (column >= 0)` sẽ trả về `TRUE` nếu `column` là `NULL`. Do đó, mọi cột áp dụng CHECK constraint bắt buộc phải có thuộc tính **`NOT NULL`**.
+- **Kiểm tra schema thực tế:**
+  * Bảng `inventory_balances`:
+    - `quantity_on_hand Decimal(12, 3) NOT NULL DEFAULT 0.000` (Prisma: `Decimal @default(0.000)`)
+    - `quantity_reserved Decimal(12, 3) NOT NULL DEFAULT 0.000` (Prisma: `Decimal @default(0.000)`)
+  * Bảng `inventory_reservations`:
+    - `quantity Decimal(12, 3) NOT NULL` (Prisma: `Decimal`)
+  * Bảng `sales_order_items`:
+    - `quantity Decimal(12, 3) NOT NULL` (Prisma: `Decimal`)
+    - `fulfilled_quantity Decimal(12, 3) NOT NULL DEFAULT 0.000` (Prisma: `Decimal @default(0.000)`)
+  * Bảng `payment_transactions`:
+    - `amount Decimal(15, 2) NOT NULL` (Prisma: `Decimal`)
+  * Bảng `sales_orders`:
+    - `paid_amount Decimal(15, 2) NOT NULL DEFAULT 0.00`
+    - `remaining_balance Decimal(15, 2) NOT NULL DEFAULT 0.00`
+    - `overpaid_amount Decimal(15, 2) NOT NULL DEFAULT 0.00`
 - **Hệ thống bất biến vật lý bắt buộc bảo vệ:**
   $$\text{OnHand} \ge 0$$
   $$\text{Reserved} \ge 0$$
   $$\text{Reserved} \le \text{OnHand}$$
   $$\text{Available} = \text{OnHand} - \text{Reserved} \ge 0$$
-- **Cấu trúc trường thực tế trên bảng `inventory_balances`:**
-  * `quantity_on_hand Decimal(12, 3) NOT NULL DEFAULT 0.000`
-  * `quantity_reserved Decimal(12, 3) NOT NULL DEFAULT 0.000`
-  * Không có trường NULL, dữ liệu khởi tạo ban đầu sạch.
-- **Quy tắc bảo toàn bất biến trong toàn bộ vòng đời kho:**
+  $$\text{FulfilledQuantity} \ge 0$$
+  $$\text{FulfilledQuantity} \le \text{Quantity}$$
+  $$\text{OrderQuantity} > 0$$
+  $$\text{TransactionAmount} > 0$$
+  $$\text{PaidAmount} \ge 0, \quad \text{RemainingBalance} \ge 0, \quad \text{OverpaidAmount} \ge 0$$
+- **Quy tắc bảo toàn bất biến qua các nghiệp vụ kho:**
   | Nghiệp vụ kho | `quantity_on_hand` ($H$) | `quantity_reserved` ($R$) | Đánh giá điều kiện $R \le H$ và $H, R \ge 0$ |
   |---|:---:|:---:|---|
   | **Nhập kho (`StockReceipt`)** | $+ \Delta Q$ ($\Delta Q > 0$) | Không đổi ($0$) | $H$ tăng, $R$ giữ nguyên $\rightarrow$ Luôn thỏa mãn. |
@@ -52,107 +70,103 @@ Mọi quyết định tuân thủ nghiêm ngặt 3 nguyên tắc kỹ thuật c�
   | **Điều chỉnh kiểm kê giảm** | $- \Delta Q$ | Không đổi ($0$) | Tương tự xuất kho: Không thể giảm tồn thực tế xuống dưới số lượng đã cam kết giữ hàng cho khách. |
 - **SQL Migration thực thi trong Phase 1C-C:**
   ```sql
+  -- 1. Bảo vệ tồn kho bất biến
   ALTER TABLE "inventory_balances"
     ADD CONSTRAINT "chk_inventory_balances_on_hand_non_negative" CHECK ("quantity_on_hand" >= 0),
     ADD CONSTRAINT "chk_inventory_balances_reserved_non_negative" CHECK ("quantity_reserved" >= 0),
     ADD CONSTRAINT "chk_inventory_balances_reserved_lte_on_hand" CHECK ("quantity_reserved" <= "quantity_on_hand");
 
+  -- 2. Bảo vệ giữ chỗ kho
   ALTER TABLE "inventory_reservations"
     ADD CONSTRAINT "chk_inventory_reservations_quantity_positive" CHECK ("quantity" > 0);
+
+  -- 3. Bảo vệ chi tiết đơn hàng
+  ALTER TABLE "sales_order_items"
+    ADD CONSTRAINT "chk_sales_order_items_quantity_positive" CHECK ("quantity" > 0),
+    ADD CONSTRAINT "chk_sales_order_items_fulfilled_non_negative" CHECK ("fulfilled_quantity" >= 0),
+    ADD CONSTRAINT "chk_sales_order_items_fulfilled_lte_quantity" CHECK ("fulfilled_quantity" <= "quantity");
+
+  -- 4. Bảo vệ giao dịch thanh toán
+  ALTER TABLE "payment_transactions"
+    ADD CONSTRAINT "chk_payment_transactions_amount_positive" CHECK ("amount" > 0);
+
+  -- 5. Bảo vệ tổng hợp thanh toán đơn hàng
+  ALTER TABLE "sales_orders"
+    ADD CONSTRAINT "chk_sales_orders_paid_amount_non_negative" CHECK ("paid_amount" >= 0),
+    ADD CONSTRAINT "chk_sales_orders_remaining_balance_non_negative" CHECK ("remaining_balance" >= 0),
+    ADD CONSTRAINT "chk_sales_orders_overpaid_amount_non_negative" CHECK ("overpaid_amount" >= 0);
   ```
 
 ---
 
-### QUYẾT ĐỊNH 03: GIẢI QUYẾT DỨT ĐIỂM QUAN HỆ USER – EMPLOYEE VỚI 1 KHÓA NGOẠI DUY NHẤT
-- **Vấn đề đã rà soát:** Trong schema hiện tại, `User` có `employee_id` (với quan hệ `@relation` và `@unique`) trỏ sang `Employee`. Đồng thời `Employee` lại có cột `user_id` (scalar UUID, `@unique`) nhưng không gắn quan hệ. Việc duy trì 2 cột FK trỏ chéo nhau dẫn đến nguy cơ sai lệch trạng thái (User A trỏ sang Emp 1 trong khi Emp 1 trỏ sang User B).
-- **Phân tích bản chất nghiệp vụ 1-1:**
-  1. **Tính tùy chọn 2 chiều (Optional 1-1: 0..1 to 0..1):**
-     * Một `Employee` (Hồ sơ nhân sự) có thể **chưa hoặc không có** tài khoản đăng nhập (ví dụ: công nhân kho, tạp vụ, nhân viên thời vụ). Do đó quan hệ là tùy chọn từ phía Employee.
-     * Một `User` (Tài khoản người dùng) có thể là tài khoản quản trị hệ sinh thái (System Superadmin, External Technical Auditor) không thuộc biên chế nhân sự của doanh nghiệp. Do đó quan hệ là tùy chọn từ phía User.
-  2. **Bên sở hữu khóa ngoại (FK Ownership):**
-     * `User` là thực thể sở hữu khóa ngoại vật lý: `users.employee_id REFERENCES employees(id)`.
-     * `Employee` là thực thể nhân sự gốc (chứa lý lịch, phòng ban, chức vụ, hợp đồng). `User` là thông tin xác thực (Email, Password Hash, Quyền hạn) được sinh ra để định danh cho nhân viên đó trên hệ thống số.
-     * Ràng buộc: `users.employee_id` được gắn thuộc tính **`@unique`** và **`onDelete: SetNull`**. Khi tài khoản đăng nhập bị xóa, hồ sơ nhân viên trong bảng `employees` vẫn được bảo toàn nguyên vẹn cho mục đích chấm công và khai báo thuế.
-- **Quyết định thiết kế cuối cùng:**
-  1. **Loại bỏ hoàn toàn cột vật lý `user_id` trên bảng `employees`.** Bảng `employees` không lưu bất kỳ khóa ngoại nào về bảng `users`.
-  2. Trong Prisma Schema:
-     * Model `User`:
-       ```prisma
-       employeeId String?   @unique @map("employee_id") @db.Uuid
-       employee   Employee? @relation("UserEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
-       ```
-     * Model `Employee`:
-       ```prisma
-       user User? @relation("UserEmployee")
-       // Tuyệt đối không có trường scalar userId!
-       ```
-  3. **Chiến lược Migration:**
-     * Trước khi xóa cột `employees.user_id`, chạy script chuyển tiếp:
-       ```sql
-       UPDATE users u
-       SET employee_id = e.id
-       FROM employees e
-       WHERE e.user_id = u.id AND u.employee_id IS NULL;
-       
-       ALTER TABLE "employees" DROP COLUMN IF EXISTS "user_id";
-       ```
-  4. **Tác động đến Backend:**
-     * `AuthService` / `UsersService`: Khi liên kết người dùng với nhân viên, cập nhật trường `users.employeeId`.
-     * `EmployeesService`: Khi cần thông tin tài khoản của nhân viên, sử dụng truy vấn `prisma.employee.findUnique({ include: { user: true } })`. Cơ chế eager load của Prisma hoàn toàn tự động dựa trên quan hệ 1-1 ảo.
+### QUYẾT ĐỊNH 03: QUAN HỆ USER – EMPLOYEE (SINGLE PHYSICAL FK & PRE-MIGRATION VALIDATION)
+- **Bản chất nghiệp vụ:** Quan hệ **1-1 tùy chọn hai chiều (0..1 to 0..1)**.
+  - Một `Employee` có thể không có tài khoản phần mềm (công nhân, tạp vụ, tài xế không dùng hệ thống).
+  - Một `User` có thể không thuộc nhân sự công ty (tài khoản IT Support, chuyên gia kiểm toán bên ngoài).
+- **Quyền sở hữu khóa ngoại (FK Ownership):**
+  - **`User` là bên sở hữu khóa ngoại vật lý duy nhất:** Cột `users.employee_id UUID UNIQUE REFERENCES employees(id) ON DELETE SET NULL`.
+  - **`Employee` KHÔNG lưu cột khóa ngoại vật lý:** Loại bỏ hoàn toàn cột `employees.user_id`. Trong model Prisma, chỉ giữ trường quan hệ ảo `user User? @relation("UserEmployee")`.
+- **Hành vi tham chiếu (`ON DELETE SET NULL`):** Khi tài khoản `User` bị xóa vật lý, hồ sơ nhân sự của nhân viên trong bảng `employees` vẫn được bảo toàn nguyên vẹn.
+  *Lưu ý nghiệp vụ:* Khóa tài khoản nhân viên không kích hoạt `ON DELETE SET NULL`, mà được thực hiện qua trường trạng thái `User.status = INACTIVE` ở tầng nghiệp vụ.
+- **Bộ Kiểm tra Tiền di trú (Pre-Migration Validation Queries) nghiêm ngặt:**
+  Trước khi thực hiện migration, kịch bản phải thực thi khối kiểm tra sau; nếu có bất kỳ vi phạm nào, migration sẽ **ABORT ngay lập tức** kèm thông báo lỗi chi tiết thay vì âm thầm bỏ qua:
+
+  ```sql
+  DO $$
+  DECLARE
+    v_conflicts INT := 0;
+    v_multi_user INT := 0;
+    v_multi_emp INT := 0;
+  BEGIN
+    -- 1. Kiểm tra quan hệ mâu thuẫn giữa 2 cột (User trỏ Emp A nhưng Emp A trỏ User B)
+    SELECT COUNT(*) INTO v_conflicts
+    FROM users u
+    JOIN employees e ON u.employee_id = e.id
+    WHERE e.user_id IS NOT NULL AND e.user_id <> u.id;
+
+    IF v_conflicts > 0 THEN
+      RAISE EXCEPTION 'MIGRATION ABORTED: Phát hiện % bản ghi có quan hệ mâu thuẫn chéo giữa users.employee_id và employees.user_id!', v_conflicts;
+    END IF;
+
+    -- 2. Kiểm tra 1 Employee bị liên kết bởi nhiều User
+    SELECT COUNT(*) INTO v_multi_user
+    FROM (
+      SELECT employee_id FROM users WHERE employee_id IS NOT NULL GROUP BY employee_id HAVING COUNT(*) > 1
+    ) sub;
+
+    IF v_multi_user > 0 THEN
+      RAISE EXCEPTION 'MIGRATION ABORTED: Phát hiện % Employee đang bị liên kết bởi nhiều User!', v_multi_user;
+    END IF;
+
+    -- 3. Kiểm tra 1 User bị liên kết bởi nhiều Employee
+    SELECT COUNT(*) INTO v_multi_emp
+    FROM (
+      SELECT user_id FROM employees WHERE user_id IS NOT NULL GROUP BY user_id HAVING COUNT(*) > 1
+    ) sub;
+
+    IF v_multi_emp > 0 THEN
+      RAISE EXCEPTION 'MIGRATION ABORTED: Phát hiện % User đang bị liên kết bởi nhiều Employee!', v_multi_emp;
+    END IF;
+
+    -- 4. An toàn: Đồng bộ dữ liệu hợp lệ từ employees.user_id sang users.employee_id (nếu u.employee_id còn NULL)
+    UPDATE users u
+    SET employee_id = e.id
+    FROM employees e
+    WHERE e.user_id = u.id AND u.employee_id IS NULL;
+
+    -- 5. Xóa bỏ cột vật lý user_id thừa trên employees
+    ALTER TABLE "employees" DROP COLUMN IF EXISTS "user_id";
+  END $$;
+  ```
 
 ---
 
-### QUYẾT ĐỊNH 04: CẤU TRÚC SNAPSHOT ĐỊA CHỈ GIAO HÀNG (SHIPPING ADDRESS SNAPSHOT)
-- **Vấn đề nghiệp vụ:** Khách hàng (`Customer`) có thể cập nhật thông tin địa chỉ văn phòng hoặc chuyển trụ sở. Nếu đơn hàng cũ chỉ join động sang `Customer.address`, các đơn hàng đã hoàn tất trong quá khứ sẽ bị sai lệch thông tin lịch sử giao nhận, gây rủi ro tranh chấp pháp lý và kiểm toán kế toán.
-- **Quy tắc thiết kế chốt:**
-  1. **Độc lập và Bất biến (Immutable Snapshot):**
-     * Dữ liệu địa chỉ giao nhận tại thời điểm đặt hàng được chụp lại thành một JSON document lưu vào trường `shippingAddressSnapshot` kiểu `Json` (PostgreSQL `JSONB`) trên bảng `sales_orders`.
-     * Một khi đơn hàng được tạo (`INSERT`), document này trở thành **bất biến**; không bao giờ bị ghi đè khi thông tin khách hàng trong danh mục đối tác thay đổi.
-  2. **Các trường tra cứu phục vụ báo cáo và lọc dữ liệu (Queryable Lookup Fields):**
-     * Để báo cáo doanh thu theo Tỉnh/Thành phố hoặc tích hợp phân vùng giao vận không phải parse JSON trong mệnh đề `WHERE` và `GROUP BY`, bổ sung 3 cột tra cứu chuẩn hóa:
-       - `shippingRecipientName String? @map("shipping_recipient_name") @db.VarChar(255)`
-       - `shippingPhone String? @map("shipping_phone") @db.VarChar(50)`
-       - `shippingProvinceCode String? @map("shipping_province_code") @db.VarChar(20)`
-       - `shippingDistrictCode String? @map("shipping_district_code") @db.VarChar(20)`
-       - `shippingWardCode String? @map("shipping_ward_code") @db.VarChar(20)`
-       - `shippingFullAddress String? @map("shipping_full_address") @db.Text`
-  3. **Nguyên tắc đồng bộ:**
-     * Các cột tra cứu (`shippingProvinceCode`, v.v.) **bắt buộc được trích xuất trực tiếp từ chính `shippingAddressSnapshot`** tại thời điểm tạo đơn hàng (trong câu lệnh `INSERT`).
-     * Không có luồng dữ liệu thứ hai cập nhật các trường này từ bảng `customers`, triệt tiêu hoàn toàn nguy cơ lệch pha dữ liệu.
-  4. **Cấu trúc JSON Schema chuẩn hóa cho `shippingAddressSnapshot`:**
-     ```json
-     {
-       "recipientName": "Nguyễn Văn Hùng",
-       "phone": "0912345678",
-       "alternatePhone": "0987654321",
-       "addressLine": "Số 18, Ngõ 45, Đường Trần Thái Tông",
-       "wardCode": "0012",
-       "wardName": "Phường Dịch Vọng Hậu",
-       "districtCode": "005",
-       "districtName": "Quận Cầu Giấy",
-       "provinceCode": "01",
-       "provinceName": "Thành phố Hà Nội",
-       "deliveryNotes": "Giao hàng trong giờ hành chính, gọi điện trước khi đến"
-     }
-     ```
+### QUYẾT ĐỊNH 04: KIẾN TRÚC THANH TOÁN (PAYMENT ARCHITECTURE) TOÀN DIỆN
+- **Phân định 2 trạng thái độc lập:**
+  1. `SalesOrderStatus` (Tiến độ kho/giao nhận): `DRAFT`, `CONFIRMED`, `PARTIALLY_FULFILLED`, `FULFILLED`, `CANCELLED`, `ON_HOLD`.
+  2. `PaymentStatus` (Nghĩa vụ tài chính): `UNPAID`, `PARTIALLY_PAID`, `PAID`, `REFUNDED`.
 
----
-
-### QUYẾT ĐỊNH 05: KIẾN TRÚC THANH TOÁN (PAYMENT ARCHITECTURE) VÀ CÔNG NỢ
-- **Phân định rõ ràng các khái niệm nghiệp vụ:**
-  1. **Trạng thái Đơn hàng (`SalesOrderStatus`):** Phản ánh tiến độ giao vận và giữ chỗ hàng hóa (`DRAFT`, `CONFIRMED`, `PARTIALLY_FULFILLED`, `FULFILLED`, `CANCELLED`, `ON_HOLD`).
-  2. **Trạng thái Thanh toán (`PaymentStatus`):** Phản ánh nghĩa vụ tài chính của khách hàng đối với đơn hàng (`UNPAID`, `PARTIALLY_PAID`, `PAID`, `REFUNDED`).
-  3. **Giao dịch Thanh toán (`PaymentTransaction`):** Ghi nhận từng lần phát sinh dòng tiền thực tế (thanh toán cọc, trả theo đợt, thanh toán nốt hoặc hoàn tiền).
-- **Phạm vi MVP vs Phạm vi Mở rộng tương lai:**
-  * **Triển khai trong MVP (Phase 1C):**
-    - Thêm model `PaymentTransaction` lưu lịch sử giao dịch tiền mặt, chuyển khoản ngân hàng (Napas/VietQR), quẹt thẻ.
-    - Hỗ trợ thanh toán một phần (đặt cọc, trả góp theo đợt).
-    - Hỗ trợ hoàn tiền (Refund) khi hủy đơn hoặc giảm giá trị đơn hàng.
-    - Cập nhật số tiền thực thu (`paidAmount`) và số tiền còn nợ (`remainingBalance`) trực tiếp trên `SalesOrder` trong cùng 1 database transaction.
-  * **Để dành cho giai đoạn mở rộng sau MVP:**
-    - Kết nối Webhook tự động đối soát với cổng thanh toán ngân hàng / Open Banking API.
-    - Bù trừ công nợ đa đơn hàng phức tạp (Credit Memo / Debit Memo kế toán doanh nghiệp lớn).
-- **Mô hình `PaymentTransaction` trong Prisma Schema:**
+- **Mô hình `PaymentTransaction`:**
   ```prisma
   enum PaymentMethod {
     CASH
@@ -183,9 +197,9 @@ Mọi quyết định tuân thủ nghiêm ngặt 3 nguyên tắc kỹ thuật c�
     idempotencyKey  String?                @map("idempotency_key") @db.VarChar(100)
     type            PaymentTransactionType @default(PAYMENT)
     method          PaymentMethod          @default(BANK_TRANSFER)
-    status          TransactionStatus      @default(SUCCESS)
+    status          TransactionStatus      @default(PENDING) // BẮT BUỘC PENDING, TUYỆT ĐỐI KHÔNG DEFAULT SUCCESS
     amount          Decimal                @db.Decimal(15, 2)
-    referenceCode   String?                @map("reference_code") @db.VarChar(100) // Mã tham chiếu ngân hàng/FT code
+    referenceCode   String?                @map("reference_code") @db.VarChar(100)
     transactedAt    DateTime               @default(now()) @map("transacted_at") @db.Timestamptz
     note            String?                @db.Text
     createdBy       String                 @map("created_by") @db.Uuid
@@ -203,79 +217,180 @@ Mọi quyết định tuân thủ nghiêm ngặt 3 nguyên tắc kỹ thuật c�
     @@map("payment_transactions")
   }
   ```
-- **Quy tắc toán học tính Số tiền Thực thu và Công nợ:**
-  1. **Số tiền thực thu của đơn hàng (`paidAmount`):**
-     $$\text{paidAmount} = \sum_{\substack{\text{type} = \text{PAYMENT} \\ \text{status} = \text{SUCCESS}}} \text{amount} - \sum_{\substack{\text{type} = \text{REFUND} \\ \text{status} = \text{SUCCESS}}} \text{amount}$$
-     *Các giao dịch có `status = FAILED`, `CANCELLED` hoặc `PENDING` bị loại bỏ 100% khỏi công thức tính toán.*
-  2. **Số tiền còn phải thanh toán của đơn hàng (`remainingBalance`):**
-     $$\text{remainingBalance} = \max(0, \text{totalAmount} - \text{paidAmount})$$
-  3. **Tổng công nợ phải thu của khách hàng (Customer Receivables):**
-     $$\text{Total Customer Debt} = \sum_{\substack{\text{sales\_orders} \\ \text{status} \ne \text{CANCELLED}}} \text{remainingBalance}$$
-  4. **Quy tắc chuyển dịch trạng thái thanh toán (`PaymentStatus`):**
-     * Nếu $\text{paidAmount} = 0$: `UNPAID`.
-     * Nếu $0 < \text{paidAmount} < \text{totalAmount}$: `PARTIALLY_PAID` (Áp dụng khi khách đặt cọc hoặc thanh toán theo tiến độ).
-     * Nếu $\text{paidAmount} \ge \text{totalAmount}$: `PAID`.
-     * Nếu đơn hàng từng có thanh toán nhưng sau đó được hoàn trả toàn bộ ($\text{paidAmount} = 0$ sau khi có giao dịch `REFUND`): `REFUNDED`.
-  5. **Chống ghi nhận giao dịch trùng lặp (Deduplication):**
-     * Tầng API áp dụng Header `Idempotency-Key` lưu vào cột `idempotency_key` có ràng buộc `@@unique([organizationId, idempotencyKey])`. Nếu client nhấn đúp hoặc mạng retry, request thứ hai bị PostgreSQL từ chối vi phạm unique constraint ngay lập tức.
-     * Cột `referenceCode` (mã giao dịch ngân hàng/Napas) ngăn chặn việc kế toán nhập trùng một ủy nhiệm chi hai lần cho cùng một tổ chức.
+
+- **Quy trình trạng thái theo từng phương thức thanh toán:**
+  * **Mặc định:** Trường `status` khởi tạo là **`PENDING`** (không dùng `SUCCESS` làm giá trị mặc định để bảo đảm an toàn dòng tiền).
+  * `CASH` (Tiền mặt): Khởi tạo `PENDING` $\rightarrow$ Chuyển thành `SUCCESS` khi nhân viên thu ngân/kế toán xác nhận đã cầm tiền mặt thực tế.
+  * `BANK_TRANSFER` (Chuyển khoản VietQR/Napas): Khởi tạo `PENDING` $\rightarrow$ Chuyển thành `SUCCESS` khi kế toán đối soát khớp sao kê ngân hàng (hoặc webhook báo có tiền).
+  * `CREDIT_CARD` / `E_WALLET`: Khởi tạo `PENDING` $\rightarrow$ Chuyển thành `SUCCESS` khi cổng thanh toán trả mã phản hồi 00 (Authorized & Captured) hoặc chuyển `FAILED` nếu quẹt lỗi/hết hạn.
+
+- **Cơ chế Chống trùng `referenceCode` (Deduplication):**
+  * `referenceCode` (mã giao dịch ngân hàng / FT code): Cho phép `NULL` (vì thanh toán tiền mặt không có mã ngân hàng).
+  * Để chống nhập trùng một ủy nhiệm chi hai lần trong cùng tổ chức, thiết lập **Partial Unique Index** trong PostgreSQL:
+    ```sql
+    CREATE UNIQUE INDEX "uq_payment_transactions_org_ref_code" 
+    ON "payment_transactions" ("organization_id", "reference_code") 
+    WHERE "reference_code" IS NOT NULL;
+    ```
+    *Cơ chế này cho phép nhiều dòng có `reference_code = NULL`, nhưng khi có giá trị chuỗi thì bắt buộc duy nhất 100% trong tổ chức.*
+  * Cột `idempotencyKey` bảo vệ chống double-click hoặc network retry từ phía client.
+
+- **Quy tắc bảo vệ Hoàn tiền (Refund Integrity):**
+  * Nguyên tắc cốt lõi:
+    $$\text{TotalSuccessfulRefund} \le \text{TotalSuccessfulPayment}$$
+  * Xử lý chống đua tranh (Concurrent Refund Attack): Khi tạo giao dịch `REFUND`, backend thực hiện khóa bi quan (Pessimistic Lock) dòng đơn hàng:
+    ```sql
+    SELECT id, total_amount, paid_amount FROM sales_orders WHERE id = :orderId FOR UPDATE;
+    ```
+    Kiểm tra trong transaction: Nếu `refundAmount > currentPaidAmount`, ném lỗi `RefundExceedsPaidAmountException` và rollback ngay lập tức.
+
+- **Xử lý Khách thanh toán thừa (Overpayment):**
+  * Công thức đầy đủ:
+    - $\text{PaidAmount} = \sum (\text{SUCCESS PAYMENT}) - \sum (\text{SUCCESS REFUND})$.
+    - $\text{RemainingBalance} = \max(0, \text{TotalAmount} - \text{PaidAmount})$: Số tiền khách còn phải trả.
+    - $\text{OverpaidAmount} = \max(0, \text{PaidAmount} - \text{TotalAmount})$: Số tiền khách thanh toán thừa.
+    - $\text{RefundableAmount} = \text{PaidAmount}$: Số tiền tối đa có thể hoàn lại cho khách.
+    - $\text{Customer Outstanding Balance} = \sum \text{RemainingBalance} - \sum \text{OverpaidAmount}$: Tổng công nợ ròng của khách hàng (khoản thừa được trừ vào công nợ chung).
+  * Bảng `sales_orders` lưu trữ cả 3 trường: `paid_amount`, `remaining_balance`, `overpaid_amount`.
+
+- **Nguồn Dữ liệu Chuẩn (Single Source of Truth):**
+  * `payment_transactions` là **nguồn dữ liệu gốc duy nhất**.
+  * Các trường `paid_amount`, `remaining_balance`, `overpaid_amount`, `payment_status` trên `sales_orders` là dữ liệu tổng hợp được tính toán và cập nhật **ngay trong cùng một Database Transaction** (`prisma.$transaction`) với thao tác ghi nhận giao dịch.
+  * Cung cấp hàm tự chữa lành (Self-healing reconciliation script) `reconcileOrderPayments(orderId)` để tính lại các trường tổng hợp từ lịch sử `payment_transactions` nếu xảy ra sự cố bất thường.
+
+---
+
+### QUYẾT ĐỊNH 05: SNAPSHOT ĐỊA CHỈ GIAO HÀNG (SHIPPING ADDRESS SNAPSHOT)
+- **Cơ chế bảo vệ tính bất biến:**
+  1. **Quy tắc vòng đời:** Địa chỉ giao nhận chỉ được phép sửa đổi khi đơn hàng ở trạng thái **`DRAFT`**. Một khi đơn hàng chuyển sang `CONFIRMED`, `PARTIALLY_FULFILLED`, `FULFILLED` hoặc `CANCELLED`, snapshot bị **đóng băng vĩnh viễn (Immutable)**.
+  2. **Bảo vệ tầng Database:** Sử dụng PostgreSQL Trigger:
+     ```sql
+     CREATE OR REPLACE FUNCTION fn_freeze_sales_order_shipping_address()
+     RETURNS TRIGGER AS $$
+     BEGIN
+       IF OLD.status <> 'DRAFT' AND (
+         NEW.shipping_address_snapshot <> OLD.shipping_address_snapshot OR
+         NEW.shipping_province_code <> OLD.shipping_province_code OR
+         NEW.shipping_district_code <> OLD.shipping_district_code OR
+         NEW.shipping_ward_code <> OLD.shipping_ward_code OR
+         NEW.shipping_phone <> OLD.shipping_phone OR
+         NEW.shipping_recipient_name <> OLD.shipping_recipient_name OR
+         NEW.shipping_full_address <> OLD.shipping_full_address
+       ) THEN
+         RAISE EXCEPTION 'DATABASE VIOLATION: Không được phép sửa đổi địa chỉ giao hàng của đơn hàng đã xác nhận (status = %)!', OLD.status;
+       END IF;
+       RETURN NEW;
+     END;
+     $$ LANGUAGE plpgsql;
+
+     CREATE TRIGGER trg_freeze_sales_order_shipping_address
+     BEFORE UPDATE ON "sales_orders"
+     FOR EACH ROW EXECUTE FUNCTION fn_freeze_sales_order_shipping_address();
+     ```
+  3. **Đồng bộ 100% từ Snapshot:** 6 cột lookup được trích xuất trực tiếp từ chính JSON document snapshot tại thời điểm INSERT, không có luồng dữ liệu thứ hai.
+- **Căn cứ nghiệp vụ & Index cho 6 cột Lookup:**
+  | Cột Lookup | Kiểu dữ liệu | Query Pattern thực tế cần phục vụ | Index đề xuất |
+  |---|---|---|---|
+  | `shipping_province_code` | `VARCHAR(20)` | Thống kê doanh thu theo Tỉnh/Thành (`GROUP BY shipping_province_code`), lọc đơn theo địa bàn. | `@@index([organizationId, shippingProvinceCode])` |
+  | `shipping_district_code` | `VARCHAR(20)` | Định tuyến đội ngũ giao hàng / phân quyền nhân viên phụ trách khu vực quận huyện. | Không cần index riêng (cardinality thấp, nằm trong composite query). |
+  | `shipping_ward_code` | `VARCHAR(20)` | Tích hợp tính cước API đơn vị vận chuyển (GHN, GHTK yêu cầu mã phường xã). | Không index (chỉ đọc chi tiết). |
+  | `shipping_phone` | `VARCHAR(50)` | Tra cứu nhanh đơn hàng khi tài xế hoặc khách gọi hotline đọc số điện thoại nhận. | `@@index([organizationId, shippingPhone])` |
+  | `shipping_recipient_name`| `VARCHAR(255)` | Tìm kiếm đơn hàng theo tên người nhận (khi khác tên chủ tài khoản khách hàng). | Tìm kiếm full-text hoặc LIKE khi cần. |
+  | `shipping_full_address` | `TEXT` | In phiếu giao hàng (Bill of Lading / Packing Slip) trực tiếp mà không cần parse JSON. | Không index (chuỗi text dài). |
 
 ---
 
 ### QUYẾT ĐỊNH 06: QUY TẮC RÀNG BUỘC PHIẾU KIỂM KÊ KHO (`Stocktake` & `StocktakeItem`)
 - **Phân tích nghiệp vụ kho hiện tại:**
-  * Mỗi phiếu kiểm kê `Stocktake` được gắn cố định với một kho vật lý xác định (`warehouseId`).
-  * Ở phạm vi kho trung cấp (Intermediate Inventory) của MVP, hệ thống quản lý tồn kho theo cặp `(warehouseId, productId)` và **chưa quản lý theo vị trí chi tiết (Location/Bin) hoặc số Lô/Hạn dùng (Lot/Serial)**.
+  * Mỗi phiếu kiểm kê `Stocktake` luôn thuộc về **một kho xác định** (`warehouseId`).
+  * Ở phạm vi kho trung cấp (Intermediate Inventory) của MVP, hệ thống quản lý tồn theo cặp `(warehouseId, productId)` và **chưa quản lý theo vị trí chi tiết (Location/Bin) hoặc số Lô (Lot/Serial)**.
   * Vì vậy, trong phạm vi một phiếu kiểm kê của một kho, một sản phẩm chỉ có thể và chỉ được phép xuất hiện **tối đa một dòng kiểm kê duy nhất**.
-- **Quyết định thiết kế ràng buộc:**
-  1. Áp dụng ràng buộc toàn vẹn dữ liệu ở mức Database:
-     ```prisma
-     model StocktakeItem {
-       id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-       stocktakeId        String   @map("stocktake_id") @db.Uuid
-       productId          String   @map("product_id") @db.Uuid
-       systemQuantity     Decimal  @map("system_quantity") @db.Decimal(12, 3)
-       actualQuantity     Decimal  @map("actual_quantity") @db.Decimal(12, 3)
-       differenceQuantity Decimal  @map("difference_quantity") @db.Decimal(12, 3)
-       note               String?  @db.Text
-
-       stocktake Stocktake @relation(fields: [stocktakeId], references: [id], onDelete: Cascade)
-       product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
-
-       @@unique([stocktakeId, productId], name: "uq_stocktake_items_product")
-       @@index([stocktakeId])
-       @@index([productId])
-       @@map("stocktake_items")
-     }
-     ```
-  2. **Kế hoạch mở rộng không phá vỡ (Zero-breaking Evolution) trong tương lai:**
-     * Khi hệ thống nâng cấp lên quản lý đa vị trí trong kho hoặc quản lý theo Lô ở Phase 3:
-       - Bổ sung 2 cột nullable: `locationId String? @db.Uuid` và `lotNumber String? @db.VarChar(50)`.
-       - Migration script trong tương lai chỉ cần DROP constraint `uq_stocktake_items_product` và thay thế bằng `@@unique([stocktakeId, productId, locationId, lotNumber])`.
-     * **Cam kết tuyệt đối cho MVP:** Hiện tại KHÔNG thêm các trường ảo Location/Lot vào schema để tránh làm rác cơ sở dữ liệu khi nghiệp vụ chưa vận hành đến.
+- **Ràng buộc MVP:**
+  ```prisma
+  @@unique([stocktakeId, productId], name: "uq_stocktake_items_product")
+  ```
+- **Kế hoạch mở rộng tương lai (Zero-breaking Upgrade) & Lưu ý PostgreSQL NULL:**
+  * Theo chuẩn SQL-92 và PostgreSQL thông thường, ràng buộc `UNIQUE` coi mỗi giá trị `NULL` là một giá trị riêng biệt. Nếu sau này mở rộng composite key sang `(stocktake_id, product_id, location_id, lot_number)` và cho phép `location_id` hoặc `lot_number` là NULL, PostgreSQL sẽ cho phép chèn nhiều dòng trùng lặp!
+  * **Giải pháp chuẩn hóa khi mở rộng ở Phase 3:**
+    Sử dụng tính năng **`UNIQUE NULLS NOT DISTINCT`** của PostgreSQL 15+:
+    ```sql
+    ALTER TABLE "stocktake_items" 
+      DROP CONSTRAINT "uq_stocktake_items_product",
+      ADD CONSTRAINT "uq_stocktake_items_product_loc_lot" 
+        UNIQUE NULLS NOT DISTINCT ("stocktake_id", "product_id", "location_id", "lot_number");
+    ```
+  * **Cam kết tuyệt đối cho MVP:** Hiện tại KHÔNG thêm trường Location/Lot giả vào schema.
 
 ---
 
-## 3. BẢNG TỔNG HỢP TOÀN BỘ THAY ĐỔI SCHEMA TRÌNH PHÊ DUYỆT TRƯỚC PHASE 1C-C
-
-Dưới đây là bảng đối chiếu chi tiết toàn bộ các thay đổi sẽ được đưa vào `prisma/schema.prisma` trong Phase 1C-C:
-
-| Model | Trường / Quan hệ / Constraint | Thiết kế Hiện tại | Thiết kế Đề xuất Mới | Căn cứ Kỹ thuật & Nghiệp vụ | Đánh giá Rủi ro Migration |
-|---|---|---|---|---|---|
-| **`EmployeeContract`** | Quan hệ Tổ chức (`organizationId`) | Có cột `organizationId UUID`, thiếu decorator `@relation`. | `organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)` | Đảm bảo toàn vẹn tham chiếu tenant; ngăn chặn xóa nhầm dữ liệu pháp lý lịch sử. | Thấp: Đã có cột dữ liệu, chỉ thêm ràng buộc FK. |
-| **`User`** | Quan hệ với Nhân viên | `employeeId UUID @unique`, `@relation(onDelete: SetNull)` | Giữ nguyên: Là bên sở hữu khóa ngoại vật lý duy nhất đại diện cho quan hệ 1-1 tùy chọn. | Đã chuẩn hóa đúng chuẩn quan hệ 1-1. | Thấp: Đã có sẵn cột và index. |
-| **`Employee`** | Cột liên kết tài khoản (`userId`) | Có cột `userId UUID @unique` (scalar, không có `@relation`). | **Xóa bỏ cột vật lý `userId`.** Chỉ giữ trường quan hệ ảo `user User? @relation("UserEmployee")`. | Loại bỏ khóa ngoại kép gây xung đột dữ liệu; User là bên sở hữu FK duy nhất. | Rất thấp: Cột hiện chưa có dữ liệu production; script migration đã sẵn sàng. |
-| **`inventory_balances`** | Kiểm tra số lượng tồn và giữ hàng | Không có ràng buộc ở CSDL (phụ thuộc application). | Bổ sung 3 Physical PostgreSQL **`CHECK Constraints`**: $H \ge 0$, $R \ge 0$, $R \le H$. | Ngăn chặn vĩnh viễn tình trạng âm kho do race condition đa luồng khi bán hàng đồng thời. | Không có rủi ro: Dữ liệu hiện tại sạch, CHECK được thêm qua migration SQL. |
-| **`inventory_reservations`** | Số lượng giữ chỗ | Không có ràng buộc CHECK. | Bổ sung Physical CHECK Constraint: `quantity > 0`. | Ngăn chặn việc ghi nhận giữ hàng với số lượng $\le 0$. | Thấp: Bổ sung qua migration SQL. |
-| **`SalesOrder`** | Quản lý Dòng tiền & Địa chỉ | Thiếu trạng thái thanh toán, thiếu số tiền đã thanh toán, thiếu snapshot địa chỉ. | Bổ sung: `paymentStatus PaymentStatus @default(UNPAID)`, `paidAmount Decimal(15,2)`, `remainingBalance Decimal(15,2)`, `shippingAddressSnapshot Json`, 4 cột tra cứu địa chỉ. | Tách bạch giữa trạng thái kho và trạng thái dòng tiền; bảo vệ bất biến địa chỉ giao hàng lịch sử. | Thấp: Các trường mới đều có giá trị DEFAULT hoặc NULLABLE. |
-| **`PaymentTransaction`** | Thực thể thanh toán | Chưa có trong schema. | **Bổ sung mới model `PaymentTransaction`** (Idempotency key, Cash/BankTransfer/CreditCard, Payment/Refund). | Quản lý lịch sử dòng tiền thực tế, cọc, thanh toán nhiều đợt và chống ghi trùng giao dịch. | Thấp: Bổ sung bảng mới, không ảnh hưởng dữ liệu cũ. |
-| **`StocktakeItem`** | Tính độc nhất của dòng kiểm kê | Chưa có unique constraint giữa phiếu và sản phẩm. | Bổ sung `@@unique([stocktakeId, productId], name: "uq_stocktake_items_product")`. | Mỗi sản phẩm chỉ xuất hiện 1 lần trong 1 phiếu kiểm kê kho trung cấp. | Thấp: Không có dữ liệu trùng lặp hiện tại. |
-| **8 Bảng chi tiết** | Chỉ mục khóa ngoại tham chiếu | Thiếu index trên các cột FK ở các bảng Detail. | Bổ sung chính xác 10 Index có chọn lọc (cho `sales_order_items`, `stock_receipt_items`, `status_histories`...). | Tối ưu hiệu năng truy vấn JOIN Master-Detail và vẽ timeline lịch sử theo thời gian. | Thấp: Tăng tốc độ đọc dữ liệu, tăng dung lượng lưu trữ index không đáng kể. |
+### QUYẾT ĐỊNH 07: BẢO VỆ TOÀN VẸN ĐA TỔ CHỨC (MULTI-TENANT INTEGRITY)
+- **Vấn đề rủi ro:** Một request cố tình gửi `salesOrderId` thuộc Tổ chức A nhưng lại ghi nhận `payment_transactions` gắn `organizationId` của Tổ chức B (Cross-tenant data pollution).
+- **Cơ chế phòng vệ 2 lớp:**
+  1. **Lớp Database (Composite Foreign Key):**
+     * Để PostgreSQL chặn đứng việc liên kết chéo tenant, bảng cha `sales_orders` được khai báo ràng buộc duy nhất composite `@@unique([id, organizationId])`.
+     * Bảng con `payment_transactions` thiết lập khóa ngoại composite:
+       ```sql
+       ALTER TABLE "payment_transactions"
+         ADD CONSTRAINT "fk_payment_transactions_sales_order_tenant"
+         FOREIGN KEY ("sales_order_id", "organization_id")
+         REFERENCES "sales_orders" ("id", "organization_id")
+         ON DELETE RESTRICT;
+       ```
+       *Nếu kẻ tấn công cố tình truyền `organization_id` khác với `sales_orders.organization_id`, câu lệnh INSERT sẽ bị PostgreSQL ném lỗi `23503 foreign_key_violation` ngay lập tức.*
+     * Cơ chế tương tự được áp dụng cho cặp `(sales_order_id, organization_id)` trên `inventory_reservations` và `(warehouse_id, organization_id)` trên `inventory_balances`.
+  2. **Lớp Application (Tenant Context Guard & Pipeline):**
+     * Mọi query đều được tự động gắn `where: { organizationId: currentTenantId }` từ JWT Claims đã được ký cryptographically.
+     * Kiểm tra `parent.organizationId === currentTenantId` trong Validation Pipe.
 
 ---
 
-## 4. KẾT LUẬN & ĐIỂM KIỂM SOÁT GATE
+## 3. BẢNG KIỂM TOÁN CHỈ MỤC (INDEX AUDIT MATRIX)
 
-Toàn bộ 6 yêu cầu kỹ thuật của bạn đối với Database Architecture đã được giải quyết triệt để và văn bản hóa đầy đủ.
+Dưới đây là danh sách chính xác các chỉ mục được đề xuất, kèm query pattern và đánh giá chi phí ghi dữ liệu:
 
-Tại thời điểm này, **chưa có bất kỳ thay đổi nào được áp dụng vào `prisma/schema.prisma` hay cơ sở dữ liệu PostgreSQL**. Hệ thống đã sẵn sàng và dừng lại chờ quyết định phê duyệt chính thức để bước vào **Phase 1C-C (Database Migration Execution)**.
+| Bảng (Table) | Cột & Thứ tự (Columns & Order) | Query Pattern thực tế cần phục vụ | Index hiện tại | Đánh giá trùng lặp | Lợi ích dự kiến | Đánh giá chi phí ghi |
+|---|---|---|---|---|---|---|
+| `sales_order_items` | `[salesOrderId]` | `SELECT * FROM sales_order_items WHERE sales_order_id = :id` (lấy toàn bộ mặt hàng của đơn). | Chưa có | Không trùng (hiện chỉ có PK `id`). | Giảm chi phí Seq Scan xuống Index Scan khi xem đơn hàng. | Thấp (chỉ ghi khi tạo đơn). |
+| `sales_order_items` | `[productId]` | `SELECT ... WHERE product_id = :id` (kiểm tra lịch sử bán hàng theo sản phẩm). | Chưa có | Không trùng. | Tăng tốc tính doanh số theo SKU. | Thấp. |
+| `stock_receipt_items` | `[receiptId]` | `SELECT * FROM stock_receipt_items WHERE receipt_id = :id` (lấy danh sách hàng nhập). | Chưa có | Không trùng. | Tăng tốc mở phiếu nhập kho. | Rất thấp. |
+| `stock_receipt_items` | `[productId]` | `SELECT ... WHERE product_id = :id` (truy vết lịch sử giá vốn nhập). | Chưa có | Không trùng. | Tăng tốc tính giá vốn bình quân gia quyền. | Rất thấp. |
+| `stock_issue_items` | `[issueId]` | `SELECT * FROM stock_issue_items WHERE issue_id = :id` (lấy danh sách hàng xuất). | Chưa có | Không trùng. | Tăng tốc mở phiếu xuất kho. | Rất thấp. |
+| `stock_issue_items` | `[productId]` | Thống kê sản lượng xuất theo sản phẩm. | Chưa có | Không trùng. | Tăng tốc báo cáo xuất nhập tồn. | Rất thấp. |
+| `stock_transfer_items`| `[transferId]` | Lấy danh sách hàng trong phiếu điều chuyển kho. | Chưa có | Không trùng. | Tăng tốc mở phiếu chuyển kho. | Rất thấp. |
+| `stock_transfer_items`| `[productId]` | Lịch sử điều chuyển theo sản phẩm. | Chưa có | Không trùng. | Hỗ trợ phân tích luân chuyển hàng hóa. | Rất thấp. |
+| `stock_adjustment_items`| `[adjustmentId]`| Lấy chi tiết chênh lệch điều chỉnh kho. | Chưa có | Không trùng. | Tăng tốc mở phiếu điều chỉnh. | Rất thấp. |
+| `stock_adjustment_items`| `[productId]` | Lịch sử hao hụt/thừa thiếu theo sản phẩm. | Chưa có | Không trùng. | Phục vụ kiểm soát thất thoát kho. | Rất thấp. |
+| `sales_order_status_histories` | `[salesOrderId, changedAt(Asc)]` | `WHERE sales_order_id = :id ORDER BY changed_at ASC` (vẽ timeline đơn). | Chưa có | Không trùng. | Tối ưu tuyệt đối Index Only Scan, không cần Sort memory. | Cực thấp (chỉ ghi 1 dòng khi đổi status). |
+| `deal_stage_histories` | `[dealId, changedAt(Asc)]` | `WHERE deal_id = :id ORDER BY changed_at ASC` (tính chu kỳ bán hàng Sales Cycle). | Chưa có | Không trùng. | Tối ưu tính toán phễu chuyển đổi. | Cực thấp. |
+| `sales_orders` | `[organizationId, shippingProvinceCode]` | `GROUP BY shipping_province_code WHERE organization_id = :id` (báo cáo doanh thu theo tỉnh). | Chưa có | Không trùng. | Tăng tốc báo cáo phân vùng địa lý. | Thấp. |
+| `sales_orders` | `[organizationId, shippingPhone]` | `WHERE organization_id = :id AND shipping_phone = :phone` (tra cứu đơn theo SĐT). | Chưa có | Không trùng. | Tăng tốc tìm kiếm đơn hàng cho chăm sóc khách hàng. | Thấp. |
+| `payment_transactions` | `[organizationId, referenceCode]` (Partial) | `WHERE organization_id = :id AND reference_code = :code` (chống trùng ủy nhiệm chi). | Chưa có | Không trùng. | Vừa chống trùng vừa tăng tốc đối soát ngân hàng. | Rất thấp. |
+
+---
+
+## 4. BẢNG TỔNG HỢP TOÀN BỘ THAY ĐỔI SCHEMA TRÌNH DUYỆT (SCHEMA AUDIT TABLE)
+
+| Vấn đề (Issue) | Thiết kế Hiện tại (Current Design) | Thiết kế Đề xuất Cuối cùng (Final Proposed Design) | Căn cứ Nghiệp vụ (Business Reason) | Ràng buộc Kỹ thuật (Technical Enforcement) | Đánh giá Rủi ro (Migration Risk) | Kịch bản Kiểm thử (Test Case) |
+|---|---|---|---|---|---|---|
+| **ISSUE-01: Contract Org FK** | Có cột `organizationId UUID`, thiếu decorator `@relation`. | `organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)` | Bảo vệ hồ sơ pháp lý lao động lịch sử; áp dụng Soft Delete cho Organization. | PostgreSQL FK Restrict (`23503`). | Rất thấp: Chỉ thêm ràng buộc FK. | Cố tình xóa Organization có Contract $\rightarrow$ Bị chặn `23503`. |
+| **ISSUE-02: Inventory CHECK** | Không có ràng buộc ở CSDL. | Bổ sung 3 Physical CHECK: $H \ge 0, R \ge 0, R \le H$. | Ngăn chặn vĩnh viễn âm kho do race condition khi bán hàng đồng thời. | PostgreSQL CHECK Constraints (`23514`). | Không có: Dữ liệu sạch, cột đã NOT NULL. | Chèn tồn âm hoặc giữ > tồn $\rightarrow$ Bị chặn `23514`. |
+| **ISSUE-03: User-Employee 1-1** | 2 cột FK trỏ chéo nhau (`users.employee_id` và `employees.user_id`). | **Một FK duy nhất trên `users.employee_id` (`UNIQUE`, `onDelete: SetNull`).** Xóa bỏ cột `employees.user_id`. | Tránh mâu thuẫn dữ liệu 2 đầu; chuẩn hóa quan hệ 0..1 to 0..1. | Single Physical FK + Unique Index + Pre-migration Validation. | Rất thấp: Có script kiểm tra phát hiện mâu thuẫn trước khi chạy. | Thử tạo 2 user trỏ cùng 1 employee $\rightarrow$ Bị chặn Unique `23505`. |
+| **ISSUE-04: Detail Indexes** | Thiếu index trên các bảng chi tiết. | Bổ sung chính xác 15 index có căn cứ query patterns rõ ràng. | Tăng tốc độ đọc dữ liệu JOIN Master-Detail và vẽ timeline lịch sử. | B-Tree Indexes & Composite Indexes. | Thấp: Tăng tốc độ đọc, tăng nhẹ dung lượng index. | Chạy `EXPLAIN ANALYZE` chứng minh chuyển từ Seq Scan sang Index Scan. |
+| **ISSUE-05: Address Snapshot** | Chưa có snapshot địa chỉ, thiếu phân tích địa bàn. | `shippingAddressSnapshot Json` + 6 cột lookup + Trigger đóng băng. | Bảo vệ bất biến thông tin giao hàng lịch sử khi khách đổi trụ sở. | PostgreSQL Trigger `trg_freeze_sales_order_shipping_address` + Zod schema. | Rất thấp: Cột mới có DEFAULT/NULLABLE. | Sửa địa chỉ đơn `CONFIRMED` $\rightarrow$ Bị chặn bởi Trigger. |
+| **ISSUE-06: Payment Architecture** | Chưa có thực thể thanh toán; thiếu quản lý cọc và hoàn tiền. | Thêm `PaymentTransaction` (Status: `PENDING`), Partial Unique `referenceCode`, tính `overpaidAmount`. | Quản lý dòng tiền thực tế, cọc, trả góp theo đợt, hoàn tiền và chống trùng giao dịch. | Partial Index `uq_org_ref_code` + `SELECT ... FOR UPDATE` + Same DB Transaction. | Rất thấp: Bổ sung bảng mới độc lập. | 1. Gửi 2 transaction cùng ref code $\rightarrow$ Chặn `23505`.<br>2. Hoàn tiền vượt số đã thu $\rightarrow$ Bị từ chối. |
+| **ISSUE-07: Stocktake Unique** | Chưa có unique constraint giữa phiếu và sản phẩm. | `@@unique([stocktakeId, productId], name: "uq_stocktake_items_product")`. | Một sản phẩm chỉ xuất hiện 1 lần trong phiếu kiểm kê kho trung cấp. | PostgreSQL Composite Unique Constraint. | Rất thấp: Dữ liệu hiện tại chưa có trùng lặp. | Thêm 2 dòng cùng 1 sản phẩm vào 1 phiếu $\rightarrow$ Bị chặn `23505`. |
+| **ISSUE-08: Cross-tenant Defense** | Chỉ có `organizationId` đơn lẻ trên từng bảng. | Composite FK `(sales_order_id, organization_id)` trên các bảng thanh toán và giữ hàng. | Ngăn chặn việc liên kết nhầm hoặc tiêm dữ liệu chéo tổ chức. | PostgreSQL Composite Foreign Key. | Thấp: Đã có đủ cặp cột trên các bảng. | Tạo Payment Org A trỏ Order Org B $\rightarrow$ Bị chặn `23503`. |
+
+---
+
+## 5. KẾT LUẬN & ĐIỂM KIỂM SOÁT GATE
+
+Toàn bộ 11 tiêu chí kỹ thuật chuyên sâu theo đánh giá của bạn đã được tích hợp đầy đủ vào tài liệu thiết kế.
+
+Hệ thống tuân thủ nghiêm ngặt **STRICT EXECUTION BOUNDARY**:
+- **Chưa can thiệp vào `prisma/schema.prisma`.**
+- **Chưa tạo migration.**
+- **Chưa chạy `db push` hay `migrate dev`.**
+- **Toàn bộ source code backend và frontend được giữ nguyên vẹn.**
+
+Hệ thống dừng lại tại đây và chờ quyết định phê duyệt chính thức từ bạn.

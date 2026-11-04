@@ -177,16 +177,18 @@ Kiểm toán toàn diện 100% tệp tin `prisma/schema.prisma` (1.277 dòng cod
 
 #### Vấn đề 6: `SalesOrder` thiếu theo dõi trạng thái thanh toán (Payment Status)
 - **Mức độ:** **MEDIUM**
-- **Vị trí:** `model SalesOrder` và `SalesOrderStatus`.
+- **Vị trí:** `model SalesOrder` và thực thể quản lý dòng tiền.
 - **Phân tích nghiệp vụ & kỹ thuật:**
   Hiện tại `SalesOrderStatus` chỉ quản lý vòng đời hoàn tất kho:
   `DRAFT`, `CONFIRMED`, `PARTIALLY_FULFILLED`, `FULFILLED`, `CANCELLED`, `ON_HOLD`.
-  Hệ thống SME thực tế bắt buộc phải phân biệt được đơn:
-  * Đã giao nhưng **chưa thanh toán** (công nợ phải thu).
-  * Đã thanh toán chuyển khoản trước nhưng **chưa xuất kho**.
-- **Đề xuất khắc phục (2 phương án):**
-  - **Phương án A (Khuyên dùng cho MVP):** Thêm enum `PaymentStatus` (UNPAID, PARTIALLY_PAID, PAID, REFUNDED) và bổ sung trường `paymentStatus PaymentStatus @default(UNPAID) @map("payment_status")` trực tiếp trên `SalesOrder`.
-  - **Phương án B:** Tách riêng bảng `PaymentTransaction` độc lập liên kết `salesOrderId`. (Phù hợp khi hệ thống tích hợp cổng thanh toán trực tuyến Napas/VNPay ở giai đoạn nâng cao).
+  Hệ thống SME thực tế bắt buộc phải tách bạch giữa tiến độ giao nhận và nghĩa vụ tài chính:
+  * Đơn hàng đã giao nhưng chưa thanh toán (công nợ phải thu).
+  * Đơn hàng thanh toán đặt cọc hoặc trả nhiều đợt.
+  * Hoàn tiền (Refund) một phần hoặc toàn bộ.
+- **Đề xuất khắc phục đã chuẩn hóa:**
+  1. Thêm model `PaymentTransaction` lưu lịch sử dòng tiền thực tế (`status @default(PENDING)`, Partial Unique `referenceCode`, `idempotencyKey`).
+  2. Bổ sung các trường tổng hợp trên `SalesOrder`: `paymentStatus PaymentStatus @default(UNPAID)`, `paidAmount`, `remainingBalance`, `overpaidAmount`.
+  3. Cập nhật đồng bộ trong cùng 1 database transaction.
 
 ---
 
