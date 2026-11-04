@@ -235,7 +235,9 @@ Kiểm toán toàn diện 100% tệp tin `prisma/schema.prisma` (1.277 dòng cod
 ## 6. KẾT LUẬN & TRÌNH DUYỆT (GATE DECISION)
 
 Báo cáo kiểm toán **Phase 1C-B** đã chỉ ra chính xác 7 vấn đề kỹ thuật với nguyên nhân, hậu quả và phương án xử lý cụ thể.  
-Tuân thủ nghiêm ngặt nguyên tắc **KHÔNG TỰ Ý SỬA SCHEMA**, tôi xin dừng lại tại đây và trình bản kiểm toán này lên User để:
-1. Xem xét các phát hiện và phân loại mức độ.
-2. Cho ý kiến phê duyệt danh sách các thay đổi schema đề xuất.
-3. Ra quyết định phê duyệt chuyển sang **Phase 1C-C (Migration & Database Constraints)**.
+Chi tiết các phân tích kỹ thuật và quyết định thiết kế đã được lập thành các tài liệu quy chuẩn:
+- [`docs/DATABASE_DESIGN_DECISIONS.md`](file:///e:/dự%20án/docs/DATABASE_DESIGN_DECISIONS.md): Phân tích chi tiết 7 quyết định thiết kế cốt lõi.
+- [`docs/DATABASE_RELATIONSHIP_REVIEW.md`](file:///e:/dự%20án/docs/DATABASE_RELATIONSHIP_REVIEW.md): Rà soát toàn bộ quan hệ ERD và tính toàn vẹn tham chiếu.
+- [`docs/DATABASE_MIGRATION_PLAN.md`](file:///e:/dự%20án/docs/DATABASE_MIGRATION_PLAN.md): Kịch bản migration từng bước và kiểm thử CHECK constraints.
+
+Tuân thủ nghiêm ngặt nguyên tắc **KHÔNG TỰ Ý SỬA SCHEMA**, tôi xin dừng lại tại đây và trình bộ tài liệu thiết kế này lên User để xem xét và phê duyệt chuyển sang **Phase 1C-C (Migration & Database Constraints)**.
