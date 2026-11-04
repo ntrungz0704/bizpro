@@ -148,6 +148,33 @@ enum NotificationType {
   APPROVAL_REQUIRED
 }
 
+enum PaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  E_WALLET
+  OTHER
+}
+
+enum PaymentTransactionType {
+  PAYMENT
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
 // ==========================================
 // 1. SHARED PLATFORM & SECURITY
 // ==========================================
@@ -200,6 +227,8 @@ model Organization {
   salesOrders           SalesOrder[]
   leaveTypes            LeaveType[]
   workShifts            WorkShift[]
+  employeeContracts     EmployeeContract[]
+  paymentTransactions   PaymentTransaction[]
 
   @@map("organizations")
 }
@@ -220,7 +249,7 @@ model User {
 
   // Relations
   organization         Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  employee             Employee?             @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  employee             Employee?             @relation("UserEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
   userRoles            UserRole[]
   auditLogs            AuditLog[]
   notifications        Notification[]
@@ -231,6 +260,7 @@ model User {
   createdCrmNotes      CrmNote[]             @relation("UserCreatedNotes")
   createdSalesOrders   SalesOrder[]          @relation("UserCreatedOrders")
   confirmedSalesOrders SalesOrder[]          @relation("UserConfirmedOrders")
+  createdPayments      PaymentTransaction[]  @relation("UserCreatedPayments")
   createdReceipts      StockReceipt[]        @relation("UserCreatedReceipts")
   postedReceipts       StockReceipt[]        @relation("UserPostedReceipts")
   createdIssues        StockIssue[]          @relation("UserCreatedIssues")
@@ -420,7 +450,6 @@ model Employee {
   managerEmployeeId String?          @map("manager_employee_id") @db.Uuid
   hireDate          DateTime         @map("hire_date") @db.Date
   employmentStatus  EmploymentStatus @default(OFFICIAL) @map("employment_status")
-  userId            String?          @unique @map("user_id") @db.Uuid
   createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -429,7 +458,7 @@ model Employee {
   position        Position?          @relation(fields: [positionId], references: [id], onDelete: Restrict)
   manager         Employee?          @relation("EmployeeHierarchy", fields: [managerEmployeeId], references: [id], onDelete: SetNull)
   directReports   Employee[]         @relation("EmployeeHierarchy")
-  user            User?
+  user            User?              @relation("UserEmployee")
   contracts       EmployeeContract[]
   attendanceRecords AttendanceRecord[]
   leaveBalances   LeaveBalance[]
@@ -457,8 +486,9 @@ model EmployeeContract {
   createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  file     File?    @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  file         File?        @relation(fields: [fileId], references: [id], onDelete: SetNull)
 
   @@unique([organizationId, contractNumber])
   @@map("employee_contracts")
@@ -682,9 +712,10 @@ model Customer {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   company      Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  deals        Deal[]
-  salesOrders  SalesOrder[]
-  leads        Lead[]       @relation("CustomerConvertedLeads")
+  deals               Deal[]
+  salesOrders         SalesOrder[]
+  paymentTransactions PaymentTransaction[]
+  leads               Lead[]       @relation("CustomerConvertedLeads")
 
   @@unique([organizationId, customerCode])
   @@index([organizationId, status])
@@ -777,6 +808,7 @@ model DealStageHistory {
   toStage   PipelineStage  @relation("DealToStage", fields: [toStageId], references: [id], onDelete: Restrict)
   changer   User?          @relation("UserChangedDealStages", fields: [changedBy], references: [id], onDelete: SetNull)
 
+  @@index([dealId, changedAt])
   @@map("deal_stage_histories")
 }
 
@@ -999,6 +1031,8 @@ model StockReceiptItem {
   receipt StockReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   product Product      @relation(fields: [productId], references: [id], onDelete: Restrict)
 
+  @@index([receiptId])
+  @@index([productId])
   @@map("stock_receipt_items")
 }
 
@@ -1038,6 +1072,8 @@ model StockIssueItem {
   issue   StockIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
   product Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
 
+  @@index([issueId])
+  @@index([productId])
   @@map("stock_issue_items")
 }
 
@@ -1075,6 +1111,8 @@ model StockTransferItem {
   transfer StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
   product  Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
 
+  @@index([transferId])
+  @@index([productId])
   @@map("stock_transfer_items")
 }
 
@@ -1112,6 +1150,8 @@ model StockAdjustmentItem {
   adjustment StockAdjustment @relation(fields: [adjustmentId], references: [id], onDelete: Cascade)
   product    Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
 
+  @@index([adjustmentId])
+  @@index([productId])
   @@map("stock_adjustment_items")
 }
 
@@ -1149,6 +1189,7 @@ model StocktakeItem {
   stocktake Stocktake @relation(fields: [stocktakeId], references: [id], onDelete: Cascade)
   product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
 
+  @@unique([stocktakeId, productId], name: "uq_stocktake_items_product")
   @@map("stocktake_items")
 }
 
@@ -1203,39 +1244,54 @@ model InventoryReservation {
 // ==========================================
 
 model SalesOrder {
-  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  organizationId       String           @map("organization_id") @db.Uuid
-  orderCode            String           @map("order_code") @db.VarChar(50)
-  customerId           String           @map("customer_id") @db.Uuid
-  dealId               String?          @map("deal_id") @db.Uuid
-  warehouseId          String           @map("warehouse_id") @db.Uuid
-  orderDate            DateTime         @default(now()) @map("order_date") @db.Timestamptz
-  expectedDeliveryDate DateTime?        @map("expected_delivery_date") @db.Date
-  status               SalesOrderStatus @default(DRAFT)
-  subtotal             Decimal          @default(0.00) @db.Decimal(15, 2)
-  discountAmount       Decimal          @default(0.00) @map("discount_amount") @db.Decimal(15, 2)
-  taxAmount            Decimal          @default(0.00) @map("tax_amount") @db.Decimal(15, 2)
-  totalAmount          Decimal          @default(0.00) @map("total_amount") @db.Decimal(15, 2)
-  note                 String?          @db.Text
-  createdBy            String           @map("created_by") @db.Uuid
-  confirmedBy          String?          @map("confirmed_by") @db.Uuid
-  confirmedAt          DateTime?        @map("confirmed_at") @db.Timestamptz
-  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId          String                    @map("organization_id") @db.Uuid
+  orderCode               String                    @map("order_code") @db.VarChar(50)
+  customerId              String                    @map("customer_id") @db.Uuid
+  dealId                  String?                   @map("deal_id") @db.Uuid
+  warehouseId             String                    @map("warehouse_id") @db.Uuid
+  orderDate               DateTime                  @default(now()) @map("order_date") @db.Timestamptz
+  expectedDeliveryDate    DateTime?                 @map("expected_delivery_date") @db.Date
+  status                  SalesOrderStatus          @default(DRAFT)
+  paymentStatus           PaymentStatus             @default(UNPAID) @map("payment_status")
+  subtotal                Decimal                   @default(0.00) @db.Decimal(15, 2)
+  discountAmount          Decimal                   @default(0.00) @map("discount_amount") @db.Decimal(15, 2)
+  taxAmount               Decimal                   @default(0.00) @map("tax_amount") @db.Decimal(15, 2)
+  totalAmount             Decimal                   @default(0.00) @map("total_amount") @db.Decimal(15, 2)
+  paidAmount              Decimal                   @default(0.00) @map("paid_amount") @db.Decimal(15, 2)
+  remainingBalance        Decimal                   @default(0.00) @map("remaining_balance") @db.Decimal(15, 2)
+  overpaidAmount          Decimal                   @default(0.00) @map("overpaid_amount") @db.Decimal(15, 2)
+  shippingAddressSnapshot Json                      @default("{}") @map("shipping_address_snapshot")
+  shippingRecipientName   String?                   @map("shipping_recipient_name") @db.VarChar(255)
+  shippingPhone           String?                   @map("shipping_phone") @db.VarChar(50)
+  shippingProvinceCode    String?                   @map("shipping_province_code") @db.VarChar(20)
+  shippingDistrictCode    String?                   @map("shipping_district_code") @db.VarChar(20)
+  shippingWardCode        String?                   @map("shipping_ward_code") @db.VarChar(20)
+  shippingFullAddress     String?                   @map("shipping_full_address") @db.Text
+  note                    String?                   @db.Text
+  createdBy               String                    @map("created_by") @db.Uuid
+  confirmedBy             String?                   @map("confirmed_by") @db.Uuid
+  confirmedAt             DateTime?                 @map("confirmed_at") @db.Timestamptz
+  createdAt               DateTime                  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt               DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
-  organization   Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  customer       Customer                  @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  deal           Deal?                     @relation(fields: [dealId], references: [id], onDelete: SetNull)
-  warehouse      Warehouse                 @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
-  creator        User                      @relation("UserCreatedOrders", fields: [createdBy], references: [id], onDelete: Restrict)
-  confirmer      User?                     @relation("UserConfirmedOrders", fields: [confirmedBy], references: [id], onDelete: Restrict)
-  items          SalesOrderItem[]
-  reservations   InventoryReservation[]
-  statusHistories SalesOrderStatusHistory[]
+  organization        Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer            Customer                  @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  deal                Deal?                     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  warehouse           Warehouse                 @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  creator             User                      @relation("UserCreatedOrders", fields: [createdBy], references: [id], onDelete: Restrict)
+  confirmer           User?                     @relation("UserConfirmedOrders", fields: [confirmedBy], references: [id], onDelete: Restrict)
+  items               SalesOrderItem[]
+  reservations        InventoryReservation[]
+  statusHistories     SalesOrderStatusHistory[]
+  paymentTransactions PaymentTransaction[]
 
   @@unique([organizationId, orderCode])
+  @@unique([id, organizationId], name: "uq_sales_orders_id_org")
   @@index([organizationId, status])
   @@index([organizationId, customerId])
+  @@index([organizationId, shippingProvinceCode])
+  @@index([organizationId, shippingPhone])
   @@map("sales_orders")
 }
 
@@ -1258,6 +1314,8 @@ model SalesOrderItem {
   salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
   product    Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
 
+  @@index([salesOrderId])
+  @@index([productId])
   @@map("sales_order_items")
 }
 
@@ -1273,5 +1331,36 @@ model SalesOrderStatusHistory {
   salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
   changer    User?      @relation("UserChangedOrderStatuses", fields: [changedBy], references: [id], onDelete: SetNull)
 
+  @@index([salesOrderId, changedAt])
   @@map("sales_order_status_histories")
+}
+
+model PaymentTransaction {
+  id              String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String                 @map("organization_id") @db.Uuid
+  salesOrderId    String                 @map("sales_order_id") @db.Uuid
+  customerId      String                 @map("customer_id") @db.Uuid
+  transactionCode String                 @map("transaction_code") @db.VarChar(50)
+  idempotencyKey  String?                @map("idempotency_key") @db.VarChar(100)
+  type            PaymentTransactionType @default(PAYMENT)
+  method          PaymentMethod          @default(BANK_TRANSFER)
+  status          TransactionStatus      @default(PENDING)
+  amount          Decimal                @db.Decimal(15, 2)
+  referenceCode   String?                @map("reference_code") @db.VarChar(100)
+  transactedAt    DateTime               @default(now()) @map("transacted_at") @db.Timestamptz
+  note            String?                @db.Text
+  createdBy       String                 @map("created_by") @db.Uuid
+  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  salesOrder   SalesOrder   @relation(fields: [salesOrderId], references: [id], onDelete: Restrict)
+  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  creator      User         @relation("UserCreatedPayments", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, transactionCode])
+  @@unique([organizationId, idempotencyKey])
+  @@index([organizationId, salesOrderId])
+  @@index([organizationId, customerId])
+  @@index([organizationId, status])
+  @@map("payment_transactions")
 }
