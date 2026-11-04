@@ -45,7 +45,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
       title: "CRM",
       icon: Users,
       subItems: [
-        { title: "Khách hàng", href: "/crm/customers" },
+        { title: "Khách hàng & Đối tác", href: "/crm/customers" },
         { title: "Cơ hội", href: "/crm/deals" },
         { title: "Đơn hàng tiềm năng", href: "/crm/leads" },
       ],
@@ -55,7 +55,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
       icon: ShoppingCart,
       subItems: [
         { title: "Đơn bán hàng", href: "/sales/orders" },
-        { title: "Khách hàng", href: "/sales/customers" },
+        { title: "Khách hàng thương mại", href: "/sales/customers" },
       ],
     },
     {
@@ -112,7 +112,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 
       <aside
         className={cn(
-          "w-64 h-screen bg-[#0B132B] text-slate-300 flex flex-col p-3 select-none shrink-0 border-r border-slate-800/80 fixed lg:sticky top-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden",
+          "w-64 h-[100dvh] max-h-screen bg-[#0B132B] text-slate-300 flex flex-col p-3 select-none shrink-0 border-r border-slate-800/80 fixed lg:sticky top-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
@@ -232,27 +232,37 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
               </div>
             );
           })}
+
+          {/* Pro Upgrade Card moved inside scrollable nav so it never causes viewport clipping */}
+          <div className="pt-3 pb-1">
+            <div className="rounded-xl bg-gradient-to-b from-slate-800/80 to-slate-900/90 p-2.5 border border-slate-700/50 text-center relative overflow-hidden">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <div className="w-5 h-5 rounded-md bg-blue-600/25 border border-blue-500/40 flex items-center justify-center">
+                  <Rocket className="w-3 h-3 text-blue-400" />
+                </div>
+                <h4 className="text-[11px] font-bold text-white">Nâng cấp lên Pro</h4>
+              </div>
+              <p className="text-[10px] text-slate-400 mb-2 leading-tight">
+                Mở khóa báo cáo AI & đa kho hàng
+              </p>
+              <button
+                type="button"
+                onClick={() => alert("Hệ thống Business Management System Enterprise Pro v1.0!")}
+                className="w-full py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold rounded-lg transition-colors shadow-xs active:scale-95"
+              >
+                Nâng cấp ngay
+              </button>
+            </div>
+          </div>
         </nav>
 
-        {/* Pinned Bottom Pro Card (Never cut off with shrink-0 and compact height) */}
-        <div className="shrink-0 pt-2 mt-auto border-t border-slate-800/80">
-          <div className="rounded-xl bg-gradient-to-b from-slate-800/90 to-slate-900/95 p-2.5 border border-slate-700/60 text-center relative overflow-hidden">
-            <div className="flex items-center justify-center gap-1.5 mb-1">
-              <div className="w-6 h-6 rounded-lg bg-blue-600/25 border border-blue-500/40 flex items-center justify-center">
-                <Rocket className="w-3.5 h-3.5 text-blue-400" />
-              </div>
-              <h4 className="text-xs font-bold text-white">Nâng cấp lên Pro</h4>
-            </div>
-            <p className="text-[11px] text-slate-400 mb-2 leading-tight">
-              Trải nghiệm nhiều tính năng cao cấp hơn!
-            </p>
-            <button
-              onClick={() => alert("Hệ thống Business Management System Enterprise Pro v1.0!")}
-              className="w-full py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold rounded-lg transition-colors shadow-xs active:scale-95"
-            >
-              Nâng cấp ngay
-            </button>
+        {/* Pinned Bottom Enterprise Status Bar (Always visible, compact, never clipped) */}
+        <div className="shrink-0 pt-2 mt-auto border-t border-slate-800/80 px-2 py-1 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="font-medium text-slate-300">Hệ thống Online</span>
           </div>
+          <span className="text-[10px] bg-slate-800/90 px-1.5 py-0.5 rounded-md font-mono text-slate-400 border border-slate-700/50">v1.0-MVP</span>
         </div>
       </aside>
     </>

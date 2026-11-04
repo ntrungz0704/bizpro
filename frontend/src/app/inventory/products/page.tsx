@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useApp } from "@/context/AppContext";
 import { formatVND } from "@/lib/utils";
 import { Package, Plus, Search, AlertTriangle, Boxes, Tag, ShieldCheck } from "lucide-react";
@@ -101,6 +102,7 @@ export default function ProductsPage() {
                 <th className="py-3 px-4 text-center">Đang giữ</th>
                 <th className="py-3 px-4 text-center">Khả dụng</th>
                 <th className="py-3 px-4 text-center">Trạng thái kho</th>
+                <th className="py-3 px-4 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -154,12 +156,22 @@ export default function ProductsPage() {
                         </span>
                       )}
                     </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <Link
+                        href="/inventory/receipts-issues"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white transition-all border border-blue-200/80 shadow-xs active:scale-95 cursor-pointer"
+                        title="Tạo phiếu nhập thêm hàng"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Nhập hàng</span>
+                      </Link>
+                    </td>
                   </tr>
                 );
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-slate-400 text-xs">
+                  <td colSpan={9} className="text-center py-8 text-slate-400 text-xs">
                     Không tìm thấy sản phẩm nào.
                   </td>
                 </tr>

@@ -18,6 +18,7 @@ import CrmFunnel from "@/components/CrmFunnel";
 import InventoryAlerts from "@/components/InventoryAlerts";
 import HrOverview from "@/components/HrOverview";
 import { useApp } from "@/context/AppContext";
+import { formatNumber, formatVND } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { customers, salesOrders, products, employees } = useApp();
@@ -28,14 +29,14 @@ export default function DashboardPage() {
   const dynamicOrderRevenue = salesOrders
     .filter((o) => o.status === "CONFIRMED" || o.status === "FULFILLED")
     .reduce((sum, o) => sum + o.totalAmount, 0);
-  const revenueDisplay = (baseRevenue + dynamicOrderRevenue).toLocaleString("vi-VN") + "đ";
+  const revenueDisplay = formatVND(baseRevenue + dynamicOrderRevenue);
 
   const customersCountDisplay = (125 + customers.length).toString();
   const ordersCountDisplay = (253 + salesOrders.length).toString();
   
   const baseAvailableStock = 12400;
   const currentAvailableStock = baseAvailableStock + products.reduce((sum, p) => sum + (p.onHand - p.reserved), 0);
-  const stockDisplay = currentAvailableStock.toLocaleString("vi-VN");
+  const stockDisplay = formatNumber(currentAvailableStock);
 
   // Sparklines data
   const sparklineCustomers = [{ v: 30 }, { v: 45 }, { v: 35 }, { v: 60 }, { v: 50 }, { v: 75 }, { v: 95 }];

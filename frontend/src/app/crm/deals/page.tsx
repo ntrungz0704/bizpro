@@ -131,27 +131,28 @@ export default function DealsPage() {
                       </span>
 
                       {/* Quick stage transition buttons */}
-                      <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100">
+                      <div className="flex items-center gap-1.5 opacity-90 group-hover:opacity-100">
                         {col.key !== "Won" && col.key !== "Lost" && (
                           <>
                             <button
-                              title={`Chuyển sang ${nextStageMap[deal.stage]}`}
+                              title={`Chuyển sang giai đoạn tiếp theo: ${nextStageMap[deal.stage]}`}
                               onClick={() => moveDealStage(deal.id, nextStageMap[deal.stage])}
-                              className="p-1 rounded hover:bg-blue-100 text-blue-600 transition-colors"
+                              className="flex items-center gap-0.5 px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 font-bold text-[10px] transition-all border border-blue-200/70 shadow-xs cursor-pointer active:scale-95"
                             >
-                              <ChevronRight className="w-3.5 h-3.5" />
+                              <span>Tiếp</span>
+                              <ChevronRight className="w-3 h-3 stroke-[2.5]" />
                             </button>
                             <button
                               title="Chốt thành công (Won)"
                               onClick={() => moveDealStage(deal.id, "Won")}
-                              className="p-1 rounded hover:bg-emerald-100 text-emerald-600 transition-colors"
+                              className="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-600 transition-all border border-emerald-200/70 shadow-xs cursor-pointer active:scale-95"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              title="Thất bại (Lost)"
+                              title="Đánh dấu thất bại (Lost)"
                               onClick={() => moveDealStage(deal.id, "Lost")}
-                              className="p-1 rounded hover:bg-rose-100 text-rose-600 transition-colors"
+                              className="p-1 rounded-lg bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 transition-all border border-rose-200/70 shadow-xs cursor-pointer active:scale-95"
                             >
                               <XCircle className="w-3.5 h-3.5" />
                             </button>

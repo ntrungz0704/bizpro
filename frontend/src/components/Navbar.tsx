@@ -2,16 +2,93 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, Bell, ChevronDown, Menu, CheckCircle2, AlertTriangle, Calendar, User, Settings, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  Bell,
+  ChevronDown,
+  Menu,
+  CheckCircle2,
+  AlertTriangle,
+  Calendar,
+  User,
+  Settings,
+  LogOut,
+  Check,
+} from "lucide-react";
+import { useApp } from "@/context/AppContext";
 
 interface NavbarProps {
   onMobileMenuToggle?: () => void;
 }
 
+interface NotificationItem {
+  id: string;
+  title: string;
+  time: string;
+  href: string;
+  type: "order" | "leave" | "inventory";
+  isRead: boolean;
+}
+
 export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
+  const router = useRouter();
+  const { showToast } = useApp();
+
   const [showNoti, setShowNoti] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const notiRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  const [notifications, setNotifications] = useState<NotificationItem[]>([
+    {
+      id: "noti_1",
+      title: "Đơn hàng #SO-2026-0042 đã xác nhận",
+      time: "2 phút trước",
+      href: "/sales/orders",
+      type: "order",
+      isRead: false,
+    },
+    {
+      id: "noti_2",
+      title: "Nguyễn Văn B gửi đơn xin nghỉ phép",
+      time: "15 phút trước",
+      href: "/hrm/leave",
+      type: "leave",
+      isRead: false,
+    },
+    {
+      id: "noti_3",
+      title: "Laptop Dell XPS 13 chạm ngưỡng tồn tối thiểu",
+      time: "1 giờ trước",
+      href: "/inventory/products",
+      type: "inventory",
+      isRead: false,
+    },
+  ]);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  // Click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notiRef.current && !notiRef.current.contains(event.target as Node)) {
+        setShowNoti(false);
+      }
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setShowProfile(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Global Ctrl + K shortcut
   useEffect(() => {
@@ -24,6 +101,20 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleMarkAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    showToast("Đã đánh dấu đã đọc tất cả thông báo!", "success");
+  };
+
+  const handleNotificationClick = (noti: NotificationItem) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === noti.id ? { ...n, isRead: true } : n))
+    );
+    setShowNoti(false);
+    showToast(`Đang mở: ${noti.title}`, "info");
+    router.push(noti.href);
+  };
 
   return (
     <header className="h-16 bg-white border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
@@ -55,7 +146,7 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
       {/* Right Controls */}
       <div className="flex items-center gap-3 sm:gap-5 ml-4">
         {/* Notification Bell */}
-        <div className="relative">
+        <div className="relative" ref={notiRef}>
           <button
             onClick={() => {
               setShowNoti(!showNoti);
@@ -65,75 +156,98 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
             aria-label="Thông báo"
           >
             <Bell className="w-5 h-5 stroke-[1.8]" />
-            <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-              3
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           {/* Notification Popover Dropdown */}
           {showNoti && (
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50 animate-scale-up">
+            <div className="absolute right-0 mt-2 w-80 sm:w-88 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50 animate-scale-up">
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                <h4 className="text-xs font-bold text-slate-800">Thông báo mới</h4>
-                <span className="text-[10px] text-blue-600 font-semibold cursor-pointer hover:underline">
-                  Đánh dấu đã đọc
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-slate-800">
+                    Thông báo mới
+                  </h4>
+                  {unreadCount > 0 && (
+                    <span className="px-1.5 py-0.2 bg-red-100 text-red-600 text-[10px] font-bold rounded-full">
+                      {unreadCount} chưa đọc
+                    </span>
+                  )}
+                </div>
+                {unreadCount > 0 ? (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="text-[11px] text-blue-600 font-semibold hover:underline flex items-center gap-1"
+                  >
+                    <Check className="w-3 h-3" />
+                    <span>Đánh dấu đã đọc</span>
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-slate-400">
+                    Đã đọc tất cả
+                  </span>
+                )}
               </div>
-              <div className="space-y-2.5">
-                <Link
-                  href="/sales/orders"
-                  onClick={() => setShowNoti(false)}
-                  className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors"
-                >
-                  <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-800">
-                      Đơn hàng #SO-2026-0042 đã xác nhận
-                    </p>
-                    <span className="text-[10px] text-slate-400">2 phút trước</span>
-                  </div>
-                </Link>
 
-                <Link
-                  href="/hrm/leave"
-                  onClick={() => setShowNoti(false)}
-                  className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors"
-                >
-                  <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <Calendar className="w-3.5 h-3.5" />
+              <div className="space-y-2">
+                {notifications.map((noti) => (
+                  <div
+                    key={noti.id}
+                    onClick={() => handleNotificationClick(noti)}
+                    className={`flex items-start gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all ${
+                      noti.isRead
+                        ? "bg-slate-50/50 hover:bg-slate-100/70 opacity-75"
+                        : "bg-blue-50/40 hover:bg-blue-50 border border-blue-100/50"
+                    }`}
+                  >
+                    <div
+                      className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                        noti.type === "order"
+                          ? "bg-blue-100 text-blue-600"
+                          : noti.type === "leave"
+                          ? "bg-purple-100 text-purple-600"
+                          : "bg-amber-100 text-amber-600"
+                      }`}
+                    >
+                      {noti.type === "order" ? (
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      ) : noti.type === "leave" ? (
+                        <Calendar className="w-3.5 h-3.5" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-xs leading-snug line-clamp-2 ${
+                          noti.isRead
+                            ? "font-normal text-slate-600"
+                            : "font-semibold text-slate-900"
+                        }`}
+                      >
+                        {noti.title}
+                      </p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] text-slate-400">
+                          {noti.time}
+                        </span>
+                        {!noti.isRead && (
+                          <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-800">
-                      Nguyễn Văn B gửi đơn xin nghỉ phép
-                    </p>
-                    <span className="text-[10px] text-slate-400">15 phút trước</span>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/inventory/products"
-                  onClick={() => setShowNoti(false)}
-                  className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors"
-                >
-                  <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-800">
-                      Laptop Dell XPS 13 chạm ngưỡng tồn tối thiểu
-                    </p>
-                    <span className="text-[10px] text-slate-400">1 giờ trước</span>
-                  </div>
-                </Link>
+                ))}
               </div>
             </div>
           )}
         </div>
 
         {/* User Profile Menu */}
-        <div className="relative">
+        <div className="relative" ref={profileRef}>
           <div
             onClick={() => {
               setShowProfile(!showProfile);
@@ -149,7 +263,9 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
                 Nguyễn Văn A
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </div>
-              <div className="text-[11px] text-slate-400 font-normal">Quản trị viên</div>
+              <div className="text-[11px] text-slate-400 font-normal">
+                Quản trị viên
+              </div>
             </div>
           </div>
 
@@ -181,7 +297,7 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
 
               <button
                 onClick={() => {
-                  alert("Đăng xuất khỏi hệ thống BizPro+!");
+                  showToast("Đã đăng xuất khỏi hệ thống BizPro+!", "info");
                   setShowProfile(false);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-600 hover:bg-rose-50 transition-colors border-t border-slate-100 mt-1"

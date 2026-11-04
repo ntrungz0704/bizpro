@@ -137,7 +137,7 @@ export default function SalesOrdersPage() {
             Quản lý Đơn bán hàng (Sales Orders)
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Liên kết trực tiếp giữa CRM và Kho hàng: Tạo đơn nháp $\rightarrow$ Xác nhận giữ hàng $\rightarrow$ Xuất kho.
+            Theo dõi toàn trình đơn bán hàng từ tiếp nhận, giữ chỗ tồn kho đến xuất hàng.
           </p>
         </div>
 
