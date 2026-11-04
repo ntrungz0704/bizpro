@@ -25,6 +25,11 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   CORS_ORIGIN: string = 'http://localhost:3000';
+
+  @IsString()
+  @IsOptional()
+  DATABASE_URL: string =
+    'postgresql://bizpro_user:bizpro_password@localhost:5432/bizpro_db?schema=public';
 }
 
 export function validate(config: Record<string, unknown>) {

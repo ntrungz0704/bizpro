@@ -2,9 +2,11 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   HealthCheck,
+  HealthCheckError,
   HealthCheckService,
   MemoryHealthIndicator,
 } from '@nestjs/terminus';
+import { PrismaService } from '../prisma/prisma.service';
 
 @ApiTags('Health')
 @Controller('health')
@@ -12,6 +14,7 @@ export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
     private readonly memory: MemoryHealthIndicator,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Get('live')
@@ -20,7 +23,7 @@ export class HealthController {
   @HealthCheck()
   checkLive() {
     return this.health.check([
-      () => this.memory.checkHeap('memory_heap', 500 * 1024 * 1024),
+      () => this.memory.checkHeap('memory_heap', 1024 * 1024 * 1024),
       async () => ({
         process: {
           status: 'up',
@@ -33,20 +36,36 @@ export class HealthController {
 
   @Get('ready')
   @ApiOperation({
-    summary: 'Readiness probe - checks if the application is ready to accept traffic',
+    summary: 'Readiness probe - actively checks PostgreSQL database connection',
   })
-  @ApiResponse({ status: 200, description: 'Application is ready' })
+  @ApiResponse({ status: 200, description: 'Application and Database are ready' })
+  @ApiResponse({ status: 503, description: 'Database is not reachable' })
   @HealthCheck()
   checkReady() {
     return this.health.check([
-      // In Phase 1C, Prisma database connection check will be attached here
-      async () => ({
-        system: {
-          status: 'up',
-          ready: true,
-          phase: '1B - Backend Foundation',
-        },
-      }),
+      async () => {
+        const dbHealth = await this.prisma.isHealthy();
+        if (!dbHealth.status) {
+          throw new HealthCheckError('Database health check failed', {
+            database: {
+              status: 'down',
+              error: dbHealth.error,
+              latencyMs: dbHealth.latencyMs,
+            },
+          });
+        }
+        return {
+          database: {
+            status: 'up',
+            latencyMs: dbHealth.latencyMs,
+          },
+          system: {
+            status: 'up',
+            ready: true,
+            phase: '1C - Database Foundation',
+          },
+        };
+      },
     ]);
   }
 }
