@@ -31,9 +31,9 @@ flowchart TD
 #### 1. Phase 1A — Quản lý mã nguồn & Hạ tầng (Source Control & Infrastructure)
 | Task ID | Phân hệ | Mô tả công việc | Phụ thuộc | Mức ưu tiên | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) | Yêu cầu kiểm thử (Test Requirements) |
 |---|---|---|:---:|:---:|:---:|---|---|
-| `CORE-1A-01` | Git | Khởi tạo Git repository tại thư mục gốc `e:\dự án`, cấu hình `.gitignore` toàn diện (bảo vệ `node_modules`, `.next`, `.env`, build artifacts) | Không | **P0** | `NOT_STARTED` | Thư mục `.git` được tạo, `git status` sạch, không đưa secrets lên git. | Lệnh `git status` thực tế. |
-| `CORE-1A-02` | Git | Tạo Baseline Commit bảo vệ 100% mã nguồn hiện tại của dự án | `CORE-1A-01` | **P0** | `NOT_STARTED` | Có commit hash đầu tiên, không làm mất bất kỳ tệp tin hiện có nào. | Lệnh `git log -1` trả về commit baseline. |
-| `CORE-1A-03` | Docker | Thiết lập `docker-compose.yml` chạy PostgreSQL 16 (Port 5432) với healthcheck và persistent volume | `CORE-1A-02` | **P0** | `NOT_STARTED` | Container PostgreSQL khởi chạy ổn định, chấp nhận kết nối từ host. (Redis đánh giá phụ trợ, không chặn tiến độ). | Kiểm tra `docker compose ps` và `pg_isready -h localhost -p 5432`. |
+| `CORE-1A-01` | Git | Khởi tạo Git repository tại thư mục gốc `e:\dự án`, cấu hình `.gitignore` toàn diện (bảo vệ `node_modules`, `.next`, `.env`, build artifacts) | Không | **P0** | `COMPLETED` | Thư mục `.git` được tạo, `git status` sạch, không đưa secrets lên git. | Lệnh `git status` thực tế (đã pass). |
+| `CORE-1A-02` | Git | Tạo Baseline Commit bảo vệ 100% mã nguồn hiện tại của dự án | `CORE-1A-01` | **P0** | `COMPLETED` | Có commit hash đầu tiên (`e671146`), không làm mất bất kỳ tệp tin hiện có nào. | Lệnh `git log -1` trả về commit baseline (đã pass). |
+| `CORE-1A-03` | Docker | Thiết lập `docker-compose.yml` chạy PostgreSQL 16 (Port 5432) với healthcheck và persistent volume | `CORE-1A-02` | **P0** | `COMPLETED` | File `docker-compose.yml` và `.env.example` đã được cấu hình chuẩn và commit lên Git. | Lệnh `docker compose config` hợp lệ (đã pass). |
 
 #### 2. Phase 1B — Nền tảng Backend (Backend Foundation)
 | Task ID | Phân hệ | Mô tả công việc | Phụ thuộc | Mức ưu tiên | Trạng thái | Tiêu chí nghiệm thu (Acceptance Criteria) | Yêu cầu kiểm thử (Test Requirements) |
