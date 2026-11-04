@@ -81,10 +81,10 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
   ];
 
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
-    CRM: true,
-    "Bán hàng": true,
-    "Kho hàng": true,
-    "Nhân sự": true,
+    CRM: false,
+    "Bán hàng": false,
+    "Kho hàng": false,
+    "Nhân sự": false,
   });
 
   // Auto expand menu based on active pathname
@@ -94,6 +94,10 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
         setOpenMenus((prev) => ({ ...prev, [item.title]: true }));
       }
     });
+    // Default open CRM if at root
+    if (pathname === "/") {
+      setOpenMenus((prev) => ({ ...prev, CRM: true }));
+    }
   }, [pathname]);
 
   const toggleSubmenu = (title: string) => {
@@ -136,8 +140,8 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
           </button>
         </div>
 
-        {/* Scrollable Navigation Items - min-h-0 is essential so flex-1 can shrink and scroll */}
-        <nav className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-1 custom-scrollbar">
+        {/* Scrollable Navigation Items - sleek dark sidebar scrollbar */}
+        <nav className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-1 sidebar-scrollbar">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const hasSub = !!item.subItems;
@@ -158,14 +162,14 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                   )}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <Icon
                       className={cn(
-                        "w-4 h-4 stroke-[2]",
+                        "w-4 h-4 stroke-[2] shrink-0",
                         isRootActive ? "text-white" : "text-slate-400"
                       )}
                     />
-                    <span>{item.title}</span>
+                    <span className="truncate whitespace-nowrap">{item.title}</span>
                   </div>
                 </Link>
               );
@@ -183,18 +187,18 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                   )}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <Icon
                       className={cn(
-                        "w-4 h-4 stroke-[2]",
+                        "w-4 h-4 stroke-[2] shrink-0",
                         isAnySubActive ? "text-blue-400" : "text-slate-400"
                       )}
                     />
-                    <span>{item.title}</span>
+                    <span className="truncate whitespace-nowrap">{item.title}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0 ml-1">
                     {isAnySubActive && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
                     )}
                     <span className="text-slate-400">
                       {isOpen ? (
@@ -217,7 +221,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                           href={sub.href}
                           onClick={onMobileClose}
                           className={cn(
-                            "block py-1.5 px-2.5 text-xs rounded-lg transition-all",
+                            "block py-1.5 px-2.5 text-xs rounded-lg transition-all truncate whitespace-nowrap",
                             isSubActive
                               ? "bg-blue-600 text-white font-semibold shadow-xs"
                               : "text-slate-400 hover:text-white hover:bg-slate-800/50"
@@ -240,7 +244,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                 <div className="w-5 h-5 rounded-md bg-blue-600/25 border border-blue-500/40 flex items-center justify-center">
                   <Rocket className="w-3 h-3 text-blue-400" />
                 </div>
-                <h4 className="text-[11px] font-bold text-white">Nâng cấp lên Pro</h4>
+                <h4 className="text-[11px] font-bold text-white truncate">Nâng cấp lên Pro</h4>
               </div>
               <p className="text-[10px] text-slate-400 mb-2 leading-tight">
                 Mở khóa báo cáo AI & đa kho hàng
@@ -257,12 +261,12 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
         </nav>
 
         {/* Pinned Bottom Enterprise Status Bar (Always visible, compact, never clipped) */}
-        <div className="shrink-0 pt-2 mt-auto border-t border-slate-800/80 px-2 py-1 flex items-center justify-between text-[11px] text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="font-medium text-slate-300">Hệ thống Online</span>
+        <div className="shrink-0 pt-2.5 pb-2 mt-auto border-t border-slate-800/80 px-2 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+            <span className="font-medium text-slate-300 truncate">Hệ thống Online</span>
           </div>
-          <span className="text-[10px] bg-slate-800/90 px-1.5 py-0.5 rounded-md font-mono text-slate-400 border border-slate-700/50">v1.0-MVP</span>
+          <span className="text-[10px] bg-slate-800/90 px-1.5 py-0.5 rounded-md font-mono text-slate-400 border border-slate-700/50 shrink-0 ml-2">v1.0-MVP</span>
         </div>
       </aside>
     </>

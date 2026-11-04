@@ -10,15 +10,29 @@ export default function EmployeesPage() {
   const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
-    code: `NV-${Math.floor(100 + Math.random() * 900)}`,
+    code: "",
     name: "",
     department: "Phòng Kinh Doanh",
     position: "Chuyên viên Kinh Doanh",
     email: "",
     phone: "",
     status: "OFFICIAL" as const,
-    hireDate: new Date().toISOString().split("T")[0],
+    hireDate: "2026-01-15",
   });
+
+  const handleOpenModal = () => {
+    setFormData({
+      code: `NV-${Math.floor(100 + Math.random() * 900)}`,
+      name: "",
+      department: "Phòng Kinh Doanh",
+      position: "Chuyên viên Kinh Doanh",
+      email: "",
+      phone: "",
+      status: "OFFICIAL",
+      hireDate: new Date().toISOString().split("T")[0],
+    });
+    setShowModal(true);
+  };
 
   const filtered = employees.filter(
     (e) =>
@@ -62,7 +76,7 @@ export default function EmployeesPage() {
         </div>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenModal}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md shadow-blue-600/20 transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />

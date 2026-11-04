@@ -11,15 +11,27 @@ export default function CustomersPage() {
   const [filterType, setFilterType] = useState<string>("ALL");
   const [showModal, setShowModal] = useState(false);
 
-  // Form state
+  // Form state - use deterministic initial state to eliminate SSR hydration mismatch
   const [formData, setFormData] = useState({
-    code: `KH-${Math.floor(1000 + Math.random() * 9000)}`,
+    code: "",
     name: "",
     phone: "",
     email: "",
     type: "Doanh nghiệp" as "Cá nhân" | "Doanh nghiệp",
     address: "",
   });
+
+  const handleOpenModal = () => {
+    setFormData({
+      code: `KH-${Math.floor(1000 + Math.random() * 9000)}`,
+      name: "",
+      phone: "",
+      email: "",
+      type: "Doanh nghiệp",
+      address: "",
+    });
+    setShowModal(true);
+  };
 
   const filtered = customers.filter((c) => {
     const matchSearch =
@@ -67,7 +79,7 @@ export default function CustomersPage() {
         </div>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenModal}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md shadow-blue-600/20 transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />

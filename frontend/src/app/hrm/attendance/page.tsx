@@ -8,11 +8,20 @@ export default function AttendancePage() {
   const { attendance, checkIn, checkOut, employees } = useApp();
   const [selectedEmp, setSelectedEmp] = useState(employees[0]?.name || "Nguyễn Văn A");
   const [currentTime, setCurrentTime] = useState("");
+  const [currentDateStr, setCurrentDateStr] = useState("");
 
   useEffect(() => {
     const update = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString("vi-VN", { hour12: false }));
+      setCurrentDateStr(
+        now.toLocaleDateString("vi-VN", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      );
     };
     update();
     const interval = setInterval(update, 1000);
@@ -37,8 +46,11 @@ export default function AttendancePage() {
       {/* Interactive Punch In/Out Card */}
       <div className="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center md:text-left">
-          <span className="text-xs font-semibold px-3 py-1 bg-white/20 rounded-full inline-block backdrop-blur-xs">
-            Hôm nay: {new Date().toLocaleDateString("vi-VN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          <span
+            suppressHydrationWarning
+            className="text-xs font-semibold px-3 py-1 bg-white/20 rounded-full inline-block backdrop-blur-xs"
+          >
+            Hôm nay: {currentDateStr || "Đang tải ngày..."}
           </span>
           <div className="text-4xl sm:text-5xl font-mono font-extrabold tracking-tight">
             {currentTime || "08:30:00"}
