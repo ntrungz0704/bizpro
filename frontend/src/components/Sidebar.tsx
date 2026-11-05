@@ -104,7 +104,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 
       <aside
         className={cn(
-          "w-64 h-screen min-h-screen bg-[#0B132B] text-slate-300 flex flex-col p-3 select-none shrink-0 border-r border-slate-800/80 fixed lg:sticky top-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden",
+          "w-64 h-full max-h-screen bg-[#0B132B] text-slate-300 flex flex-col p-3 select-none shrink-0 border-r border-slate-800/80 fixed lg:static top-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >

@@ -61,23 +61,26 @@ body {
   background: #94a3b8;
 }
 
-/* Sidebar Dark Scrollbar - Seamless on Windows */
+/* Sidebar Visible Enterprise Scrollbar - Clear & Smooth Up/Down Scrolling */
 .sidebar-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: #475569 rgba(15, 23, 42, 0.7);
 }
 .sidebar-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 .sidebar-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 9999px;
+  margin: 4px 0;
 }
 .sidebar-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #475569;
   border-radius: 9999px;
+  border: 1px solid rgba(15, 23, 42, 0.5);
 }
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(56, 189, 248, 0.4);
+  background: #38BDF8;
 }
 
 /* Toast animation */
