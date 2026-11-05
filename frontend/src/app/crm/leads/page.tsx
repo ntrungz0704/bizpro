@@ -5,7 +5,7 @@ import { useApp } from "@/context/AppContext";
 import { UserCheck, Plus, Search, UserPlus, Phone, Mail, Building2, CheckCircle } from "lucide-react";
 
 export default function LeadsPage() {
-  const { leads, addLead, convertLead } = useApp();
+  const { leads, addLead, convertLead, showToast } = useApp();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
 
@@ -29,7 +29,7 @@ export default function LeadsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.contactName || !formData.phone) {
-      alert("Vui lòng nhập tên người liên hệ và số điện thoại!");
+      showToast("Vui lòng nhập tên người liên hệ và số điện thoại!", "error");
       return;
     }
     addLead(formData);

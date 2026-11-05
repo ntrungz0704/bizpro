@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -9,6 +9,7 @@ import {
   Boxes,
   Calendar,
   ChevronDown,
+  Check,
 } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
 import RevenueChart from "@/components/RevenueChart";
@@ -20,9 +21,29 @@ import HrOverview from "@/components/HrOverview";
 import { useApp } from "@/context/AppContext";
 import { formatNumber, formatVND } from "@/lib/utils";
 
+const timeOptions = ["Hôm nay", "Tuần này", "Tháng này", "Quý này", "Năm nay"];
+
 export default function DashboardPage() {
-  const { customers, salesOrders, products, employees } = useApp();
+  const { customers, salesOrders, products, showToast } = useApp();
   const [timeRange, setTimeRange] = useState("Tháng này");
+  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const timeDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (timeDropdownRef.current && !timeDropdownRef.current.contains(e.target as Node)) {
+        setShowTimeDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectTime = (t: string) => {
+    setTimeRange(t);
+    setShowTimeDropdown(false);
+    showToast(`Đã lọc báo cáo tổng quan: ${t}`, "info");
+  };
 
   // Calculate live dynamic metrics synchronized with AppContext
   const baseRevenue = 548200000;
@@ -57,13 +78,41 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Time Filter Button */}
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-700 rounded-xl shadow-xs transition-colors">
-            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+        {/* Time Filter Button Dropdown */}
+        <div className="relative" ref={timeDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-700 rounded-xl shadow-xs transition-colors cursor-pointer"
+          >
+            <Calendar className="w-3.5 h-3.5 text-blue-600" />
             <span>{timeRange}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown
+              className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+                showTimeDropdown ? "rotate-180" : ""
+              }`}
+            />
           </button>
+
+          {showTimeDropdown && (
+            <div className="absolute right-0 top-full mt-1.5 w-36 bg-white rounded-xl shadow-xl border border-slate-100 p-1 z-40 animate-scale-up text-xs">
+              {timeOptions.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => handleSelectTime(opt)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${
+                    timeRange === opt
+                      ? "bg-blue-50 text-blue-700 font-bold"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{opt}</span>
+                  {timeRange === opt && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

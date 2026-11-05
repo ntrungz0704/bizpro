@@ -5,7 +5,7 @@ import { useApp } from "@/context/AppContext";
 import { CalendarDays, Plus, CheckCircle, XCircle, Clock, ShieldCheck } from "lucide-react";
 
 export default function LeavePage() {
-  const { leaveRequests, addLeaveRequest, approveLeaveRequest, rejectLeaveRequest, employees } = useApp();
+  const { leaveRequests, addLeaveRequest, approveLeaveRequest, rejectLeaveRequest, employees, showToast } = useApp();
   const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -20,7 +20,7 @@ export default function LeavePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.reason) {
-      alert("Vui lòng điền lý do xin nghỉ!");
+      showToast("Vui lòng điền lý do xin nghỉ phép!", "error");
       return;
     }
     addLeaveRequest(formData);

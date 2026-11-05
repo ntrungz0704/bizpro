@@ -5,7 +5,7 @@ import { useApp } from "@/context/AppContext";
 import { ClipboardCheck, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function StocktakesPage() {
-  const { products, showToast } = useApp();
+  const { products, applyStocktake, showToast } = useApp();
   const [counts, setCounts] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     products.forEach((p) => {
@@ -19,7 +19,7 @@ export default function StocktakesPage() {
   };
 
   const handleApplyStocktake = () => {
-    showToast("Đã hoàn tất đợt kiểm kê và lập phiếu điều chỉnh chênh lệch kho!");
+    applyStocktake(counts);
   };
 
   return (

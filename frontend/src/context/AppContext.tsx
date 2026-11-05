@@ -127,6 +127,15 @@ export interface LeaveRequest {
   status: "PENDING" | "APPROVED" | "REJECTED";
 }
 
+export interface UserProfile {
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  organization: string;
+  department: string;
+}
+
 export interface ActivityItem {
   id: string;
   title: string;
@@ -143,6 +152,11 @@ export interface ToastMessage {
 }
 
 interface AppContextType {
+  userProfile: UserProfile;
+  updateUserProfile: (profile: Partial<UserProfile>) => void;
+  isLoggedIn: boolean;
+  login: () => void;
+  logout: () => void;
   customers: Customer[];
   addCustomer: (customer: Omit<Customer, "id">) => void;
   leads: Lead[];
@@ -153,6 +167,7 @@ interface AppContextType {
   moveDealStage: (dealId: string, newStage: Deal["stage"]) => void;
   products: Product[];
   addProduct: (product: Omit<Product, "id" | "reserved">) => void;
+  applyStocktake: (updatedCounts: Record<string, number>) => void;
   salesOrders: SalesOrder[];
   createSalesOrder: (order: Omit<SalesOrder, "id">) => void;
   confirmSalesOrder: (orderId: string) => void;
@@ -180,6 +195,33 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  // User Profile & Authentication State
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    name: "Nguyễn Văn A",
+    email: "admin@bizpro.vn",
+    phone: "0901 234 567",
+    role: "Quản trị viên (ORG_ADMIN)",
+    organization: "Công ty Cổ phần Giải pháp Doanh nghiệp BizPro+",
+    department: "Ban Điều Hành & Quản Trị Hệ Thống",
+  });
+
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+  const updateUserProfile = (profile: Partial<UserProfile>) => {
+    setUserProfile((prev) => ({ ...prev, ...profile }));
+    showToast("Đã cập nhật hồ sơ cá nhân thành công!", "success");
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    showToast("Đã đăng xuất khỏi hệ thống BizPro+ an toàn!", "info");
+  };
+
+  const login = () => {
+    setIsLoggedIn(true);
+    showToast("Đăng nhập thành công! Chào mừng bạn quay lại BizPro+.", "success");
+  };
+
   // Initial Customers
   const [customers, setCustomers] = useState<Customer[]>([
     {
@@ -715,6 +757,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(`Đã thêm sản phẩm "${p.name}" vào kho!`);
   };
 
+  const applyStocktake = (updatedCounts: Record<string, number>) => {
+    setProducts((prev) =>
+      prev.map((prod) => {
+        if (updatedCounts[prod.id] !== undefined) {
+          return {
+            ...prod,
+            onHand: updatedCounts[prod.id],
+          };
+        }
+        return prod;
+      })
+    );
+    addActivity({
+      title: "Hoàn tất kiểm kê kho định kỳ",
+      detail: "Đã cân bằng số lượng tồn kho sổ sách khớp với số lượng thực đếm",
+      type: "INVENTORY",
+      href: "/inventory/products",
+    });
+    showToast("Đã cân bằng kho và đồng bộ tồn kho thực tế thành công!", "success");
+  };
+
   const createSalesOrder = (ord: Omit<SalesOrder, "id">) => {
     const newOrder: SalesOrder = {
       ...ord,
@@ -988,6 +1051,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider
       value={{
+        userProfile,
+        updateUserProfile,
+        isLoggedIn,
+        login,
+        logout,
         customers,
         addCustomer,
         leads,
@@ -998,6 +1066,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         moveDealStage,
         products,
         addProduct,
+        applyStocktake,
         salesOrders,
         createSalesOrder,
         confirmSalesOrder,
