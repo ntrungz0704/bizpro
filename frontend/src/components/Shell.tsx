@@ -8,7 +8,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen w-full bg-[#F8FAFC]" suppressHydrationWarning>
       {/* Sidebar with Mobile Toggle */}
       <Sidebar
         mobileOpen={mobileMenuOpen}
@@ -16,9 +16,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 w-full" suppressHydrationWarning>
         <Navbar onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 w-full overflow-y-auto" suppressHydrationWarning>
+          {children}
+        </main>
       </div>
     </div>
   );

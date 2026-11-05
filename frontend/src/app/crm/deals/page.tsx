@@ -16,7 +16,7 @@ const STAGES: { key: Deal["stage"]; title: string; color: string; bg: string }[]
 ];
 
 export default function DealsPage() {
-  const { deals, addDeal, moveDealStage, customers } = useApp();
+  const { deals, addDeal, moveDealStage, customers, showToast } = useApp();
   const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -31,10 +31,11 @@ export default function DealsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title) {
-      alert("Vui lòng nhập tên cơ hội!");
+      showToast("Vui lòng nhập tên cơ hội kinh doanh!", "error");
       return;
     }
     addDeal(formData);
+    showToast(`Đã tạo cơ hội kinh doanh "${formData.title}" thành công!`, "success");
     setShowModal(false);
     setFormData({
       title: "",
@@ -136,7 +137,10 @@ export default function DealsPage() {
                           <>
                             <button
                               title={`Chuyển sang giai đoạn tiếp theo: ${nextStageMap[deal.stage]}`}
-                              onClick={() => moveDealStage(deal.id, nextStageMap[deal.stage])}
+                              onClick={() => {
+                                moveDealStage(deal.id, nextStageMap[deal.stage]);
+                                showToast(`Đã chuyển cơ hội "${deal.title}" sang giai đoạn tiếp theo!`, "info");
+                              }}
                               className="flex items-center gap-0.5 px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 font-bold text-[10px] transition-all border border-blue-200/70 shadow-xs cursor-pointer active:scale-95"
                             >
                               <span>Tiếp</span>
@@ -144,14 +148,20 @@ export default function DealsPage() {
                             </button>
                             <button
                               title="Chốt thành công (Won)"
-                              onClick={() => moveDealStage(deal.id, "Won")}
+                              onClick={() => {
+                                moveDealStage(deal.id, "Won");
+                                showToast(`Chúc mừng! Đã chốt thành công cơ hội "${deal.title}"!`, "success");
+                              }}
                               className="p-1 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-600 transition-all border border-emerald-200/70 shadow-xs cursor-pointer active:scale-95"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               title="Đánh dấu thất bại (Lost)"
-                              onClick={() => moveDealStage(deal.id, "Lost")}
+                              onClick={() => {
+                                moveDealStage(deal.id, "Lost");
+                                showToast(`Đã ghi nhận cơ hội "${deal.title}" ở trạng thái thất bại.`, "info");
+                              }}
                               className="p-1 rounded-lg bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 transition-all border border-rose-200/70 shadow-xs cursor-pointer active:scale-95"
                             >
                               <XCircle className="w-3.5 h-3.5" />
@@ -184,14 +194,23 @@ export default function DealsPage() {
         })}
       </div>
 
-      {/* Modal Add Deal */}
+      {/* Modal Add Deal with Viewport Safety & Scroll */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <h2 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-blue-600" />
-              Tạo cơ hội kinh doanh mới
-            </h2>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 max-h-[88vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-600" />
+                Tạo cơ hội kinh doanh mới
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                aria-label="Đóng"
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">

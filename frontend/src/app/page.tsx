@@ -45,7 +45,7 @@ export default function DashboardPage() {
   const sparklineStock = [{ v: 85 }, { v: 80 }, { v: 90 }, { v: 75 }, { v: 95 }, { v: 90 }, { v: 100 }];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Page Title & Time Filter Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

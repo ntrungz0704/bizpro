@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 
 // Types
 export interface Customer {
@@ -1023,25 +1024,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      {/* Global Toast Floating Notification */}
-      <div className="fixed bottom-5 right-5 z-50 space-y-2 max-w-sm pointer-events-none">
+      {/* Global Toast Floating Notification with Modern Glassmorphism Design */}
+      <div className="fixed bottom-6 right-6 z-50 space-y-2.5 max-w-sm sm:max-w-md pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto p-3.5 rounded-xl shadow-lg border text-xs font-semibold flex items-center justify-between gap-3 animate-slide-up ${
-              toast.type === "success"
-                ? "bg-slate-900 text-white border-slate-800 shadow-slate-900/30"
-                : toast.type === "error"
-                ? "bg-red-600 text-white border-red-500 shadow-red-600/30"
-                : "bg-blue-600 text-white border-blue-500 shadow-blue-600/30"
-            }`}
+            className="pointer-events-auto p-3.5 sm:p-4 rounded-2xl shadow-2xl border border-slate-700/80 bg-[#0F172A]/95 backdrop-blur-md text-white flex items-start gap-3 animate-toast transition-all"
           >
-            <span>{toast.title}</span>
+            <div
+              className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                toast.type === "success"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : toast.type === "error"
+                  ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                  : "bg-blue-500/20 text-sky-400 border border-blue-500/30"
+              }`}
+            >
+              {toast.type === "success" ? (
+                <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+              ) : toast.type === "error" ? (
+                <AlertCircle className="w-4 h-4 stroke-[2.5]" />
+              ) : (
+                <Info className="w-4 h-4 stroke-[2.5]" />
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0 pr-1">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-wider ${
+                    toast.type === "success"
+                      ? "text-emerald-400"
+                      : toast.type === "error"
+                      ? "text-rose-400"
+                      : "text-sky-400"
+                  }`}
+                >
+                  {toast.type === "success"
+                    ? "Thành công"
+                    : toast.type === "error"
+                    ? "Thông báo lỗi"
+                    : "Thông báo"}
+                </span>
+              </div>
+              <p className="text-xs text-slate-200 leading-snug font-medium break-words">
+                {toast.title}
+              </p>
+            </div>
+
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-white/70 hover:text-white font-bold ml-2 text-sm"
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0 -mr-1 -mt-1"
+              aria-label="Đóng thông báo"
             >
-              ✕
+              <X className="w-4 h-4" />
             </button>
           </div>
         ))}

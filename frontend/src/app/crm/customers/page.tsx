@@ -6,7 +6,7 @@ import { formatVND } from "@/lib/utils";
 import { Users, Plus, Search, Filter, Phone, Mail, MapPin, Building, User } from "lucide-react";
 
 export default function CustomersPage() {
-  const { customers, addCustomer } = useApp();
+  const { customers, addCustomer, showToast } = useApp();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("ALL");
   const [showModal, setShowModal] = useState(false);
@@ -45,7 +45,7 @@ export default function CustomersPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
-      alert("Vui lòng điền họ tên và số điện thoại!");
+      showToast("Vui lòng điền họ tên và số điện thoại!", "error");
       return;
     }
     addCustomer({
@@ -53,6 +53,7 @@ export default function CustomersPage() {
       totalSpent: 0,
       status: "ACTIVE",
     });
+    showToast(`Đã thêm khách hàng "${formData.name}" thành công!`, "success");
     setShowModal(false);
     setFormData({
       code: `KH-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -65,7 +66,7 @@ export default function CustomersPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -191,14 +192,23 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Modal Add Customer */}
+      {/* Modal Add Customer with Viewport Safety */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-scale-up">
-            <h2 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-blue-600" />
-              Thêm khách hàng mới
-            </h2>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-scale-up max-h-[88vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-600" />
+                Thêm khách hàng mới
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                aria-label="Đóng"
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">

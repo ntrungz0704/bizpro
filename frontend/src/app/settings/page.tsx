@@ -20,7 +20,18 @@ export default function SettingsPage() {
 
   const handleSaveOrg = (e: React.FormEvent) => {
     e.preventDefault();
-    showToast("Đã lưu cập nhật thông tin tổ chức thành công!");
+    showToast("Đã lưu cập nhật thông tin doanh nghiệp thành công!", "success");
+  };
+
+  const handleTabChange = (tab: "ORG" | "RBAC" | "AUDIT") => {
+    setActiveTab(tab);
+    if (tab === "ORG") {
+      showToast("Đang xem Hồ sơ tổ chức", "info");
+    } else if (tab === "RBAC") {
+      showToast("Đang xem Ma trận phân quyền vai trò (RBAC)", "info");
+    } else {
+      showToast("Đang xem Nhật ký kiểm toán hệ thống (Audit Logs)", "info");
+    }
   };
 
   // Mock Audit Logs
@@ -64,7 +75,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -81,7 +92,7 @@ export default function SettingsPage() {
       {/* Tabs */}
       <div className="flex items-center gap-3 border-b border-slate-200">
         <button
-          onClick={() => setActiveTab("ORG")}
+          onClick={() => handleTabChange("ORG")}
           className={`flex items-center gap-2 pb-3 px-1 text-xs font-bold transition-all border-b-2 ${
             activeTab === "ORG"
               ? "border-blue-600 text-blue-600"
@@ -93,7 +104,7 @@ export default function SettingsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab("RBAC")}
+          onClick={() => handleTabChange("RBAC")}
           className={`flex items-center gap-2 pb-3 px-1 text-xs font-bold transition-all border-b-2 ${
             activeTab === "RBAC"
               ? "border-blue-600 text-blue-600"
@@ -105,7 +116,7 @@ export default function SettingsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab("AUDIT")}
+          onClick={() => handleTabChange("AUDIT")}
           className={`flex items-center gap-2 pb-3 px-1 text-xs font-bold transition-all border-b-2 ${
             activeTab === "AUDIT"
               ? "border-blue-600 text-blue-600"
@@ -119,7 +130,7 @@ export default function SettingsPage() {
 
       {/* Tab 1: Organization Settings Form */}
       {activeTab === "ORG" && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 max-w-3xl">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 w-full max-w-4xl">
           <form onSubmit={handleSaveOrg} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">

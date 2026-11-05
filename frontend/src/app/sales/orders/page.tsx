@@ -24,6 +24,7 @@ export default function SalesOrdersPage() {
     confirmSalesOrder,
     fulfillSalesOrder,
     cancelSalesOrder,
+    showToast,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<string>("ALL");
@@ -56,12 +57,17 @@ export default function SalesOrdersPage() {
     const prod = products.find((p) => p.id === selectedProductId);
 
     if (!cust || !prod) {
-      alert("Vui lòng chọn khách hàng và sản phẩm!");
+      showToast("Vui lòng chọn khách hàng và sản phẩm!", "error");
+      return;
+    }
+
+    if (quantity <= 0) {
+      showToast("Số lượng đặt hàng phải lớn hơn 0!", "error");
       return;
     }
 
     const lineTotal = prod.sellingPrice * quantity;
-    const newOrder: Omit<SalesOrder, "id"> = {
+    createSalesOrder({
       code: `SO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
       customerId: cust.id,
       customerName: cust.name,
@@ -73,15 +79,15 @@ export default function SalesOrdersPage() {
           productId: prod.id,
           productName: prod.name,
           sku: prod.sku,
-          quantity: quantity,
+          quantity,
           unitPrice: prod.sellingPrice,
-          lineTotal: lineTotal,
+          lineTotal,
         },
       ],
-      note: note || "Đơn hàng tạo mới trên hệ thống",
-    };
+      note,
+    });
 
-    createSalesOrder(newOrder);
+    showToast(`Đã lập đơn bán hàng mới cho khách hàng "${cust.name}" thành công!`, "success");
     setShowCreateModal(false);
     setQuantity(1);
     setNote("");
@@ -128,7 +134,7 @@ export default function SalesOrdersPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -226,7 +232,10 @@ export default function SalesOrdersPage() {
                     {/* Actions based on lifecycle */}
                     {order.status === "DRAFT" && (
                       <button
-                        onClick={() => confirmSalesOrder(order.id)}
+                        onClick={() => {
+                          confirmSalesOrder(order.id);
+                          showToast(`Đã xác nhận đơn hàng ${order.code}! Đã giữ tồn kho tương ứng.`, "success");
+                        }}
                         className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors active:scale-95"
                       >
                         <CheckCircle className="w-3.5 h-3.5" />
@@ -236,7 +245,10 @@ export default function SalesOrdersPage() {
 
                     {order.status === "CONFIRMED" && (
                       <button
-                        onClick={() => fulfillSalesOrder(order.id)}
+                        onClick={() => {
+                          fulfillSalesOrder(order.id);
+                          showToast(`Đã xuất kho và hoàn tất giao hàng đơn ${order.code}!`, "success");
+                        }}
                         className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors active:scale-95"
                       >
                         <Truck className="w-3.5 h-3.5" />
@@ -246,7 +258,10 @@ export default function SalesOrdersPage() {
 
                     {order.status !== "FULFILLED" && order.status !== "CANCELLED" && (
                       <button
-                        onClick={() => cancelSalesOrder(order.id)}
+                        onClick={() => {
+                          cancelSalesOrder(order.id);
+                          showToast(`Đã hủy đơn hàng ${order.code} và hoàn trả lượng giữ kho.`, "info");
+                        }}
                         className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 rounded-lg text-xs font-semibold transition-colors"
                       >
                         <XCircle className="w-3.5 h-3.5" />
@@ -276,14 +291,23 @@ export default function SalesOrdersPage() {
         </div>
       </div>
 
-      {/* Modal Create Sales Order */}
+      {/* Modal Create Sales Order with Viewport Safety */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-scale-up">
-            <h2 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 text-blue-600" />
-              Lập đơn bán hàng mới
-            </h2>
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-scale-up max-h-[88vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-blue-600" />
+                Lập đơn bán hàng mới
+              </h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                aria-label="Đóng"
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleCreateOrder} className="space-y-4">
               <div>

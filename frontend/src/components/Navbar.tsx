@@ -128,19 +128,19 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
           <Menu className="w-5 h-5" />
         </button>
 
-        {/* Search Input Bar with Ctrl+K */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Tìm kiếm khách hàng, đơn hàng, sản phẩm... (Ctrl + K)"
-            className="w-full pl-10 pr-16 py-2 bg-slate-100/70 hover:bg-slate-100 text-xs sm:text-sm text-slate-700 placeholder-slate-400 rounded-xl border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-all"
-          />
-          <kbd className="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 text-[10px] font-medium text-slate-500 bg-white border border-slate-200 rounded-md shadow-xs pointer-events-none">
-            Ctrl + K
-          </kbd>
-        </div>
+          {/* Search Input Bar with Ctrl+K */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Tìm kiếm khách hàng, đơn hàng, sản phẩm..."
+              className="w-full pl-10 pr-16 py-2 bg-slate-100/70 hover:bg-slate-100 text-xs sm:text-sm text-slate-700 placeholder-slate-400 rounded-xl border border-transparent focus:border-blue-500 focus:bg-white focus:outline-none transition-all"
+            />
+            <kbd className="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 text-[10px] font-medium text-slate-500 bg-white border border-slate-200 rounded-md shadow-xs pointer-events-none">
+              Ctrl + K
+            </kbd>
+          </div>
       </div>
 
       {/* Right Controls */}

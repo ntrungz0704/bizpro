@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -14,10 +14,10 @@ import {
   ChevronDown,
   ChevronRight,
   Rocket,
-  Layers,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import BizProLogo from "@/components/BizProLogo";
 
 interface SubItem {
   title: string;
@@ -80,25 +80,13 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
     { title: "Cài đặt", icon: Settings, href: "/settings" },
   ];
 
+  // Default all submenus to OPEN as requested
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
-    CRM: false,
-    "Bán hàng": false,
-    "Kho hàng": false,
-    "Nhân sự": false,
+    CRM: true,
+    "Bán hàng": true,
+    "Kho hàng": true,
+    "Nhân sự": true,
   });
-
-  // Auto expand menu based on active pathname
-  useEffect(() => {
-    menuItems.forEach((item) => {
-      if (item.subItems?.some((sub) => sub.href === pathname)) {
-        setOpenMenus((prev) => ({ ...prev, [item.title]: true }));
-      }
-    });
-    // Default open CRM if at root
-    if (pathname === "/") {
-      setOpenMenus((prev) => ({ ...prev, CRM: true }));
-    }
-  }, [pathname]);
 
   const toggleSubmenu = (title: string) => {
     setOpenMenus((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -116,31 +104,27 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 
       <aside
         className={cn(
-          "w-64 h-[100dvh] max-h-screen bg-[#0B132B] text-slate-300 flex flex-col p-3 select-none shrink-0 border-r border-slate-800/80 fixed lg:sticky top-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden",
+          "w-64 h-screen min-h-screen bg-[#0B132B] text-slate-300 flex flex-col p-3 select-none shrink-0 border-r border-slate-800/80 fixed lg:sticky top-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Brand Logo & Mobile Close */}
-        <div className="shrink-0 flex items-center justify-between px-2 py-1.5 mb-2">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform">
-              <Layers className="w-4 h-4 text-white stroke-[2.5]" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-white flex items-center">
-              BizPro<span className="text-blue-500 font-extrabold">+</span>
-            </span>
+        <div className="shrink-0 flex items-center justify-between px-2 py-2 mb-2">
+          <Link href="/" className="flex items-center group">
+            <BizProLogo variant="full" size="md" />
           </Link>
 
           {/* Mobile close button */}
           <button
             onClick={onMobileClose}
             className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+            aria-label="Đóng menu"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Scrollable Navigation Items - sleek dark sidebar scrollbar */}
+        {/* Scrollable Navigation Items with Sleek Clean Scrollbar */}
         <nav className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-1 sidebar-scrollbar">
           {menuItems.map((item) => {
             const Icon = item.icon;
