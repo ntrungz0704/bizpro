@@ -221,25 +221,21 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
             );
           })}
 
-          {/* Pro Upgrade Card moved inside scrollable nav so it never causes viewport clipping */}
-          <div className="pt-3 pb-1">
-            <div className="rounded-xl bg-gradient-to-b from-slate-800/80 to-slate-900/90 p-2.5 border border-slate-700/50 text-center relative overflow-hidden">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <div className="w-5 h-5 rounded-md bg-blue-600/25 border border-blue-500/40 flex items-center justify-center">
-                  <Rocket className="w-3 h-3 text-blue-400" />
+          {/* Sleek Enterprise Pro Badge (Compact, fits within 100vh) */}
+          <div className="pt-2 pb-1">
+            <div className="rounded-xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 p-2 border border-blue-500/30 flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-5 h-5 rounded-md bg-blue-600/30 border border-blue-400/40 flex items-center justify-center shrink-0">
+                  <Rocket className="w-3 h-3 text-sky-400" />
                 </div>
-                <h4 className="text-[11px] font-bold text-white truncate">Nâng cấp lên Pro</h4>
+                <div className="truncate">
+                  <h4 className="text-[11px] font-bold text-white truncate leading-none">BizPro+ Pro</h4>
+                  <p className="text-[9px] text-slate-400 truncate leading-none mt-0.5">Enterprise v1.0</p>
+                </div>
               </div>
-              <p className="text-[10px] text-slate-400 mb-2 leading-tight">
-                Mở khóa báo cáo AI & đa kho hàng
-              </p>
-              <button
-                type="button"
-                onClick={() => alert("Hệ thống Business Management System Enterprise Pro v1.0!")}
-                className="w-full py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold rounded-lg transition-colors shadow-xs active:scale-95"
-              >
-                Nâng cấp ngay
-              </button>
+              <span className="text-[9px] font-extrabold bg-blue-600 text-white px-1.5 py-0.5 rounded-md shadow-xs shrink-0 ml-1">
+                ACTIVE
+              </span>
             </div>
           </div>
         </nav>

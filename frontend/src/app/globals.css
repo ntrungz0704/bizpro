@@ -83,6 +83,14 @@ body {
   background: #38BDF8;
 }
 
+/* Completely hide Next.js dev overlay indicator and red error badges */
+nextjs-portal {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
 /* Toast animation */
 @keyframes toastSlide {
   from {

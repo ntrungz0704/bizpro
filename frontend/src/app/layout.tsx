@@ -15,6 +15,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Auto-remove extension attributes before hydration
+              try {
+                const clean = () => {
+                  document.querySelectorAll('[bis_skin_checked]').forEach(el => el.removeAttribute('bis_skin_checked'));
+                };
+                clean();
+                const observer = new MutationObserver(clean);
+                observer.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['bis_skin_checked'] });
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className="bg-[#F8FAFC] antialiased" suppressHydrationWarning>
         <AppProvider>
           <Shell>{children}</Shell>
