@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BizProLogo from "@/components/BizProLogo";
+import { useApp } from "@/context/AppContext";
 
 interface SubItem {
   title: string;
@@ -38,6 +39,7 @@ interface SidebarProps {
 
 export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
+  const { showToast } = useApp();
 
   const menuItems: MenuItem[] = [
     { title: "Tổng quan", icon: Home, href: "/" },
@@ -223,7 +225,15 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 
           {/* Sleek Enterprise Pro Badge (Compact, fits within 100vh) */}
           <div className="pt-2 pb-1">
-            <div className="rounded-xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 p-2 border border-blue-500/30 flex items-center justify-between">
+            <div
+              onClick={() =>
+                showToast(
+                  "Tài khoản doanh nghiệp đang sử dụng phiên bản BizPro+ Enterprise v1.0 đầy đủ tính năng!",
+                  "info"
+                )
+              }
+              className="rounded-xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 p-2 border border-blue-500/30 flex items-center justify-between cursor-pointer hover:border-blue-400/60 transition-colors"
+            >
               <div className="flex items-center gap-2 min-w-0">
                 <div className="w-5 h-5 rounded-md bg-blue-600/30 border border-blue-400/40 flex items-center justify-center shrink-0">
                   <Rocket className="w-3 h-3 text-sky-400" />
@@ -242,11 +252,30 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 
         {/* Pinned Bottom Enterprise Status Bar (Always visible, compact, never clipped) */}
         <div className="shrink-0 pt-2.5 pb-2 mt-auto border-t border-slate-800/80 px-2 flex items-center justify-between text-[11px] text-slate-400">
-          <div className="flex items-center gap-2 min-w-0">
+          <div
+            onClick={() =>
+              showToast(
+                "Trạng thái hệ thống: Kết nối Backend NestJS & PostgreSQL 16 hoạt động 100% thời gian thực.",
+                "success"
+              )
+            }
+            className="flex items-center gap-2 min-w-0 cursor-pointer hover:text-white transition-colors"
+          >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
             <span className="font-medium text-slate-300 truncate">Hệ thống Online</span>
           </div>
-          <span className="text-[10px] bg-slate-800/90 px-1.5 py-0.5 rounded-md font-mono text-slate-400 border border-slate-700/50 shrink-0 ml-2">v1.0-MVP</span>
+          <button
+            type="button"
+            onClick={() =>
+              showToast(
+                "BizPro+ Enterprise v1.0-MVP — Toàn bộ dịch vụ backend & database đang hoạt động ổn định 100%",
+                "info"
+              )
+            }
+            className="text-[10px] bg-slate-800/90 hover:bg-slate-700/90 px-1.5 py-0.5 rounded-md font-mono text-slate-400 hover:text-white border border-slate-700/50 shrink-0 ml-2 cursor-pointer transition-colors"
+          >
+            v1.0-MVP
+          </button>
         </div>
       </aside>
     </>

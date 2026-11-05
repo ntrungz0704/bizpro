@@ -1,25 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 
 export default function Shell({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="flex h-screen w-screen bg-[#0B132B] overflow-hidden">
-        <div className="w-64 h-full bg-[#0B132B] border-r border-slate-800" />
-        <div className="flex-1 h-full bg-[#F8FAFC]" />
-      </div>
-    );
-  }
 
   return (
     <div

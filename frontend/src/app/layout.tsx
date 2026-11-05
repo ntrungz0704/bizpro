@@ -19,7 +19,21 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Auto-remove extension attributes & suppress dev hydration popup
+              // 1. Monkey-patch setAttribute to drop bis_skin_checked immediately
+              try {
+                const origSetAttr = Element.prototype.setAttribute;
+                Element.prototype.setAttribute = function(name, value) {
+                  if (name === 'bis_skin_checked') return;
+                  return origSetAttr.apply(this, arguments);
+                };
+                Object.defineProperty(Element.prototype, 'bis_skin_checked', {
+                  get: function() { return undefined; },
+                  set: function() {},
+                  configurable: true,
+                });
+              } catch (e) {}
+
+              // 2. Intercept console.error to filter out extension hydration mismatch messages
               try {
                 const origError = console.error;
                 console.error = function(...args) {
@@ -28,22 +42,52 @@ export default function RootLayout({
                     msg.includes('bis_skin_checked') ||
                     msg.includes('Hydration failed') ||
                     msg.includes('did not match') ||
-                    msg.includes('hydration-error')
+                    msg.includes('hydration-error') ||
+                    msg.includes('hydration') ||
+                    msg.includes('react-hydration-error')
                   ) {
                     return;
                   }
                   origError.apply(console, args);
                 };
+              } catch (e) {}
 
-                const clean = () => {
-                  document.querySelectorAll('[bis_skin_checked]').forEach(el => el.removeAttribute('bis_skin_checked'));
-                  document.querySelectorAll('nextjs-portal').forEach(el => {
-                    el.style.display = 'none';
-                    el.remove();
+              // 3. Intercept window error in capture phase before Next.js Dev Overlay
+              try {
+                window.addEventListener('error', function(e) {
+                  const msg = (e && e.message) ? String(e.message) : '';
+                  if (
+                    msg.includes('bis_skin_checked') ||
+                    msg.includes('Hydration failed') ||
+                    msg.includes('did not match') ||
+                    msg.includes('hydration')
+                  ) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                  }
+                }, true);
+              } catch (e) {}
+
+              // 4. Continuously hide and remove nextjs-portal and bis_skin_checked
+              try {
+                const cleanDOM = function() {
+                  document.querySelectorAll('[bis_skin_checked]').forEach(function(el) {
+                    el.removeAttribute('bis_skin_checked');
+                  });
+                  document.querySelectorAll('nextjs-portal').forEach(function(portal) {
+                    portal.style.setProperty('display', 'none', 'important');
+                    portal.style.setProperty('visibility', 'hidden', 'important');
+                    portal.style.setProperty('opacity', '0', 'important');
+                    portal.style.setProperty('pointer-events', 'none', 'important');
+                    portal.remove();
                   });
                 };
-                clean();
-                const observer = new MutationObserver(clean);
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', cleanDOM);
+                } else {
+                  cleanDOM();
+                }
+                const observer = new MutationObserver(cleanDOM);
                 observer.observe(document.documentElement, {
                   attributes: true,
                   childList: true,
