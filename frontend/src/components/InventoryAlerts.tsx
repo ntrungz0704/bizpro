@@ -2,12 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Laptop, Mouse, Keyboard, Monitor, Package } from "lucide-react";
+import { AlertTriangle, ArrowRight, Laptop, Mouse, Keyboard, Monitor, Package, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/AppContext";
 
 export default function InventoryAlerts() {
-  const { products } = useApp();
+  const { products, quickReorderProduct } = useApp();
 
   // Find products that are low in available stock (onHand - reserved <= minStock)
   const lowStockProducts = [...products]
@@ -29,7 +29,7 @@ export default function InventoryAlerts() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-500" />
-          <h3 className="text-sm font-bold text-slate-800">Cảnh báo tồn kho</h3>
+          <h3 className="text-sm font-bold text-slate-800">Cảnh báo tồn kho & Dự báo</h3>
         </div>
         <Link
           href="/inventory/products"
@@ -44,39 +44,54 @@ export default function InventoryAlerts() {
         {lowStockProducts.map((prod) => {
           const available = prod.onHand - prod.reserved;
           const isUrgent = available <= 5;
+          const runoutEstimate = isUrgent ? "Dự đoán hết trong 3 ngày" : "Dự đoán hết trong 7 ngày";
           const Icon = getProductIcon(prod.name, prod.category);
 
           return (
-            <Link
+            <div
               key={prod.id}
-              href="/inventory/products"
               className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group"
             >
-              <div className="flex items-center gap-3">
+              <Link href="/inventory/products" className="flex items-center gap-3 flex-1 min-w-0 pr-2">
                 <div className="w-9 h-9 rounded-lg bg-slate-100 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center text-slate-600 shrink-0 transition-colors">
                   <Icon className="w-4 h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 group-hover:text-blue-600 leading-tight transition-colors">
+                <div className="min-w-0">
+                  <h4 className="text-xs font-bold text-slate-800 group-hover:text-blue-600 leading-tight transition-colors truncate">
                     {prod.name}
                   </h4>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    Còn {available} {prod.uom} khả dụng (Tồn: {prod.onHand})
+                  <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+                    Còn <b className="text-slate-700">{available}</b> {prod.uom} khả dụng •{" "}
+                    <span className={isUrgent ? "text-rose-500 font-semibold" : "text-amber-600 font-medium"}>
+                      {runoutEstimate}
+                    </span>
                   </p>
                 </div>
-              </div>
+              </Link>
 
-              <span
-                className={cn(
-                  "px-2.5 py-1 text-[11px] font-semibold rounded-md border whitespace-nowrap",
-                  isUrgent
-                    ? "bg-red-50 text-red-600 border-red-200"
-                    : "bg-amber-50 text-amber-600 border-amber-200"
-                )}
-              >
-                {isUrgent ? "Cần nhập" : "Sắp hết"}
-              </span>
-            </Link>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  title="Hệ thống tự động lập phiếu nhập kho bù định mức tồn an toàn"
+                  onClick={() => quickReorderProduct(prod.id)}
+                  className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 rounded-md border border-blue-200/80 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                >
+                  <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
+                  <span>Nhập nhanh</span>
+                </button>
+
+                <span
+                  className={cn(
+                    "px-2 py-1 text-[10px] font-semibold rounded-md border whitespace-nowrap",
+                    isUrgent
+                      ? "bg-red-50 text-red-600 border-red-200"
+                      : "bg-amber-50 text-amber-600 border-amber-200"
+                  )}
+                >
+                  {isUrgent ? "Cần nhập gấp" : "Sắp hết"}
+                </span>
+              </div>
+            </div>
           );
         })}
       </div>

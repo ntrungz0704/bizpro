@@ -1,12 +1,51 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 
+// Routes that use the Public Marketing Layout (no internal ERP sidebar/navbar)
+const isMarketingRoute = (pathname: string): boolean => {
+  if (pathname === "/") return true;
+  const publicPrefixes = [
+    "/features",
+    "/solutions",
+    "/pricing",
+    "/demo",
+    "/contact",
+    "/login",
+    "/signup",
+    "/privacy",
+    "/terms",
+    "/forgot-password",
+    "/customers",
+    "/about",
+    "/resources",
+    "/faq",
+    "/onboarding",
+    "/admin",
+  ];
+  return publicPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
+};
+
 export default function Shell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
+  // If public marketing or auth route, render clean full-width content directly
+  if (isMarketingRoute(pathname)) {
+    return (
+      <div
+        className="min-h-screen w-full bg-surface text-on-surface flex flex-col justify-between"
+        suppressHydrationWarning
+      >
+        {children}
+      </div>
+    );
+  }
+
+  // Internal ERP layout
   return (
     <div
       className="flex h-screen max-h-screen w-full overflow-hidden bg-[#F8FAFC]"

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>Trang Chu - BizPro+</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary-fixed-dim": "#b4c5ff", "on-surface": "#131b2e", "error-container": "#ffdad6", "secondary-container": "#d9dff4", "on-tertiary-container": "#f7edff", "tertiary-fixed-dim": "#d2bbff", "on-primary-container": "#eeefff", "secondary": "#585e6f", "on-primary-fixed-variant": "#003ea8", "on-primary-fixed": "#00174b", "secondary-fixed-dim": "#c0c6da", "on-tertiary": "#ffffff", "primary-container": "#2563eb", "on-error": "#ffffff", "tertiary": "#6a1edb", "inverse-surface": "#283044", "surface-container": "#eaedff", "surface-container-highest": "#dae2fd", "outline-variant": "#c3c6d7", "on-tertiary-fixed-variant": "#5a00c6", "surface-container-lowest": "#ffffff", "on-surface-variant": "#434655", "primary": "#004ac6", "on-secondary": "#ffffff", "surface": "#faf8ff", "on-secondary-fixed": "#151b2a", "outline": "#737686", "surface-dim": "#d2d9f4", "error": "#ba1a1a", "surface-container-high": "#e2e7ff", "surface-variant": "#dae2fd", "tertiary-container": "#8343f4", "inverse-primary": "#b4c5ff", "on-background": "#131b2e", "background": "#faf8ff", "on-primary": "#ffffff", "on-tertiary-fixed": "#25005a", "inverse-on-surface": "#eef0ff", "secondary-fixed": "#dce2f6", "surface-bright": "#faf8ff", "tertiary-fixed": "#eaddff", "on-secondary-container": "#5c6274", "surface-container-low": "#f2f3ff", "surface-tint": "#0053db", "on-secondary-fixed-variant": "#404757", "primary-fixed": "#dbe1ff", "on-error-container": "#93000a" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xs": "0.25rem", "margin": "2rem", "margin-mobile": "1rem", "space-lg": "1rem", "space-sm": "0.5rem", "space-md": "0.75rem", "gutter": "1.5rem", "space-xl": "1.5rem", "gutter-sm": "1rem" }, fontFamily: { "headline-md": ["Inter"], "headline-lg": ["Inter"], "title-md": ["Inter"], "headline-sm": ["Inter"], "body-lg-medium": ["Inter"], "body-lg": ["Inter"], "body-md-medium": ["Inter"], "display": ["Inter"], "headline-lg-mobile": ["Inter"], "label-md": ["Inter"], "display-mobile": ["Inter"], "body-md": ["Inter"], "caption": ["Inter"], "label-sm": ["Inter"] }, fontSize: { "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "title-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-lg-medium": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "body-md-medium": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }], "display": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "headline-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "500" }], "display-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "caption": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }], "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100%;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}details summary::-webkit-details-marker{display:none;}details>summary{list-style:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-gutter-sm flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm"><button aria-label="Menu điều hướng" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface hover:bg-surface-container-low transition-colors" type="button"><span class="material-symbols-outlined text-[24px]">menu</span></button><a class="flex items-center gap-space-xs text-primary font-headline-sm text-headline-sm tracking-tight" data-path="trang-chu" href="#"><span class="material-symbols-outlined text-[26px] text-primary">deployed_code</span><span class="tracking-tight font-headline-sm text-headline-sm text-on-surface">BizPro<span class="text-primary">+</span></span></a></div><div class="flex items-center gap-space-xs"><a class="h-9 px-space-md inline-flex items-center justify-center rounded-lg bg-primary-container text-on-primary font-body-md-medium text-body-md-medium hover:bg-primary transition-colors shadow-sm" data-path="dang-ky-dung-thu" href="#"><span>Dùng thử</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full pb-8">
+<!-- 1. Hero Section -->
+<section class="px-gutter-sm pt-space-md pb-space-lg flex flex-col gap-space-md">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 bg-surface-container rounded-full self-start shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-caption text-caption text-primary font-semibold tracking-wide">Enterprise Unified Core v4.2</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold tracking-tight">
+        Tất cả công cụ quản trị doanh nghiệp trên một nền tảng duy nhất
+      </h1>
+<p class="font-body-md text-body-md text-secondary">
+        Quản lý khách hàng, kho hàng, đơn hàng và nhân sự trong một hệ thống thống nhất, loại bỏ hoàn toàn các ốc đảo dữ liệu phân mảnh.
+      </p>
+</div>
+<!-- Dual CTAs Stacked Full-Width -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<a class="w-full h-11 px-space-lg bg-primary text-on-primary rounded-lg font-body-md-medium text-body-md-medium flex items-center justify-center gap-space-xs shadow-md active:opacity-90 transition-opacity" href="#pillars">
+<span>Khám phá chi tiết các phân hệ</span>
+<span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+</a>
+<a class="w-full h-11 px-space-lg bg-surface-container-low text-primary rounded-lg font-body-md-medium text-body-md-medium flex items-center justify-center gap-space-xs active:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+<span>Dùng thử miễn phí 14 ngày</span>
+</a>
+</div>
+<!-- Architecture Core Engine Mobile Card -->
+<div class="mt-space-sm bg-inverse-surface rounded-xl p-space-md text-inverse-on-surface shadow-xl flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[20px]">hub</span>
+<span class="font-label-sm text-label-sm text-surface-container-highest tracking-wide uppercase">Unified Core Engine</span>
+</div>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container/10 text-primary-fixed">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed animate-ping"></span>
+<span class="font-caption text-caption">Active Sync</span>
+</div>
+</div>
+<!-- 4 Connected Nodes Grid -->
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="p-space-sm rounded-lg bg-surface-variant/10 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-surface-container-highest">Trụ cột 01</span>
+<span class="material-symbols-outlined text-primary-fixed text-[16px]">groups</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-inverse-on-surface">CRM &amp; Pipeline</span>
+<span class="font-caption text-caption text-outline-variant">Realtime 360°</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-variant/10 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-surface-container-highest">Trụ cột 02</span>
+<span class="material-symbols-outlined text-primary-fixed text-[16px]">receipt_long</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-inverse-on-surface">Đơn hàng OMS</span>
+<span class="font-caption text-caption text-outline-variant">Omnichannel</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-variant/10 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-surface-container-highest">Trụ cột 03</span>
+<span class="material-symbols-outlined text-primary-fixed text-[16px]">warehouse</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-inverse-on-surface">Kho hàng WMS</span>
+<span class="font-caption text-caption text-outline-variant">Barcode Tracking</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-variant/10 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-surface-container-highest">Trụ cột 04</span>
+<span class="material-symbols-outlined text-primary-fixed text-[16px]">badge</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-inverse-on-surface">Nhân sự HRM</span>
+<span class="font-caption text-caption text-outline-variant">GPS Chấm công</span>
+</div>
+</div>
+<!-- Engine Status Bar -->
+<div class="pt-space-xs flex items-center justify-between bg-surface-variant/5 p-space-xs rounded-lg">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">sync_alt</span>
+<span class="font-caption text-caption text-outline-variant">Multi-master Replication</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim">verified_user</span>
+<span class="font-caption text-caption text-surface-container-highest font-medium">ISO 27001</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Core Pillars Overview -->
+<section class="px-gutter-sm py-space-lg flex flex-col gap-space-md" id="pillars">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Hệ thống đồng nhất</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">4 Trụ cột cốt lõi ăn khớp tuyệt đối</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Mỗi phân hệ vận hành độc lập với tính chuyên sâu tối đa, nhưng cùng chia sẻ một cấu trúc cơ sở dữ liệu đồng bộ tức thì.
+      </p>
+</div>
+<!-- 4 Pillar Vertical Cards -->
+<div class="flex flex-col gap-space-sm">
+<!-- Pillar 1 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">contact_phone</span>
+</div>
+<div>
+<span class="font-caption text-caption text-primary font-semibold">Phân hệ 01</span>
+<h3 class="font-title-md text-title-md text-on-surface">CRM &amp; Bán hàng B2B</h3>
+</div>
+</div>
+<p class="font-body-md text-body-md text-secondary">
+          Bao quát 360 độ hồ sơ khách hàng, pipeline bán hàng dạng phễu trực quan, chuẩn hóa quy trình chăm sóc từ bước đầu mối đến hợp đồng.
+        </p>
+<div class="flex flex-wrap gap-1.5 pt-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Lead 360°</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Phễu Sales</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Lịch sử tư vấn</span>
+</div>
+</div>
+<!-- Pillar 2 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">inventory_2</span>
+</div>
+<div>
+<span class="font-caption text-caption text-primary font-semibold">Phân hệ 02</span>
+<h3 class="font-title-md text-title-md text-on-surface">Kho hàng &amp; Tồn kho WMS</h3>
+</div>
+</div>
+<p class="font-body-md text-body-md text-secondary">
+          Quản trị chi tiết danh mục hàng chục ngàn SKU, sơ đồ vị trí kệ đa kho, kiểm kê nhanh bằng máy quét mã vạch và tự động báo tồn an toàn.
+        </p>
+<div class="flex flex-wrap gap-1.5 pt-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Đa điểm kho</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Barcode/QR</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Cảnh báo min/max</span>
+</div>
+</div>
+<!-- Pillar 3 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">shopping_cart_checkout</span>
+</div>
+<div>
+<span class="font-caption text-caption text-primary font-semibold">Phân hệ 03</span>
+<h3 class="font-title-md text-title-md text-on-surface">Quản lý Đơn hàng (OMS)</h3>
+</div>
+</div>
+<p class="font-body-md text-body-md text-secondary">
+          Tập trung hóa luồng đơn từ nhân viên kinh doanh, điểm bán lẻ và sàn TMĐT. Tự động kiểm soát hạn mức nợ và đối soát thu hộ COD chính xác.
+        </p>
+<div class="flex flex-wrap gap-1.5 pt-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Đa kênh TMĐT</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Duyệt công nợ</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Đối soát COD</span>
+</div>
+</div>
+<!-- Pillar 4 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">engineering</span>
+</div>
+<div>
+<span class="font-caption text-caption text-primary font-semibold">Phân hệ 04</span>
+<h3 class="font-title-md text-title-md text-on-surface">Nhân sự &amp; Chấm công HRM</h3>
+</div>
+</div>
+<p class="font-body-md text-body-md text-secondary">
+          Hồ sơ nhân sự số hóa toàn diện, chấm công chuẩn xác bằng định vị GPS/Wifi văn phòng, tính toán lương thưởng KPI tự động chỉ với 1 lượt bấm.
+        </p>
+<div class="flex flex-wrap gap-1.5 pt-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Chấm công GPS</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Lương KPI tự động</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-on-surface-variant">Hồ sơ số hóa</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Deep-Dive Micro Mockups Section -->
+<section class="px-gutter-sm py-space-lg flex flex-col gap-space-lg bg-surface-container-low">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Trải nghiệm tương tác</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Chi tiết giao diện thực tế từng phân hệ</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Được thiết kế tinh gọn cho trải nghiệm điều hành mượt mà ngay trên thiết bị di động của nhà quản lý.
+      </p>
+</div>
+<!-- Visual Module Showcase: Operational Team Photo -->
+<div class="relative w-full h-44 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Vietnamese modern warehouse operations manager using BizPro mobile app on smartphone in a high-tech logistics distribution center, professional warm lighting, clean industrial background, modern enterprise atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBb4NWULbHXcnGnpXcIKl2s0w2Ra14bM-T9fqnh74A954ZwrYChJMenx3bPIn4FdWNrmb2o-DRd0bSWXwtfI6BWaiMTNqDvLSjwGze1-Ii178zInR093i6a9eI8sYT4tYxHcm5cTeAIoUKhqH_s6NcetpZqB5hkaooKak7t1BW4c3DFtlzasEg2zztlmhrDr3RyUaoqhMg_mVEVRT2ttJT6FIpwI-VfL9gTgDk8d0Y"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-on-surface/20 to-transparent flex items-end p-space-md">
+<span class="font-label-sm text-label-sm text-on-primary">Vận hành đồng bộ tại hiện trường kho và văn phòng</span>
+</div>
+</div>
+<!-- MODULE 1: CRM & Pipeline Mockup -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">filter_alt</span>
+<span class="font-title-md text-title-md text-on-surface">Pipeline B2B Quý 4</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-primary font-medium">3 Cơ hội lớn</span>
+</div>
+<!-- Horizontal scroll compact pipeline cards -->
+<div class="flex gap-space-sm overflow-x-auto pb-2 -mx-space-xs px-space-xs">
+<!-- Stage 1 -->
+<div class="min-w-[210px] bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-space-xs shrink-0">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary font-medium">1. Mới tiếp cận</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<div class="bg-surface-container-lowest p-space-xs rounded shadow-xs flex flex-col gap-1">
+<span class="font-body-md-medium text-body-md-medium text-on-surface truncate">Tập đoàn Dược Nam Hà</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">320.000.000 ₫</span>
+<div class="flex items-center justify-between pt-1 font-caption text-caption text-secondary">
+<span>Xác suất: 30%</span>
+<span class="text-primary">12 ngày</span>
+</div>
+</div>
+</div>
+<!-- Stage 2 -->
+<div class="min-w-[210px] bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-space-xs shrink-0">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary-container font-medium">2. Báo giá/Pitch</span>
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+</div>
+<div class="bg-surface-container-lowest p-space-xs rounded shadow-xs flex flex-col gap-1">
+<span class="font-body-md-medium text-body-md-medium text-on-surface truncate">LogiTech Á Châu</span>
+<span class="font-headline-sm text-headline-sm text-primary-container font-bold">540.000.000 ₫</span>
+<div class="flex items-center justify-between pt-1 font-caption text-caption text-secondary">
+<span>Xác suất: 65%</span>
+<span class="text-primary-container">4 ngày</span>
+</div>
+</div>
+</div>
+<!-- Stage 3 -->
+<div class="min-w-[210px] bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-space-xs shrink-0">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary font-medium">3. Đàm phán chốt</span>
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+</div>
+<div class="bg-surface-container-lowest p-space-xs rounded shadow-xs flex flex-col gap-1">
+<span class="font-body-md-medium text-body-md-medium text-on-surface truncate">Việt Mart JSC</span>
+<span class="font-headline-sm text-headline-sm text-tertiary font-bold">890.000.000 ₫</span>
+<div class="flex items-center justify-between pt-1 font-caption text-caption text-secondary">
+<span>Xác suất: 90%</span>
+<span class="text-tertiary">Hôm nay</span>
+</div>
+</div>
+</div>
+</div>
+<span class="font-caption text-caption text-secondary italic">Vuốt ngang để theo dõi các giai đoạn phễu kinh doanh</span>
+</div>
+<!-- MODULE 2: Inventory WMS Mockup -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">shelves</span>
+<span class="font-title-md text-title-md text-on-surface">Kiểm soát Tồn kho Thời gian thực</span>
+</div>
+<span class="font-caption text-caption text-secondary">Kho Tổng HN</span>
+</div>
+<!-- Compact SKU List -->
+<div class="flex flex-col gap-space-xs">
+<!-- SKU 1 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-body-md-medium text-body-md-medium text-on-surface truncate">Máy chủ Rack Server 2U</span>
+<span class="font-caption text-caption text-secondary">Mã SKU: SV-R2U-88</span>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="font-label-md text-label-md font-semibold text-on-surface">18 cái</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-primary font-medium">Còn hàng</span>
+</div>
+</div>
+<!-- SKU 2 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-body-md-medium text-body-md-medium text-on-surface truncate">Switch Cisco 48 Port GbE</span>
+<span class="font-caption text-caption text-secondary">Mã SKU: CS-SW48-L3</span>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="font-label-md text-label-md font-semibold text-on-surface">35 cái</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container font-caption text-caption text-on-secondary-container font-medium">Sắp hết</span>
+</div>
+</div>
+<!-- SKU 3 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-body-md-medium text-body-md-medium text-on-surface truncate">Đầu đọc mã vạch Zebra 2D</span>
+<span class="font-caption text-caption text-secondary">Mã SKU: ZB-SC2D-01</span>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="font-label-md text-label-md font-semibold text-on-surface">120 cái</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-primary font-medium">Còn hàng</span>
+</div>
+</div>
+<!-- SKU 4 Warning -->
+<div class="p-space-sm bg-error-container/40 rounded-lg flex items-center justify-between">
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-body-md-medium text-body-md-medium text-on-surface truncate">Bộ lưu điện UPS APC 3kVA</span>
+<span class="font-caption text-caption text-error font-medium">Mã SKU: UPS-3K-ONLINE</span>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="font-label-md text-label-md font-bold text-error">15 cái</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container font-caption text-caption text-on-error-container font-bold">Cảnh báo</span>
+</div>
+</div>
+</div>
+</div>
+<!-- MODULE 3: Order Management OMS Mockup -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span>
+<span class="font-title-md text-title-md text-on-surface">Đơn hàng Bán &amp; Công nợ</span>
+</div>
+<span class="font-caption text-caption text-primary font-medium">24 Đơn/ngày</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<!-- Order 1 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">ĐH-2024-0891</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-primary font-caption text-caption font-semibold">Đã thanh toán 100%</span>
+</div>
+<span class="font-body-md text-body-md text-secondary truncate">Công ty Thiết bị Đại Dương</span>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">184.500.000 ₫</span>
+<span class="font-caption text-caption text-secondary">Xuất kho 14:20</span>
+</div>
+</div>
+<!-- Order 2 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">ĐH-2024-0892</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold">Chờ duyệt nợ</span>
+</div>
+<span class="font-body-md text-body-md text-secondary truncate">Tập đoàn Xây dựng An Phát</span>
+<div class="flex items-center justify-between pt-1">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">420.000.000 ₫</span>
+<span class="font-caption text-caption text-secondary">Hạn mức 30 ngày</span>
+</div>
+</div>
+</div>
+</div>
+<!-- MODULE 4: HRM & Attendance Mockup -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">pin_drop</span>
+<span class="font-title-md text-title-md text-on-surface">Chấm công GPS Trực ban</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-caption text-caption text-primary font-medium">184/184 Nhân sự</span>
+</div>
+<!-- Personnel Live Check-in -->
+<div class="flex flex-col gap-space-xs">
+<!-- Staff 1 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary font-label-md text-label-md font-bold">
+              PN
+            </div>
+<div class="flex flex-col">
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Trần Phương Nga</span>
+<span class="font-caption text-caption text-secondary">Trưởng phòng Kinh Doanh</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-primary font-semibold">08:14 (GPS)</span>
+<span class="font-caption text-caption text-secondary">Đúng giờ</span>
+</div>
+</div>
+<!-- Staff 2 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-on-secondary font-label-md text-label-md font-bold">
+              HD
+            </div>
+<div class="flex flex-col">
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Lê Hoàng Dũng</span>
+<span class="font-caption text-caption text-secondary">Chuyên viên Vận hành Kho</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-primary font-semibold">08:28 (Wifi HQ)</span>
+<span class="font-caption text-caption text-secondary">Đúng giờ</span>
+</div>
+</div>
+</div>
+<!-- Quick KPI Metric Bar -->
+<div class="p-space-sm bg-surface-container rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]">payments</span>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Tính lương KPI tự động</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">1-Click Ready</span>
+</div>
+</div>
+</section>
+<!-- 4. Unified Data Flow Pipeline -->
+<section class="px-gutter-sm py-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Tự động hóa toàn trình</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Kiến trúc Dữ liệu liền mạch</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Dữ liệu chảy tự động qua các phân hệ mà không cần thao tác nhập liệu thủ công lặp lại.
+      </p>
+</div>
+<!-- Vertical 5-Step Process Flow -->
+<div class="flex flex-col gap-2 relative pl-4">
+<!-- Continuous vertical progress line -->
+<div class="absolute left-7 top-4 bottom-4 w-0.5 bg-surface-container-high -z-0"></div>
+<!-- Step 1 -->
+<div class="flex items-start gap-space-sm relative z-10">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-caption text-caption font-bold shrink-0 shadow-sm">
+          1
+        </div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-xs flex-1">
+<span class="font-label-sm text-label-sm text-primary font-bold">CRM tiếp nhận</span>
+<p class="font-body-md text-body-md text-on-surface">Khách hàng chốt hợp đồng từ phễu bán hàng.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start gap-space-sm relative z-10">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-caption text-caption font-bold shrink-0 shadow-sm">
+          2
+        </div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-xs flex-1">
+<span class="font-label-sm text-label-sm text-primary font-bold">Đơn hàng tự động khởi tạo</span>
+<p class="font-body-md text-body-md text-on-surface">Kiểm tra tức thời hạn mức công nợ và duyệt xuất bán.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-space-sm relative z-10">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-caption text-caption font-bold shrink-0 shadow-sm">
+          3
+        </div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-xs flex-1">
+<span class="font-label-sm text-label-sm text-primary font-bold">Kho hàng WMS giữ chỗ</span>
+<p class="font-body-md text-body-md text-on-surface">Trừ tồn kho ảo, in tem mã vạch đóng gói tại kho gần nhất.</p>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex items-start gap-space-sm relative z-10">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-caption text-caption font-bold shrink-0 shadow-sm">
+          4
+        </div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-xs flex-1">
+<span class="font-label-sm text-label-sm text-primary font-bold">HRM ghi nhận KPI thưởng</span>
+<p class="font-body-md text-body-md text-on-surface">Cộng hoa hồng tự động vào bảng lương tháng của Sales.</p>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="flex items-start gap-space-sm relative z-10">
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-caption text-caption font-bold shrink-0 shadow-sm">
+          5
+        </div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-xs flex-1">
+<span class="font-label-sm text-label-sm text-primary-container font-bold">BI Dashboard CEO hiển thị</span>
+<p class="font-body-md text-body-md text-on-surface">Dòng tiền và biên lợi nhuận nhảy tức thì trên báo cáo điều hành.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Business Intelligence Analytics Section -->
+<section class="px-gutter-sm py-space-lg flex flex-col gap-space-md bg-surface-container-low">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Trí tuệ dữ liệu</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Báo cáo Phân tích Chuyên sâu (BI)</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Cung cấp góc nhìn tài chính và hiệu suất vận hành thời gian thực phục vụ quyết định cấp chiến lược.
+      </p>
+</div>
+<!-- Executive KPI Mobile Dashboard Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div>
+<span class="font-caption text-caption text-secondary uppercase font-semibold">Tổng doanh thu thực nhận</span>
+<div class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">28.450.000.000 ₫</div>
+</div>
+<div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+18.4%</span>
+</div>
+</div>
+<!-- Secondary Metrics Pair -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1">
+<span class="font-caption text-caption text-secondary">Lead-to-Deal</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">24.8%</span>
+<span class="font-caption text-caption text-primary">+3.2% vs mục tiêu</span>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1">
+<span class="font-caption text-caption text-secondary">Vòng quay tồn kho</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">5.6 Lần/năm</span>
+<span class="font-caption text-caption text-primary">Tối ưu chi phí vốn</span>
+</div>
+</div>
+<!-- Mini Monthly Revenue Bar Chart (Inline SVG) -->
+<div class="flex flex-col gap-2 pt-space-xs">
+<div class="flex items-center justify-between font-caption text-caption text-secondary">
+<span>Doanh thu 6 tháng gần nhất (Tỷ VNĐ)</span>
+<span class="font-medium text-on-surface">T9: 5.2 Tỷ</span>
+</div>
+<div class="w-full h-28 bg-surface-container-low rounded-lg p-space-sm flex items-end justify-between gap-2">
+<!-- Month 4 -->
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full bg-secondary-container rounded-t" style="height: 48px;"></div>
+<span class="font-caption text-caption text-secondary">T4</span>
+</div>
+<!-- Month 5 -->
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full bg-secondary-container rounded-t" style="height: 56px;"></div>
+<span class="font-caption text-caption text-secondary">T5</span>
+</div>
+<!-- Month 6 -->
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full bg-secondary-container rounded-t" style="height: 62px;"></div>
+<span class="font-caption text-caption text-secondary">T6</span>
+</div>
+<!-- Month 7 -->
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full bg-secondary-container rounded-t" style="height: 70px;"></div>
+<span class="font-caption text-caption text-secondary">T7</span>
+</div>
+<!-- Month 8 -->
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full bg-secondary-container rounded-t" style="height: 82px;"></div>
+<span class="font-caption text-caption text-secondary">T8</span>
+</div>
+<!-- Month 9 Highlight -->
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full bg-primary rounded-t shadow-sm" style="height: 96px;"></div>
+<span class="font-caption text-caption text-primary font-bold">T9</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. Enterprise-Grade Security Section -->
+<section class="px-gutter-sm py-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Tiêu chuẩn Định chế</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Bảo mật Cấp định chế Tài chính</h2>
+<p class="font-body-md text-body-md text-secondary">
+        Bảo vệ tài sản tri thức và hồ sơ giao dịch doanh nghiệp với kiến trúc phòng thủ đa lớp chuyên sâu.
+      </p>
+</div>
+<!-- 4 Security Feature Tiles (2x2 grid for mobile) -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-xs flex flex-col gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold">Phân quyền RBAC</h3>
+<p class="font-caption text-caption text-secondary">Kiểm soát truy cập chi tiết tới từng trường dữ liệu và nút bấm tác vụ.</p>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-xs flex flex-col gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold">Audit Logs Bất biến</h3>
+<p class="font-caption text-caption text-secondary">Ghi lại toàn bộ hành vi chỉnh sửa, xem và xuất dữ liệu lưu trữ 365 ngày.</p>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-xs flex flex-col gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">domain</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold">Đa chi nhánh Độc lập</h3>
+<p class="font-caption text-caption text-secondary">Phân tách tường minh dữ liệu công ty mẹ và mạng lưới công ty con.</p>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-xs flex flex-col gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold">Chuẩn ISO 27001</h3>
+<p class="font-caption text-caption text-secondary">Mã hóa TLS 1.3 và AES-256 dữ liệu ở trạng thái nghỉ (at-rest).</p>
+</div>
+</div>
+</section>
+<!-- 7. Final CTA Banner Navy & Footer -->
+<section class="px-gutter-sm pt-space-md pb-space-lg flex flex-col gap-space-lg">
+<!-- Dark Navy Executive Conversion Box -->
+<div class="bg-inverse-surface rounded-2xl p-space-lg text-inverse-on-surface shadow-2xl flex flex-col gap-space-md relative overflow-hidden">
+<!-- Decorative background glow -->
+<div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none"></div>
+<div class="flex flex-col gap-space-xs relative z-10">
+<span class="font-caption text-caption text-surface-container-highest uppercase font-bold tracking-widest">Sẵn sàng chuyển đổi số</span>
+<h2 class="font-headline-sm text-headline-sm text-inverse-on-surface font-bold">
+          Một nền tảng quản trị. Nhiều khả năng phát triển.
+        </h2>
+<p class="font-body-md text-body-md text-outline-variant">
+          Triển khai nhanh chóng trong 7 ngày làm việc với sự đồng hành của đội ngũ kỹ sư giải pháp BizPro+.
+        </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-space-sm relative z-10 pt-space-xs">
+<a class="w-full h-11 bg-primary text-on-primary rounded-lg font-body-md-medium text-body-md-medium flex items-center justify-center gap-space-xs shadow-md active:opacity-90 transition-opacity" href="#">
+<span>Dùng thử miễn phí 14 ngày</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="w-full h-11 bg-surface-variant/15 text-inverse-on-surface rounded-lg font-body-md-medium text-body-md-medium flex items-center justify-center gap-space-xs active:bg-surface-variant/25 transition-colors" href="#">
+<span>Xem bảng giá chi tiết</span>
+</a>
+</div>
+<div class="flex items-center justify-center gap-space-md pt-space-xs relative z-10 font-caption text-caption text-outline-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">check_circle</span>
+<span>Không cần thẻ tín dụng</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">check_circle</span>
+<span>Hỗ trợ kỹ thuật 24/7</span>
+</div>
+</div>
+</div>
+<!-- Clean Mobile Footer Summary -->
+<div class="pt-space-md flex flex-col items-center gap-space-sm text-center">
+<div class="flex items-center gap-space-xs text-primary font-title-md text-title-md font-bold">
+<span class="material-symbols-outlined text-[20px]">deployed_code</span>
+<span class="text-on-surface">BizPro<span class="text-primary">+</span></span>
+</div>
+<p class="font-caption text-caption text-secondary max-w-xs">
+        Hệ điều hành vận hành doanh nghiệp thế hệ mới. Tiêu chuẩn kiến trúc vi dịch vụ bảo mật cao dành riêng cho doanh nghiệp Việt Nam.
+      </p>
+<div class="flex items-center gap-space-md font-caption text-caption text-secondary pt-1">
+<a class="hover:text-primary transition-colors" href="#">Điều khoản</a>
+<span>•</span>
+<a class="hover:text-primary transition-colors" href="#">Bảo mật</a>
+<span>•</span>
+<a class="hover:text-primary transition-colors" href="#">Tài liệu API</a>
+</div>
+<span class="font-caption text-caption text-secondary/60">
+        © 2024 BizPro+ Enterprise OS. All rights reserved.
+      </span>
+</div>
+</section>
+</div></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-body-md-medium"><div class="flex justify-around items-center h-20 px-space-xs"><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-16 text-on-surface-variant hover:text-on-surface transition-colors" data-path="trang-chu" href="#"><span class="material-symbols-outlined text-[24px]">dashboard</span><span class="font-caption text-caption">Tổng quan</span></a><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-16 text-on-surface-variant hover:text-on-surface transition-colors" data-path="giai-phap" href="#"><span class="material-symbols-outlined text-[24px]">apps</span><span class="font-caption text-caption">Giải pháp</span></a><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-16 text-on-surface-variant hover:text-on-surface transition-colors" data-path="bang-gia" href="#"><span class="material-symbols-outlined text-[24px]">payments</span><span class="font-caption text-caption">Bảng giá</span></a><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-16 text-on-surface-variant hover:text-on-surface transition-colors" data-path="khach-hang" href="#"><span class="material-symbols-outlined text-[24px]">apartment</span><span class="font-caption text-caption">Khách hàng</span></a><a class="flex flex-col items-center justify-center gap-space-xs w-16 h-16 text-on-surface-variant hover:text-on-surface transition-colors" data-path="lien-he" href="#"><span class="material-symbols-outlined text-[24px]">support_agent</span><span class="font-caption text-caption">Liên hệ</span></a></div></nav></body></html>

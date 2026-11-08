@@ -2,11 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  devIndicators: {
-    appIsrStatus: false,
-    buildActivity: false,
-    buildActivityPosition: "bottom-right",
-  },
+  output: "standalone",
+  poweredByHeader: false,
 };
 
 export default nextConfig;

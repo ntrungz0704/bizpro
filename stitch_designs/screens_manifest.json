@@ -1,0 +1,206 @@
+﻿[
+    {
+        "name":  "projects/1305837512473140641/screens/d0cfe6f0abaf4cc695d81118aaa3ff93",
+        "title":  "BizPro+ Về chúng tôi",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/d0cfe6f0abaf4cc695d81118aaa3ff93/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3bec1ab030503c26d7c1b7e42:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/d0cfe6f0abaf4cc695d81118aaa3ff93/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/d0cfe6f0abaf4cc695d81118aaa3ff93:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "2560",
+        "height":  "13182",
+        "deviceType":  "DESKTOP"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/5bc8da6c07ef42d98752e19efbb37e70",
+        "title":  "BizPro+ Tính năng",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/5bc8da6c07ef42d98752e19efbb37e70/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3a0d08b1501a63eb559353482:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/5bc8da6c07ef42d98752e19efbb37e70/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/5bc8da6c07ef42d98752e19efbb37e70:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "2560",
+        "height":  "16280",
+        "deviceType":  "DESKTOP"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/3df138202b0e4644a176af559970c08a",
+        "title":  "BizPro+ Bảng giá",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/3df138202b0e4644a176af559970c08a/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3a91e834107799ca83a1c2ca5:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/3df138202b0e4644a176af559970c08a/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/3df138202b0e4644a176af559970c08a:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "2560",
+        "height":  "10668",
+        "deviceType":  "DESKTOP"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/8504c2dbdc934468a5cd4e5921f45bc4",
+        "title":  "BizPro+ Trang chủ (Mobile)",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/8504c2dbdc934468a5cd4e5921f45bc4/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3da4a718607c4d33270118944:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/8504c2dbdc934468a5cd4e5921f45bc4/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/8504c2dbdc934468a5cd4e5921f45bc4:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "780",
+        "height":  "10278",
+        "deviceType":  "MOBILE"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/843fd4387b6a4d51b15646fa5b9af909",
+        "title":  "BizPro+ Tính năng (Mobile)",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/843fd4387b6a4d51b15646fa5b9af909/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3e00c7c1605c2fc4f02250e02:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/843fd4387b6a4d51b15646fa5b9af909/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/843fd4387b6a4d51b15646fa5b9af909:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "780",
+        "height":  "9808",
+        "deviceType":  "MOBILE"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/5f884284ca0c462a98abf94b67710ca4",
+        "title":  "BizPro+ Về chúng tôi (Mobile)",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/5f884284ca0c462a98abf94b67710ca4/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3ea4ce3f20392d1c417076bc0:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/5f884284ca0c462a98abf94b67710ca4/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/5f884284ca0c462a98abf94b67710ca4:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "780",
+        "height":  "11956",
+        "deviceType":  "MOBILE"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/dfc1f6fd602f49ba9bbc01b9e57f3ec9",
+        "title":  "BizPro+ Giải pháp (Mobile)",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/dfc1f6fd602f49ba9bbc01b9e57f3ec9/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3dfbcf525033858b0082fa086:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/dfc1f6fd602f49ba9bbc01b9e57f3ec9/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/dfc1f6fd602f49ba9bbc01b9e57f3ec9:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "780",
+        "height":  "9336",
+        "deviceType":  "MOBILE"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/e2c1ba077e93419ab6400a8b9f471058",
+        "title":  "BizPro+ Trang chủ",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/e2c1ba077e93419ab6400a8b9f471058/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3a07355eb05c2fc4f02250e02:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/e2c1ba077e93419ab6400a8b9f471058/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/e2c1ba077e93419ab6400a8b9f471058:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "2560",
+        "height":  "13608",
+        "deviceType":  "DESKTOP"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/eb9634da401f4dd6ad2ca60ffc6a5d60",
+        "title":  "BizPro+ Khách hàng \u0026 Case Studies",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/eb9634da401f4dd6ad2ca60ffc6a5d60/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3b38161aa00303e5ca529c16f:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/eb9634da401f4dd6ad2ca60ffc6a5d60/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/eb9634da401f4dd6ad2ca60ffc6a5d60:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "2560",
+        "height":  "9634",
+        "deviceType":  "DESKTOP"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/cb00c335c8a4447ca794cb414883ea10",
+        "title":  "BizPro+ Giải pháp",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/cb00c335c8a4447ca794cb414883ea10/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3a08de903057600821c0de884:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/cb00c335c8a4447ca794cb414883ea10/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/cb00c335c8a4447ca794cb414883ea10:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "2560",
+        "height":  "13796",
+        "deviceType":  "DESKTOP"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/12450913f8c246d189bf90d6d413d2ac",
+        "title":  "BizPro+ Bảng giá (Mobile)",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/12450913f8c246d189bf90d6d413d2ac/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3da7d08e301a637a5f8069608:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/12450913f8c246d189bf90d6d413d2ac/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/12450913f8c246d189bf90d6d413d2ac:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "780",
+        "height":  "9750",
+        "deviceType":  "MOBILE"
+    },
+    {
+        "name":  "projects/1305837512473140641/screens/9a8aeab768544dd4bedf665c4605b778",
+        "title":  "BizPro+ Khách hàng (Mobile)",
+        "screenshot":  {
+                           "name":  "projects/1305837512473140641/screens/9a8aeab768544dd4bedf665c4605b778/fileEntries/screenshot",
+                           "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/screenshot_00065fb3ea16a1680934f79b3b1dc525:download",
+                           "mimeType":  "image/png"
+                       },
+        "htmlCode":  {
+                         "name":  "projects/1305837512473140641/screens/9a8aeab768544dd4bedf665c4605b778/fileEntries/html",
+                         "downloadUrl":  "https://stitch.googleapis.com/v1/projects/1305837512473140641/files/9a8aeab768544dd4bedf665c4605b778:download",
+                         "mimeType":  "text/html"
+                     },
+        "width":  "780",
+        "height":  "10044",
+        "deviceType":  "MOBILE"
+    }
+]

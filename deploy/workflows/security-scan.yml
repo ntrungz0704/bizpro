@@ -1,0 +1,80 @@
+name: "BizPro+ Security Scan & SBOM"
+
+on:
+  schedule:
+    - cron: "0 2 * * 1" # Every Monday at 02:00 UTC
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  dependency-audit:
+    name: "Production Dependency Audit"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Audit Backend Production Dependencies"
+        working-directory: ./backend
+        run: |
+          echo "Running Backend production audit (excluding devDependencies)..."
+          npm audit --omit=dev --audit-level=high
+
+      - name: "Audit Frontend Production Dependencies"
+        working-directory: ./frontend
+        run: |
+          echo "Running Frontend production audit (excluding devDependencies)..."
+          npm audit --omit=dev --audit-level=high
+
+  container-security-scan:
+    name: "Trivy Container Scan & SBOM Generation"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        service: [ "backend", "frontend" ]
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Build local test image for scanning"
+        run: |
+          if [ "${{ matrix.service }}" = "backend" ]; then
+            docker build -t bizpro-backend:scan -f ./backend/Dockerfile ./backend
+          else
+            docker build -t bizpro-frontend:scan -f ./frontend/Dockerfile ./frontend
+          fi
+
+      - name: "Run Trivy Container Vulnerability Scan"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "bizpro-${{ matrix.service }}:scan"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL"
+
+      - name: "Generate Software Bill of Materials (SBOM) in SPDX format"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "bizpro-${{ matrix.service }}:scan"
+          format: "spdx-json"
+          output: "sbom-bizpro-${{ matrix.service }}.spdx.json"
+
+      - name: "Upload SBOM Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "sbom-${{ matrix.service }}"
+          path: "sbom-bizpro-${{ matrix.service }}.spdx.json"
+          retention-days: 30

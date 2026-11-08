@@ -56,4 +56,33 @@ export class PrismaService
       };
     }
   }
+
+  /**
+   * Executes an interactive transaction strictly bound to a tenant context with Fail-Closed RLS.
+   * Uses tx.$queryRaw with is_local=true so the setting is strictly transaction-scoped
+   * and never leaks to connection pools.
+   */
+  async runInTenantContext<T>(
+    organizationId: string,
+    fn: (tx: import('@prisma/client').Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT set_config('app.current_organization_id', ${organizationId}::text, true);`;
+      return fn(tx);
+    });
+  }
+
+  /**
+   * Executes an interactive transaction in system context (e.g. login credentials lookup,
+   * account unlock lookup, or system bootstrapping).
+   * Sets app.is_system_context = 'true' with is_local=true strictly within the transaction boundary.
+   */
+  async runInSystemContext<T>(
+    fn: (tx: import('@prisma/client').Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT set_config('app.is_system_context', 'true', true);`;
+      return fn(tx);
+    });
+  }
 }

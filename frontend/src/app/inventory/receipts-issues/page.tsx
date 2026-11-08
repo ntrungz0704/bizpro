@@ -42,7 +42,7 @@ export default function ReceiptsIssuesPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -106,47 +106,47 @@ export default function ReceiptsIssuesPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3 px-4">Mã phiếu</th>
-                  <th className="py-3 px-4">Nhà cung cấp</th>
-                  <th className="py-3 px-4">Kho nhập</th>
-                  <th className="py-3 px-4">Hàng hóa nhập</th>
-                  <th className="py-3 px-4">Tổng giá trị</th>
-                  <th className="py-3 px-4">Ngày nhập</th>
-                  <th className="py-3 px-4">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Ghi sổ</th>
+                  <th className="py-3 px-4 min-w-[130px] whitespace-nowrap">Mã phiếu</th>
+                  <th className="py-3 px-4 min-w-[180px]">Nhà cung cấp</th>
+                  <th className="py-3 px-4 min-w-[160px] whitespace-nowrap">Kho nhập</th>
+                  <th className="py-3 px-4 min-w-[240px]">Hàng hóa nhập</th>
+                  <th className="py-3 px-4 min-w-[140px] text-right whitespace-nowrap">Tổng giá trị</th>
+                  <th className="py-3 px-4 min-w-[110px] whitespace-nowrap">Ngày nhập</th>
+                  <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">Trạng thái</th>
+                  <th className="py-3 px-4 min-w-[160px] text-right whitespace-nowrap">Ghi sổ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {stockReceipts.map((rcp) => (
                   <tr key={rcp.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-blue-600">{rcp.code}</td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-900">{rcp.supplier}</td>
-                    <td className="py-3.5 px-4 text-slate-600">{rcp.warehouse}</td>
-                    <td className="py-3.5 px-4 text-slate-700">
+                    <td className="py-3.5 px-4 font-bold text-blue-600 font-mono whitespace-nowrap min-w-[130px]">{rcp.code}</td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-900 min-w-[180px]">{rcp.supplier}</td>
+                    <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap min-w-[160px]">{rcp.warehouse}</td>
+                    <td className="py-3.5 px-4 text-slate-700 min-w-[240px]">
                       {rcp.items.map((it) => (
-                        <div key={it.productId}>
-                          • {it.productName} <b className="text-slate-900">+{it.quantity}</b>
+                        <div key={it.productId} className="py-0.5">
+                          • {it.productName} <b className="text-slate-900 whitespace-nowrap">+{it.quantity}</b>
                         </div>
                       ))}
                     </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900">
+                    <td className="py-3.5 px-4 font-bold text-slate-900 text-right whitespace-nowrap min-w-[140px]">
                       {formatVND(rcp.totalAmount)}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">{rcp.date}</td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-slate-500 font-mono whitespace-nowrap min-w-[110px]">{rcp.date}</td>
+                    <td className="py-3.5 px-4 whitespace-nowrap min-w-[140px]">
                       {rcp.status === "POSTED" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                           Đã vào sổ kho
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                           Chờ ghi sổ
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[160px]">
                       {rcp.status === "DRAFT" ? (
                         <button
                           onClick={() => postStockReceipt(rcp.id)}
@@ -174,32 +174,32 @@ export default function ReceiptsIssuesPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3 px-4">Mã phiếu xuất</th>
-                  <th className="py-3 px-4">Đơn bán hàng liên kết</th>
-                  <th className="py-3 px-4">Kho xuất</th>
-                  <th className="py-3 px-4">Hàng hóa xuất</th>
-                  <th className="py-3 px-4">Ngày xuất</th>
-                  <th className="py-3 px-4">Trạng thái</th>
+                  <th className="py-3 px-4 min-w-[130px] whitespace-nowrap">Mã phiếu xuất</th>
+                  <th className="py-3 px-4 min-w-[170px] whitespace-nowrap">Đơn bán hàng liên kết</th>
+                  <th className="py-3 px-4 min-w-[160px] whitespace-nowrap">Kho xuất</th>
+                  <th className="py-3 px-4 min-w-[240px]">Hàng hóa xuất</th>
+                  <th className="py-3 px-4 min-w-[110px] whitespace-nowrap">Ngày xuất</th>
+                  <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">Trạng thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {stockIssues.map((iss) => (
                   <tr key={iss.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-rose-600">{iss.code}</td>
-                    <td className="py-3.5 px-4 font-semibold text-blue-600">
+                    <td className="py-3.5 px-4 font-bold text-rose-600 font-mono whitespace-nowrap min-w-[130px]">{iss.code}</td>
+                    <td className="py-3.5 px-4 font-semibold text-blue-600 font-mono whitespace-nowrap min-w-[170px]">
                       {iss.orderCode || "Xuất nội bộ"}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600">{iss.warehouse}</td>
-                    <td className="py-3.5 px-4 text-slate-700">
+                    <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap min-w-[160px]">{iss.warehouse}</td>
+                    <td className="py-3.5 px-4 text-slate-700 min-w-[240px]">
                       {iss.items.map((it) => (
-                        <div key={it.productId}>
-                          • {it.productName} <b className="text-rose-600">-{it.quantity}</b>
+                        <div key={it.productId} className="py-0.5">
+                          • {it.productName} <b className="text-rose-600 whitespace-nowrap">-{it.quantity}</b>
                         </div>
                       ))}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">{iss.date}</td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <td className="py-3.5 px-4 text-slate-500 font-mono whitespace-nowrap min-w-[110px]">{iss.date}</td>
+                    <td className="py-3.5 px-4 whitespace-nowrap min-w-[140px]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                         Đã xuất sổ kho
                       </span>

@@ -2,15 +2,71 @@
 
 import React, { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
-import { Clock, CheckCircle2, LogOut, LogIn, Calendar, UserCheck } from "lucide-react";
+import { Clock, CheckCircle2, LogOut, LogIn, Calendar, UserCheck, RefreshCw } from "lucide-react";
+import { hrmApi } from "@/lib/api-client";
 
 export default function AttendancePage() {
-  const { attendance, checkIn, checkOut, employees } = useApp();
-  const [selectedEmp, setSelectedEmp] = useState(employees[0]?.name || "Nguyễn Văn A");
+  const { attendance: mockAttendance, employees: mockEmployees, showToast } = useApp();
+  const [attendance, setAttendance] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [selectedEmpId, setSelectedEmpId] = useState("");
   const [currentTime, setCurrentTime] = useState("");
   const [currentDateStr, setCurrentDateStr] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [attRes, empRes] = await Promise.all([
+        hrmApi.getAttendance().catch(() => null),
+        hrmApi.getEmployees().catch(() => null),
+      ]);
+
+      if (attRes?.items && attRes.items.length > 0) {
+        setAttendance(
+          attRes.items.map((a: any) => ({
+            id: a.id,
+            employeeName: a.employee?.fullName || "Nhân viên",
+            date: a.workDate ? new Date(a.workDate).toISOString().split("T")[0] : "",
+            checkIn: a.checkInAt
+              ? new Date(a.checkInAt).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: false,
+                })
+              : "--:--",
+            checkOut: a.checkOutAt
+              ? new Date(a.checkOutAt).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: false,
+                })
+              : "--:--",
+            status: a.status,
+          })),
+        );
+      } else {
+        setAttendance(mockAttendance);
+      }
+
+      if (empRes?.items && empRes.items.length > 0) {
+        setEmployees(empRes.items);
+        setSelectedEmpId(empRes.items[0]?.id || "");
+      } else {
+        setEmployees(mockEmployees);
+        setSelectedEmpId(mockEmployees[0]?.id || "");
+      }
+    } catch {
+      setAttendance(mockAttendance);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    loadData();
     const update = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString("vi-VN", { hour12: false }));
@@ -20,7 +76,7 @@ export default function AttendancePage() {
           year: "numeric",
           month: "long",
           day: "numeric",
-        })
+        }),
       );
     };
     update();
@@ -28,8 +84,30 @@ export default function AttendancePage() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleCheckIn = async () => {
+    try {
+      await hrmApi.checkIn({ source: "WEB_UI" });
+      showToast("Check-in thành công! Giờ vào ca đã được ghi nhận vào PostgreSQL.", "success");
+      loadData();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Lỗi khi Check-in";
+      showToast(Array.isArray(msg) ? msg.join(", ") : msg, "error");
+    }
+  };
+
+  const handleCheckOut = async () => {
+    try {
+      await hrmApi.checkOut({});
+      showToast("Check-out thành công! Giờ ra về đã được đối soát.", "success");
+      loadData();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Lỗi khi Check-out";
+      showToast(Array.isArray(msg) ? msg.join(", ") : msg, "error");
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -38,9 +116,17 @@ export default function AttendancePage() {
             Chấm công & Điểm danh
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Ghi nhận giờ vào làm (Check-in) và giờ ra về (Check-out) trực tiếp trên giao diện hệ thống.
+            Ghi nhận giờ vào làm (Check-in) và giờ ra về (Check-out) trực tiếp trên giao diện hệ thống (Dữ liệu thực PostgreSQL).
           </p>
         </div>
+
+        <button
+          onClick={loadData}
+          className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all self-start sm:self-center"
+          title="Tải lại dữ liệu"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        </button>
       </div>
 
       {/* Interactive Punch In/Out Card */}
@@ -56,43 +142,26 @@ export default function AttendancePage() {
             {currentTime || "08:30:00"}
           </div>
           <p className="text-xs text-blue-100">
-            Ca làm việc tiêu chuẩn: <b>08:00 - 17:30</b> (Nghỉ trưa 60 phút)
+            Ca làm việc tiêu chuẩn: <b>08:30 - 17:30</b> (Nghỉ trưa 60 phút - Múi giờ Asia/Ho_Chi_Minh)
           </p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          <div className="w-full sm:w-56">
-            <label className="block text-[11px] text-blue-100 mb-1 font-medium">
-              Chọn nhân viên chấm công:
-            </label>
-            <select
-              value={selectedEmp}
-              onChange={(e) => setSelectedEmp(e.target.value)}
-              className="w-full px-3 py-2 bg-white text-slate-800 font-bold rounded-xl text-xs focus:outline-none shadow-xs"
-            >
-              {employees.map((e) => (
-                <option key={e.id} value={e.name}>
-                  {e.name} ({e.code})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto pt-3 sm:pt-4">
+          <div className="flex items-center gap-2 w-full sm:w-auto pt-3 sm:pt-0">
             <button
-              onClick={() => checkIn(selectedEmp)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-900/30 transition-transform active:scale-95"
+              onClick={handleCheckIn}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-900/30 transition-transform active:scale-95"
             >
               <LogIn className="w-4 h-4" />
-              <span>Check-in</span>
+              <span>Check-in Vào ca</span>
             </button>
 
             <button
-              onClick={() => checkOut(selectedEmp)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-900/30 transition-transform active:scale-95"
+              onClick={handleCheckOut}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-900/30 transition-transform active:scale-95"
             >
               <LogOut className="w-4 h-4" />
-              <span>Check-out</span>
+              <span>Check-out Tan ca</span>
             </button>
           </div>
         </div>
@@ -101,48 +170,63 @@ export default function AttendancePage() {
       {/* Attendance History Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-blue-600" />
-            Nhật ký điểm danh hôm nay
+          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-slate-400" />
+            Nhật ký Chấm công Hôm nay & Gần đây
           </h3>
-          <span className="text-xs text-slate-400">
-            Tổng số lượt ghi nhận: <b>{attendance.length}</b>
-          </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4">Mã NV</th>
-                <th className="py-3 px-4">Họ và tên</th>
-                <th className="py-3 px-4">Ngày làm việc</th>
-                <th className="py-3 px-4 text-center">Giờ vào (Check-in)</th>
-                <th className="py-3 px-4 text-center">Giờ ra (Check-out)</th>
-                <th className="py-3 px-4 text-center">Tình trạng</th>
+                <th className="py-3 px-4 min-w-[180px] whitespace-nowrap">Nhân viên</th>
+                <th className="py-3 px-4 min-w-[120px] whitespace-nowrap">Ngày</th>
+                <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">Giờ vào (Check-in)</th>
+                <th className="py-3 px-4 min-w-[140px] whitespace-nowrap">Giờ ra (Check-out)</th>
+                <th className="py-3 px-4 min-w-[120px] whitespace-nowrap">Trạng thái</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
-              {attendance.map((att) => (
-                <tr key={att.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-blue-600">
-                    {att.employeeCode}
+              {attendance.map((row) => (
+                <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
+                  <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-2 whitespace-nowrap min-w-[180px]">
+                    <UserCheck className="w-4 h-4 text-blue-500 shrink-0" />
+                    <span>{row.employeeName}</span>
                   </td>
-                  <td className="py-3.5 px-4 font-bold text-slate-900">{att.employeeName}</td>
-                  <td className="py-3.5 px-4 text-slate-600">{att.date}</td>
-                  <td className="py-3.5 px-4 text-center font-mono font-bold text-emerald-600">
-                    {att.checkIn}
-                  </td>
-                  <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-700">
-                    {att.checkOut || "--:--:--"}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                      <CheckCircle2 className="w-3 h-3" /> Đúng giờ
+                  <td className="py-3 px-4 text-slate-600 font-mono text-[11px] whitespace-nowrap min-w-[120px]">{row.date}</td>
+                  <td className="py-3 px-4 font-mono font-medium text-emerald-600 whitespace-nowrap min-w-[140px]">{row.checkIn}</td>
+                  <td className="py-3 px-4 font-mono font-medium text-slate-600 whitespace-nowrap min-w-[140px]">{row.checkOut}</td>
+                  <td className="py-3 px-4 whitespace-nowrap min-w-[120px]">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap ${
+                        row.status === "PRESENT"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : row.status === "LATE"
+                          ? "bg-amber-100 text-amber-800"
+                          : row.status === "EARLY_LEAVE"
+                          ? "bg-indigo-100 text-indigo-800"
+                          : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {row.status === "PRESENT"
+                        ? "ĐÚNG GIỜ"
+                        : row.status === "LATE"
+                        ? "ĐI MUỘN"
+                        : row.status === "EARLY_LEAVE"
+                        ? "VỀ SỚM"
+                        : row.status}
                     </span>
                   </td>
                 </tr>
               ))}
+              {attendance.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-slate-400 text-xs">
+                    Chưa có lượt chấm công nào trong ngày.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

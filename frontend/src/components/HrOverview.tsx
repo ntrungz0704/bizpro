@@ -8,7 +8,7 @@ import { useApp } from "@/context/AppContext";
 export default function HrOverview() {
   const { employees, leaveRequests } = useApp();
 
-  const totalEmployees = 140 + employees.length;
+  const totalEmployees = employees.length;
   const pendingLeave = leaveRequests.filter((r) => r.status === "PENDING").length;
 
   return (

@@ -1,98 +1,59 @@
 # BIZPRO+ PHASE 1D — API CONTRACT SPECIFICATION
 **Tài liệu:** `docs/PHASE_1D_API_CONTRACT.md`  
-**Phiên bản:** 2.0.0 (Comprehensive Cross-Document Architecture Revision)  
-**Tác giả:** Senior Backend Architect & Security Architect  
-**Trạng thái tài liệu:** DRAFT SPECIFICATION FOR ARCHITECTURAL REVIEW (DESIGN ONLY)  
-**Gate Status:** NOT APPROVED — Awaiting Independent Multi-Agent Review  
+**Phiên bản:** 3.2.0-SYNCHRONIZED (Comprehensive API Contract Specification)  
+**Tác giả:** Principal Backend Architect, Security Architect & API Designer  
+**Trạng thái tài liệu:** SPECIFICATION SYNCHRONIZED — CONTROLLED DOCUMENTATION (DESIGN ONLY)  
+**Gate Status:** NOT APPROVED (HOLD) — Implementation Gate Strict Preservation  
 
 ---
 
 ## 1. TỔNG QUAN TIÊU CHUẨN GIAO THỨC & QUY TẮC AN NINH
 
-### 1.1. Chuẩn thiết kế RESTful & Định danh
+### 1.1. Chuẩn Thiết Kế RESTful & Định Danh
 - **Base URL:** `/api/v1/auth`
 - **Content-Type:** `application/json; charset=utf-8`
-- **Data Transfer Object (DTO) Validation:** NestJS `ValidationPipe` toàn cục với `{ whitelist: true, forbidNonWhitelisted: true, transform: true }`.
-- **Cơ chế xác thực (Authentication Protocol):**
-  - **Access Token:** Bearer Token trong Header `Authorization: Bearer <access_token>`. TTL: **15 phút**. Stateless, mang theo `auth_version` để thu hồi tức thời.
-  - **Refresh Token (Browser SPA Client):** Lưu trữ ưu tiên trong **HttpOnly, Secure, SameSite=Strict Cookie** tên `bizpro_refresh_token` (Path: `/api/v1/auth/refresh`, Max-Age: `604800` tương đương 7 ngày).
-  - **Refresh Token (Native Mobile Client):** Gửi qua Request Body `{"refreshToken": "..."}` và trả về trong Response Body JSON khi client gửi header `X-Client-Type: mobile`.
-- **Envelope phản hồi thành công chuẩn:**
-```json
-{
-  "statusCode": 200,
-  "message": "Thao tác thành công",
-  "data": { ... },
-  "meta": {
-    "timestamp": "2026-11-05T04:00:00.000Z",
-    "requestId": "req_c84a8b79-5632-491a-8219-c68e7f1e941b"
-  }
-}
-```
-- **Envelope phản hồi lỗi chuẩn (RFC 7807 Problem Details adapted):**
-```json
-{
-  "statusCode": 400,
-  "error": "Bad Request",
-  "errorCode": "AUTH_INVALID_CREDENTIALS",
-  "message": "Thông tin đăng nhập không chính xác",
-  "details": [],
-  "timestamp": "2026-11-05T04:00:00.000Z",
-  "path": "/api/v1/auth/login",
-  "requestId": "req_c84a8b79-5632-491a-8219-c68e7f1e941b"
-}
-```
+- **Data Transfer Object (DTO) Validation:** NestJS `ValidationPipe` toàn cục với `{ whitelist: true, forbidNonWhitelisted: true, transform: true }`. Mọi trường không khai báo trong DTO đều bị loại bỏ tự động.
+- **Idempotency Header:** Mọi request làm mới token bắt buộc gửi kèm header:
+  `Idempotency-Key: <UUIDv4>` (ví dụ: `Idempotency-Key: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d`).
+
+### 1.2. Phân Tách Kiến Trúc Dual-Endpoint Cho Web và Mobile
+Hệ thống bãi bỏ hoàn toàn việc phân loại client bằng sự hiện diện của Cookie. Thay vào đó, thiết lập 2 endpoint làm mới token tách biệt:
+- **Web SPA:** Gọi `/api/v1/auth/refresh/web` (Chỉ chấp nhận Cookie, bắt buộc CSRF Guard).
+- **Native Mobile & API:** Gọi `/api/v1/auth/refresh/mobile` (Chỉ chấp nhận Bearer Token trong Header/Body, miễn nhiễm CSRF).
 
 ---
 
 ## 2. CHÍNH SÁCH RATE LIMITING & THROTTLING HEADERS
 
-Áp dụng `@nestjs/throttler` dựa trên client IP và định danh tài khoản:
+Hệ thống áp dụng chính sách điều tiết lưu lượng đa tầng qua NestJS `@nestjs/throttler`:
+- **Đăng nhập (`/auth/login`):** Tối đa 5 requests / 60 seconds per IP và per Email.
+- **Làm mới token (`/auth/refresh/*`):** Tối đa 30 requests / 60 seconds per Session.
+- **Yêu cầu mở khóa / Quên mật khẩu (`/auth/request-unlock`, `/auth/forgot-password`):** Tối đa 3 requests / 15 minutes per IP. Giãn cách gửi email tối thiểu 60s / tài khoản.
+- **Thử mã OTP (`/auth/unlock`):** Tối đa 3 lần thử sai trên 1 mã OTP. Quá 3 lần mã tự động bị hủy.
 
-| Endpoint | Throttling Window | Giới hạn | Headers phản hồi | Cơ chế chặn / Khóa |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST /api/v1/auth/login` | 60 giây (1 min) | 5 requests | `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` | HTTP 429 + Khóa tài khoản tạm thời sau 5 lần sai liên tiếp (15 phút, HTTP 423) |
-| `POST /api/v1/auth/refresh` | 60 giây (1 min) | 30 requests | Standard Throttler Headers | HTTP 429 ThrottlerException |
-| `POST /api/v1/auth/forgot-password` | 900 giây (15 min) | 3 requests | Standard Throttler Headers | HTTP 429 chống lạm dụng email & Enumeration |
-| `POST /api/v1/auth/reset-password` | 300 giây (5 min) | 5 requests | Standard Throttler Headers | HTTP 429 chống brute-force token |
-| `POST /api/v1/auth/change-password` | 60 giây (1 min) | 3 requests | Standard Throttler Headers | HTTP 429 |
-| Tất cả GET endpoints | 60 giây (1 min) | 120 requests | Standard Throttler Headers | HTTP 429 ThrottlerException |
+Mọi phản hồi từ hệ thống đều trả về các tiêu đề chuẩn IETF:
+```http
+X-RateLimit-Limit: 5
+X-RateLimit-Remaining: 4
+X-RateLimit-Reset: 58
+Retry-After: 900 (khi bị HTTP 423 hoặc 429)
+```
 
 ---
 
-## 3. ĐẶC TẢ CHI TIẾT 10 ENDPOINTS AUTHENTICATION & SESSION
+## 3. ĐẶC TẢ CHI TIẾT CÁC ENDPOINTS AUTHENTICATION & SESSION
 
 ### 3.1. POST `/api/v1/auth/login`
-- **Mục đích:** Xác thực người dùng bằng Email/Password, tạo phiên `UserSession` mới, phát hành thế hệ token đầu tiên trong `refresh_tokens`, cấp Access Token.
+- **Mục đích:** Xác thực người dùng bằng email và mật khẩu, thiết lập phiên làm việc vật lý và cấp phát cặp token đầu tiên.
 - **Xác thực:** Public (`@Public()`).
-- **Rate Limit:** 5 requests / 60 seconds per IP.
-
-#### Request Headers:
-```http
-Content-Type: application/json
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...
-X-Forwarded-For: 113.190.234.12
-```
 
 #### Request Body (`LoginDto`):
 ```json
 {
   "email": "admin@bizpro.vn",
   "password": "Password123!@#",
-  "deviceName": "Chrome on Windows 11"
+  "deviceId": "dev_chrome_win11_01"
 }
-```
-*Validation Rules:*
-- `email`: `@IsEmail()`, `@IsNotEmpty()`, `@Transform(({ value }) => value.trim().toLowerCase())`
-- `password`: `@IsString()`, `@IsNotEmpty()`, `@MinLength(8)`, `@MaxLength(128)`
-- `deviceName`: `@IsOptional()`, `@IsString()`, `@MaxLength(100)`
-
-#### Response Headers:
-```http
-Set-Cookie: bizpro_refresh_token=rt_9b1deb4d...; Path=/api/v1/auth/refresh; Max-Age=604800; HttpOnly; Secure; SameSite=Strict
-X-RateLimit-Limit: 5
-X-RateLimit-Remaining: 4
-X-RateLimit-Reset: 58
 ```
 
 #### Response 200 OK Body:
@@ -109,63 +70,56 @@ X-RateLimit-Reset: 58
       "email": "admin@bizpro.vn",
       "fullName": "Nguyễn Văn Admin",
       "organizationId": "org_c478491c-76e9-4e0a-9d9e-108b3e811100",
-      "organizationCode": "BIZPRO-CORP",
-      "organizationName": "Công ty Cổ phần Giải pháp Doanh nghiệp BizPro+",
-      "employeeId": "emp_f842345e-8551-419b-a010-062e73177699",
-      "departmentId": "dept_3b1d8481-9b1b-4351-92b8-93e1104e4321",
       "roles": ["ADMIN"],
-      "permissions": [
-        "crm.customers.read",
-        "crm.customers.write",
-        "sales.orders.read",
-        "sales.orders.write",
-        "inventory.products.read"
-      ]
+      "permissions": ["crm.customers.read", "sales.orders.read", "inventory.products.read"]
     },
     "session": {
       "id": "sess_84b391d1-7290-482a-a92c-0e78f993104a",
-      "tokenFamilyId": "fam_11a84b39-91d1-482a-a92c-0e78f993104b",
-      "deviceName": "Chrome on Windows 11",
       "expiresAt": "2026-11-12T04:00:00.000Z"
     }
-  },
-  "meta": {
-    "timestamp": "2026-11-05T04:00:00.000Z",
-    "requestId": "req_84b1-912f-4831"
   }
 }
 ```
 
-#### Mã lỗi có thể trả về:
-- **400 Bad Request:** Payload sai định dạng (`AUTH_VALIDATION_ERROR`).
-- **401 Unauthorized:** Mật khẩu hoặc email sai (`AUTH_INVALID_CREDENTIALS`). *Thời gian xử lý luôn được chuẩn hóa bằng dummy hash để chống Timing Attack.*
-- **403 Forbidden:** Tài khoản bị vô hiệu hóa (`status = 'INACTIVE'`) (`AUTH_ACCOUNT_DISABLED`), hoặc tổ chức bị đình chỉ (`AUTH_ORGANIZATION_SUSPENDED`).
-- **423 Locked:** Tài khoản bị tạm khóa do nhập sai liên tiếp quá 5 lần (`AUTH_ACCOUNT_LOCKED`). Body trả về `lockedUntil` để UI hiển thị đếm ngược.
-- **429 Too Many Requests:** Vượt quá 5 req/phút từ cùng một IP (`AUTH_RATE_LIMIT_EXCEEDED`).
+#### Chính Sách Phản Hồi Khi Thất Bại & Khóa Tài Khoản:
+- **Lần sai 1 đến 4:** Trả về **HTTP `401 Unauthorized`** (`AUTH_INVALID_CREDENTIALS`). *Thời gian xử lý luôn được đồng nhất qua Dummy Argon2id Verification.*
+- **Lần sai thứ 5:** Tài khoản bị tạm khóa 15 phút. Server trả về **HTTP `423 Locked`** (`AUTH_ACCOUNT_LOCKED`), kèm `lockedUntil` và `retryAfter: 900`.
+- **Lần sai thứ 6+ (khi đang bị khóa):** Trả về ngay **HTTP `423 Locked`** (Fast-Path không tốn CPU tính Argon2id).
 
 ---
 
-### 3.2. POST `/api/v1/auth/refresh`
-- **Mục đích:** Đổi Refresh Token cũ lấy Access Token mới và Refresh Token mới (Token Family Rotation & Reuse Detection).
-- **Xác thực:** Public hoặc Cookie-based (Kiểm tra Refresh Token).
-- **Rate Limit:** 30 requests / 60 seconds.
+### 3.2A. POST `/api/v1/auth/refresh/web` (Dành Cho Web Browser SPA)
+- **Mục đích:** Làm mới Access Token và Refresh Token dành riêng cho ứng dụng Web.
+- **Phương thức truyền Credential:** **COOKIE ONLY** (`bizpro_refresh_token`).
+- **CSRF Protection:** Bắt buộc kích hoạt `WebCsrfGuard`:
+  - Header `Origin` bắt buộc khớp chính xác Whitelist cấu hình (ví dụ `https://app.bizpro.vn`).
+  - Header `X-Requested-With: XMLHttpRequest` hoặc `X-BizPro-Client: WebSPA` là bắt buộc.
+- **Ràng buộc nghiêm ngặt:** Nếu request gửi token qua JSON Body hoặc Authorization Header $\to$ Lập tức từ chối **HTTP `400 Bad Request`** (`AUTH_CREDENTIAL_TRANSPORT_INVALID`).
 
-#### Quy trình xử lý & Concurrency Semantics:
-1. Tính `SHA-256(tokenString)`.
-2. Mở Transaction, thực thi `SELECT * FROM refresh_tokens WHERE token_hash = ? FOR UPDATE` (Pessimistic Row Lock).
-3. **Trường hợp Token Reuse (Status = 'REVOKED'):** Kích hoạt **Targeted Family Invalidation**:
-   - `UPDATE refresh_tokens SET status = 'REVOKED' WHERE token_family_id = ?`
-   - `UPDATE user_sessions SET status = 'REVOKED', revocation_reason = 'TOKEN_REUSE_DETECTED' WHERE id = ?`
-   - Ghi nhật ký cảnh báo an ninh Critical.
-   - Trả về mã lỗi `401 Unauthorized` (`AUTH_TOKEN_REUSE_DETECTED`).
-4. **Trường hợp Idempotent Retry (Status = 'ROTATED'):**
-   - Nếu thời điểm xoay vòng `rotated_at` nằm trong cửa sổ **Grace Period $\le$ 5 giây** và cùng Client Fingerprint: Server tra cứu `replaced_by_token_id` và cấp Access Token mới tương ứng, bảo toàn trạng thái không tạo token nhánh.
-   - Nếu ngoài 5 giây: Nhận diện là hành vi Replay Attack quá hạn $\rightarrow$ Thu hồi Token Family, trả về `AUTH_TOKEN_REUSE_DETECTED`.
-5. **Trường hợp Hợp lệ (Status = 'ACTIVE'):**
-   - Đánh dấu token hiện tại `ROTATED`, cập nhật `rotated_at = NOW()`.
-   - Tạo token mới trong `refresh_tokens` với `status = 'ACTIVE'`, `seq = seq + 1`.
-   - Cập nhật `replaced_by_token_id = new_token.id`.
-   - Cấp Access Token mới (15m), Set-Cookie Refresh Token mới (7 ngày).
+#### Response Headers:
+```http
+Set-Cookie: bizpro_refresh_token=rt_new_...; Path=/api/v1/auth/refresh/web; Max-Age=604800; HttpOnly; Secure; SameSite=Strict
+```
+
+---
+
+### 3.2B. POST `/api/v1/auth/refresh/mobile` (Dành Cho Native Mobile & API)
+- **Mục đích:** Làm mới Access Token và Refresh Token dành riêng cho ứng dụng Native Mobile (iOS/Android) hoặc Server M2M.
+- **Phương thức truyền Credential:** **BEARER ONLY** (Trong Header `Authorization: Bearer <refreshToken>` hoặc JSON Body `{ "refreshToken": "rt_..." }`).
+- **CSRF Protection:** **Không áp dụng**. Endpoint hoàn toàn bỏ qua và không đọc Cookie, miễn nhiễm tự nhiên với CSRF.
+
+---
+
+### 3.3. Quy Trình Xử Lý & Response Chung Cho Refresh (`/refresh/web` & `/refresh/mobile`)
+Cả 2 endpoint đều dùng chung tầng dịch vụ `AuthService.rotateToken(token, idempotencyKey)` với quy trình 2 bước:
+1. **Bước 1 (Auth & Lock):** `SELECT * FROM refresh_tokens WHERE token_hash = SHA256(token) FOR UPDATE`.
+   - Nếu `ACTIVE` $\to$ Xoay vòng tạo token mới (seq = seq + 1), mã hóa response envelope (AES-256-GCM, Nonce Hybrid 96-bit), lưu `auth_idempotency_records` với TTL 30s. Trả về HTTP `200 OK`.
+   - Nếu `ROTATED` $\to$ Chuyển sang Bước 2.
+2. **Bước 2 (Idempotency Resolution):** `SELECT * FROM auth_idempotency_records WHERE session_id = token.session_id AND idempotency_key = K FOR UPDATE`.
+   - Tìm thấy, khớp token hash, còn hạn ($\le 30\text{s}$) $\to$ Giải mã envelope, trả lại Response gốc (HTTP `200 OK`).
+   - Tìm thấy, khớp token hash, quá hạn ($> 30\text{s}$) $\to$ Fail-Closed: Targeted Family Invalidation, trả về HTTP `401 Unauthorized` (`AUTH_RECOVERY_WINDOW_EXPIRED`).
+   - Tìm thấy, nhưng khác token hash $\to$ HTTP `422 Unprocessable Entity` (`AUTH_IDEMPOTENCY_PAYLOAD_MISMATCH`).
+   - Không tìm thấy record $\to$ Nhận diện Token Reuse Replay Attack $\to$ Thu hồi Token Family, trả về HTTP `401 Unauthorized` (`AUTH_TOKEN_REUSE_DETECTED`).
 
 #### Response 200 OK Body:
 ```json
@@ -176,223 +130,18 @@ X-RateLimit-Reset: 58
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "tokenType": "Bearer",
     "expiresIn": 900
-  },
-  "meta": {
-    "timestamp": "2026-11-05T04:15:00.000Z",
-    "requestId": "req_refresh_93a1"
   }
 }
 ```
 
 ---
 
-### 3.3. POST `/api/v1/auth/logout`
-- **Mục đích:** Thu hồi phiên làm việc hiện tại, vô hiệu hóa toàn bộ Token Family thuộc phiên, xóa Cookie phía Client.
-- **Xác thực:** Bearer Access Token hoặc Refresh Token hợp lệ.
-
-#### Request Headers:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Cookie: bizpro_refresh_token=...
-```
-
-#### Response Headers:
-```http
-Set-Cookie: bizpro_refresh_token=; Path=/api/v1/auth/refresh; Max-Age=0; HttpOnly; Secure; SameSite=Strict
-```
-
-#### Response 200 OK Body:
-```json
-{
-  "statusCode": 200,
-  "message": "Đăng xuất thành công",
-  "data": {
-    "revokedSessionId": "sess_84b391d1-7290-482a-a92c-0e78f993104a"
-  }
-}
-```
-
----
-
-### 3.4. POST `/api/v1/auth/logout-all`
-- **Mục đích:** Thu hồi tất cả các phiên đăng nhập đang hoạt động của người dùng trên mọi thiết bị, đồng thời tăng `users.auth_version` để thu hồi tức thời toàn bộ Access Token đang lưu hành.
-- **Xác thực:** Yêu cầu Bearer Access Token (`JwtAuthGuard`).
-
-#### Request Body (`LogoutAllDto`):
-```json
-{
-  "excludeCurrentSession": false
-}
-```
-
-#### Phản ứng Database:
-- `UPDATE user_sessions SET status = 'REVOKED', revoked_at = NOW(), revocation_reason = 'USER_LOGOUT_ALL' WHERE user_id = :userId`
-- `UPDATE refresh_tokens SET status = 'REVOKED' WHERE session_id IN (SELECT id FROM user_sessions WHERE user_id = :userId)`
-- `UPDATE users SET auth_version = auth_version + 1 WHERE id = :userId`
-
-#### Response 200 OK Body:
-```json
-{
-  "statusCode": 200,
-  "message": "Đã thu hồi tất cả các phiên đăng nhập và vô hiệu hóa Access Token cũ",
-  "data": {
-    "revokedSessionsCount": 3,
-    "authVersion": 2
-  }
-}
-```
-
----
-
-### 3.5. GET `/api/v1/auth/me`
-- **Mục đích:** Trả về toàn bộ hồ sơ bảo mật, vai trò, danh sách quyền thực tế và tóm tắt chính sách phạm vi dữ liệu theo ngữ cảnh tài nguyên.
-- **Xác thực:** Yêu cầu Bearer Access Token (`JwtAuthGuard`).
-
-#### Response 200 OK Body:
-```json
-{
-  "statusCode": 200,
-  "message": "Lấy thông tin người dùng thành công",
-  "data": {
-    "id": "usr_9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    "email": "admin@bizpro.vn",
-    "fullName": "Nguyễn Văn Admin",
-    "status": "ACTIVE",
-    "authVersion": 1,
-    "organization": {
-      "id": "org_c478491c-76e9-4e0a-9d9e-108b3e811100",
-      "code": "BIZPRO-CORP",
-      "name": "Công ty Cổ phần Giải pháp Doanh nghiệp BizPro+",
-      "status": "ACTIVE"
-    },
-    "employee": {
-      "id": "emp_f842345e-8551-419b-a010-062e73177699",
-      "code": "EMP-001",
-      "departmentId": "dept_3b1d8481-9b1b-4351-92b8-93e1104e4321",
-      "departmentName": "Khối Kinh Doanh & Tiếp Thị"
-    },
-    "roles": [
-      {
-        "id": "role_admin",
-        "code": "ORG_ADMIN",
-        "name": "Quản trị viên Tổ chức"
-      }
-    ],
-    "permissions": [
-      "crm.customers.read",
-      "crm.customers.write",
-      "sales.orders.read",
-      "sales.orders.write",
-      "sales.orders.approve",
-      "inventory.products.read",
-      "system.audit.read"
-    ],
-    "contextualPolicies": {
-      "crm": "OWN_AND_ASSIGNED_OR_ORG_ADMIN",
-      "sales": "DEPARTMENT_BOUNDED_OR_ORG_ADMIN",
-      "inventory": "ASSIGNED_WAREHOUSES_ONLY",
-      "hrm": "SELF_AND_MANAGED_SUBORDINATES"
-    }
-  }
-}
-```
-
----
-
-### 3.6. GET `/api/v1/auth/sessions`
-- **Mục đích:** Liệt kê các phiên làm việc đang hoạt động của người dùng để phục vụ quản trị phiên từ xa.
-- **Xác thực:** Yêu cầu Bearer Access Token (`JwtAuthGuard`).
-
-#### Response 200 OK Body:
-```json
-{
-  "statusCode": 200,
-  "message": "Danh sách phiên hoạt động",
-  "data": [
-    {
-      "id": "sess_84b391d1-7290-482a-a92c-0e78f993104a",
-      "tokenFamilyId": "fam_11a84b39-91d1-482a-a92c-0e78f993104b",
-      "deviceName": "Chrome on Windows 11",
-      "ipAddress": "113.190.234.12",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
-      "isCurrent": true,
-      "createdAt": "2026-11-05T04:00:00.000Z",
-      "lastActiveAt": "2026-11-05T04:15:00.000Z",
-      "expiresAt": "2026-11-12T04:00:00.000Z"
-    },
-    {
-      "id": "sess_223910bb-9901-419b-bb33-4411eeff0011",
-      "tokenFamilyId": "fam_99b84b39-11d1-482a-a92c-0e78f993104c",
-      "deviceName": "BizPro Mobile on iPhone 15 Pro",
-      "ipAddress": "14.232.18.90",
-      "userAgent": "BizProMobile/1.0 (iOS 18.1)",
-      "isCurrent": false,
-      "createdAt": "2026-11-03T10:15:00.000Z",
-      "lastActiveAt": "2026-11-04T18:20:00.000Z",
-      "expiresAt": "2026-11-10T10:15:00.000Z"
-    }
-  ]
-}
-```
-
----
-
-### 3.7. DELETE `/api/v1/auth/sessions/:id`
-- **Mục đích:** Thu hồi từ xa một phiên đăng nhập cụ thể theo `sessionId` (đăng xuất máy tính văn phòng khi ở nhà).
-- **Xác thực:** Yêu cầu Bearer Access Token (`JwtAuthGuard`). Bắt buộc xác minh `session.userId == current_user.id`.
-
-#### Response 200 OK Body:
-```json
-{
-  "statusCode": 200,
-  "message": "Thu hồi phiên đăng nhập thành công",
-  "data": {
-    "sessionId": "sess_223910bb-9901-419b-bb33-4411eeff0011",
-    "status": "REVOKED",
-    "revokedAt": "2026-11-05T04:20:00.000Z"
-  }
-}
-```
-
----
-
-### 3.8. POST `/api/v1/auth/change-password`
-- **Mục đích:** Người dùng đã đăng nhập tự đổi mật khẩu.
-- **Xác thực:** Yêu cầu Bearer Access Token.
-- **An ninh:** Cập nhật `password_hash` bằng Argon2id, tăng `auth_version = auth_version + 1`, cập nhật `password_changed_at = NOW()`, và thu hồi toàn bộ các phiên làm việc khác ngoại trừ phiên hiện tại.
-
-#### Request Body (`ChangePasswordDto`):
-```json
-{
-  "currentPassword": "OldPassword123!@#",
-  "newPassword": "NewSecurePassword456$%"
-}
-```
-*Validation Rules:*
-- `currentPassword`: `@IsString()`, `@IsNotEmpty()`
-- `newPassword`: `@IsString()`, `@MinLength(8)`, `@MaxLength(128)`, `@Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)` (Bao gồm tối thiểu chữ hoa, chữ thường, số, ký tự đặc biệt).
-
-#### Response 200 OK Body:
-```json
-{
-  "statusCode": 200,
-  "message": "Đổi mật khẩu thành công. Các phiên làm việc khác đã được tự động đăng xuất.",
-  "data": {
-    "passwordChangedAt": "2026-11-05T04:25:00.000Z",
-    "newAuthVersion": 2
-  }
-}
-```
-
----
-
-### 3.9. POST `/api/v1/auth/forgot-password`
-- **Mục đích:** Yêu cầu liên kết đặt lại mật khẩu qua email.
+### 3.4. POST `/api/v1/auth/request-unlock`
+- **Mục đích:** Yêu cầu gửi mã OTP mở khóa tài khoản qua email khi tài khoản bị khóa do thử sai mật khẩu.
 - **Xác thực:** Public (`@Public()`).
-- **Chống User Enumeration Attack:** API **luôn trả về 200 OK** với thông điệp đồng nhất kể cả khi email không tồn tại trong hệ thống.
-- **Rate Limit:** 3 requests / 15 minutes per IP.
+- **Chống Account Enumeration:** Dù email có tồn tại hay không, server **LUÔN TRẢ VỀ HTTP `200 OK`** với thông điệp đồng nhất kèm delay jitter $50\text{ms} - 100\text{ms}$.
 
-#### Request Body (`ForgotPasswordDto`):
+#### Request Body (`RequestUnlockDto`):
 ```json
 {
   "email": "user@bizpro.vn"
@@ -403,23 +152,23 @@ Set-Cookie: bizpro_refresh_token=; Path=/api/v1/auth/refresh; Max-Age=0; HttpOnl
 ```json
 {
   "statusCode": 200,
-  "message": "Nếu email tồn tại trong hệ thống, hướng dẫn đặt lại mật khẩu đã được gửi đến hòm thư của bạn.",
+  "message": "Nếu email của bạn tồn tại trên hệ thống, mã mở khóa đã được gửi tới hòm thư của bạn.",
   "data": null
 }
 ```
 
 ---
 
-### 3.10. POST `/api/v1/auth/reset-password`
-- **Mục đích:** Xác thực token đặt lại mật khẩu từ email và cập nhật mật khẩu mới.
-- **Xác thực:** Public (`@Public()`).
-- **Token Design:** Mã CSPRNG 256-bit, lưu hash SHA-256 vào `users.password_reset_token_hash`. Thời hạn: 30 phút.
+### 3.5. POST `/api/v1/auth/unlock`
+- **Mục đích:** Xác thực mã OTP 6 chữ số để mở khóa tài khoản tức thì.
+- **Mật mã học:** Server kiểm tra băm `HMAC-SHA256(otpCode, SERVER_HMAC_SECRET)` với giá trị lưu trong `users.unlock_otp_hash`.
+- **Ràng buộc:** Tối đa 3 lần thử sai. Quá 3 lần mã OTP lập tức bị hủy bỏ.
 
-#### Request Body (`ResetPasswordDto`):
+#### Request Body (`UnlockAccountDto`):
 ```json
 {
-  "token": "rst_9a48fbc89210a47eb910...",
-  "newPassword": "BrandNewPassword789!#@"
+  "email": "user@bizpro.vn",
+  "otpCode": "849201"
 }
 ```
 
@@ -427,28 +176,60 @@ Set-Cookie: bizpro_refresh_token=; Path=/api/v1/auth/refresh; Max-Age=0; HttpOnl
 ```json
 {
   "statusCode": 200,
-  "message": "Đặt lại mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.",
-  "data": null
+  "message": "Mở khóa tài khoản thành công. Bạn có thể đăng nhập bình thường.",
+  "data": {
+    "unlockedAt": "2026-11-05T12:00:00.000Z"
+  }
 }
+```
+
+---
+
+### 3.6. POST `/api/v1/auth/logout`
+- **Mục đích:** Thu hồi phiên làm việc hiện tại, vô hiệu hóa Token Family thuộc phiên, xóa Cookie phía Client.
+- **Xác thực:** Yêu cầu Bearer Access Token.
+
+---
+
+### 3.7. POST `/api/v1/auth/logout-all`
+- **Mục đích:** Thu hồi tất cả các phiên đăng nhập đang hoạt động của người dùng trên mọi thiết bị, đồng thời tăng `users.auth_version` để thu hồi tức thời toàn bộ Access Token đang lưu hành.
+- **Xác thực:** Yêu cầu Bearer Access Token (`JwtAuthGuard`).
+
+---
+
+### 3.8. Giao Thức Khóa Bi Quan Trên Critical Mutation APIs
+Mọi API nghiệp vụ trọng yếu (Thanh toán đơn hàng `/sales/orders/:id/payments`, Duyệt đơn `/sales/orders/:id/approve`, Xuất kho `/inventory/issues`) bắt buộc thực thi giao thức kiểm tra kép trong transaction:
+```sql
+BEGIN;
+SET LOCAL lock_timeout = '2000ms';
+SELECT auth_version, status FROM users WHERE id = :user_id FOR SHARE;
+SELECT status FROM user_sessions WHERE id = :session_id FOR SHARE;
+-- Nếu auth_version không khớp hoặc trạng thái != ACTIVE -> ROLLBACK và trả 401
+COMMIT;
 ```
 
 ---
 
 ## 4. BẢNG MÃ LỖI ĐỒNG BỘ TOÀN HỆ THỐNG (SYSTEM ERROR CODES)
 
-| HTTP Status | Error Code | Mô tả kỹ thuật | Hành vi khuyến nghị phía Client |
-| :--- | :--- | :--- | :--- |
-| 400 | `AUTH_VALIDATION_ERROR` | Tham số gửi lên không đúng định dạng class-validator | Hiển thị lỗi form tại trường tương ứng |
-| 401 | `AUTH_INVALID_CREDENTIALS` | Sai email hoặc mật khẩu | Báo lỗi thông tin đăng nhập không hợp lệ |
-| 401 | `AUTH_TOKEN_EXPIRED` | Access Token hoặc Refresh Token đã quá hạn | Gọi endpoint `/refresh` hoặc điều hướng về `/login` |
-| 401 | `AUTH_TOKEN_INVALID` | Token chữ ký không khớp hoặc định dạng hỏng | Xóa token client, điều hướng về `/login` |
-| 401 | `AUTH_TOKEN_REVOKED` | Token bị thu hồi do `token.ver < user.auth_version` | Buộc đăng nhập lại |
-| 401 | `AUTH_TOKEN_REUSE_DETECTED` | Phát hiện tái sử dụng Refresh Token đã xoay vòng | Cảnh báo an ninh, chuyển hướng về `/login` |
-| 401 | `AUTH_SESSION_REVOKED` | Phiên làm việc đã bị thu hồi từ xa | Điều hướng người dùng về màn hình đăng nhập |
-| 403 | `AUTH_ACCOUNT_DISABLED` | Tài khoản ở trạng thái `INACTIVE` | Thông báo liên hệ quản trị viên |
-| 403 | `AUTH_ORGANIZATION_SUSPENDED`| Tổ chức đang bị tạm đình chỉ | Thông báo liên hệ quản trị viên hệ thống |
-| 403 | `AUTH_FORBIDDEN_PERMISSION` | Người dùng thiếu quyền `<module>.<resource>.<action>` | Thông báo không có quyền thực hiện hành động |
-| 403 | `AUTH_FORBIDDEN_SCOPE` | Bản ghi không thuộc phạm vi sở hữu/phòng ban/kho | Ẩn dữ liệu hoặc thông báo giới hạn phạm vi |
-| 403 | `AUTH_TENANT_MISMATCH` | Cố ý truy cập dữ liệu của Organization khác | Ghi log bảo mật, từ chối tuyệt đối |
-| 423 | `AUTH_ACCOUNT_LOCKED` | Tài khoản bị tạm khóa do nhập sai liên tiếp quá 5 lần | Hiển thị bộ đếm ngược `lockedUntil` |
-| 429 | `AUTH_RATE_LIMIT_EXCEEDED` | Gửi request vượt ngưỡng Throttler | Hiển thị yêu cầu thử lại sau ít phút |
+| HTTP Status | Error Code | Mô tả Kỹ thuật | Hành vi Khuyến nghị Client |
+| :---: | :--- | :--- | :--- |
+| **400** | `AUTH_VALIDATION_ERROR` | Tham số gửi lên không đúng định dạng DTO | Hiển thị lỗi form tại trường tương ứng |
+| **400** | `AUTH_CREDENTIAL_TRANSPORT_INVALID` | Truyền token qua sai phương thức (ví dụ gửi Body vào endpoint Web) | Sửa đổi mã nguồn client gọi đúng endpoint |
+| **401** | `AUTH_INVALID_CREDENTIALS` | Sai email hoặc mật khẩu (Chuẩn hóa Dummy Hash) | Báo lỗi thông tin đăng nhập không hợp lệ |
+| **401** | `AUTH_TOKEN_EXPIRED` | Access Token hoặc Refresh Token đã quá hạn | Thực hiện refresh hoặc điều hướng về `/login` |
+| **401** | `AUTH_TOKEN_INVALID` | Chữ ký token không hợp lệ hoặc định dạng hỏng | Xóa credential client, yêu cầu đăng nhập lại |
+| **401** | `AUTH_TOKEN_REVOKED` | Token bị thu hồi do `token.ver < user.auth_version` | Buộc đăng nhập lại toàn bộ thiết bị |
+| **401** | `AUTH_SESSION_REVOKED` | Phiên làm việc đã bị thu hồi đơn lẻ từ xa | Điều hướng người dùng về màn hình đăng nhập |
+| **401** | `AUTH_TOKEN_REUSE_DETECTED` | Phát hiện token đã rotated bị dùng lại không có Idempotency Record | Thu hồi Token Family, buộc đăng nhập lại |
+| **401** | `AUTH_RECOVERY_WINDOW_EXPIRED` | Gửi retry hợp lệ nhưng quá thời hạn lưu trữ 30 giây | Fail-Closed: Thu hồi Family, yêu cầu đăng nhập |
+| **401** | `AUTH_ENVELOPE_DECRYPT_FAILED`| Khóa giải mã bị revoke hoặc tag GCM không khớp | Cảnh báo an ninh, hủy phiên, yêu cầu đăng nhập |
+| **403** | `CSRF_ORIGIN_INVALID` | Request Web vi phạm kiểm tra Origin Whitelist | Chặn đứng hành vi Cross-Site Request |
+| **403** | `AUTH_ACCOUNT_DISABLED` | Tài khoản ở trạng thái `INACTIVE` | Thông báo liên hệ quản trị viên |
+| **403** | `AUTH_ORGANIZATION_SUSPENDED`| Tổ chức đang bị tạm đình chỉ hoạt động | Thông báo liên hệ quản trị viên hệ thống |
+| **403** | `AUTH_TENANT_ACCESS_DENIED` | Vi phạm chính sách Row Level Security (RLS) | Ghi log kiểm toán an ninh, từ chối tuyệt đối |
+| **422** | `AUTH_IDEMPOTENCY_PAYLOAD_MISMATCH`| Cùng Idempotency-Key nhưng gửi kèm Token khác trong session | Báo lỗi logic client, giữ nguyên Token Family |
+| **423** | `AUTH_ACCOUNT_LOCKED` | Tài khoản bị tạm khóa sau 5 lần nhập sai liên tiếp | Hiển thị bộ đếm ngược `lockedUntil` (15m) |
+| **429** | `AUTH_RATE_LIMIT_EXCEEDED` | Vượt ngưỡng ThrottlerGuard theo IP hoặc Account | Thử lại sau khoảng thời gian `Retry-After` |
+| **503** | `MUTATION_LOCK_TIMEOUT` | Tranh chấp khóa quá 2000ms trên API nghiệp vụ trọng yếu | Thử lại sau ít giây (Backoff Jitter) |
+| **503** | `SERVICE_UNAVAILABLE_DATABASE_DOWN`| Cơ sở dữ liệu ngừng hoạt động (Fail-Closed) | Thông báo bảo trì hệ thống tạm thời |

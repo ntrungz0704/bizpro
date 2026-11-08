@@ -3,11 +3,15 @@ node_modules/
 .pnp
 .pnp.js
 
-# Next.js Build Outputs
+# Build Outputs
 .next/
 out/
 build/
 dist/
+*.tsbuildinfo
+
+# GitHub workflows requiring oauth workflow scope
+.github/
 
 # Environment files
 .env

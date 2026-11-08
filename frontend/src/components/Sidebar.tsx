@@ -11,10 +11,13 @@ import {
   UserCheck,
   BarChart3,
   Settings,
+  CreditCard,
   ChevronDown,
   ChevronRight,
   Rocket,
   X,
+  Globe,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BizProLogo from "@/components/BizProLogo";
@@ -42,14 +45,14 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
   const { showToast } = useApp();
 
   const menuItems: MenuItem[] = [
-    { title: "Tổng quan", icon: Home, href: "/" },
+    { title: "Tổng quan", icon: Home, href: "/dashboard" },
     {
       title: "CRM",
       icon: Users,
       subItems: [
-        { title: "Khách hàng & Đối tác", href: "/crm/customers" },
+        { title: "Khách hàng tiềm năng (Leads)", href: "/crm/leads" },
         { title: "Cơ hội", href: "/crm/deals" },
-        { title: "Đơn hàng tiềm năng", href: "/crm/leads" },
+        { title: "Khách hàng & Đối tác", href: "/crm/customers" },
       ],
     },
     {
@@ -79,6 +82,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
       ],
     },
     { title: "Báo cáo", icon: BarChart3, href: "/reports" },
+    { title: "Gói cước & Ví", icon: CreditCard, href: "/billing" },
     { title: "Cài đặt", icon: Settings, href: "/settings" },
   ];
 
@@ -110,24 +114,36 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Brand Logo & Mobile Close */}
-        <div className="shrink-0 flex items-center justify-between px-2 py-2 mb-2">
-          <Link href="/" className="flex items-center group">
-            <BizProLogo variant="full" size="md" />
+        {/* Brand Logo & Top Quick Link to Marketing Site */}
+        <div className="shrink-0 flex items-center justify-between px-2 py-2 mb-2 gap-2">
+          <Link href="/dashboard" className="flex items-center group">
+            <BizProLogo variant="full" size="md" theme="dark" />
           </Link>
 
-          {/* Mobile close button */}
-          <button
-            onClick={onMobileClose}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
-            aria-label="Đóng menu"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Link
+              href="/"
+              title="Xem trang chủ Marketing bên ngoài"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-extrabold text-sky-400 hover:text-white bg-sky-950/80 hover:bg-sky-600 border border-sky-500/40 transition-all shadow-xs group"
+            >
+              <Globe className="w-3.5 h-3.5 text-sky-400 group-hover:rotate-12 transition-transform" />
+              <span>Xem Web</span>
+              <ExternalLink className="w-2.5 h-2.5 opacity-70 group-hover:opacity-100" />
+            </Link>
+
+            {/* Mobile close button */}
+            <button
+              onClick={onMobileClose}
+              className="lg:hidden p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              aria-label="Đóng menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Scrollable Navigation Items with Sleek Clean Scrollbar */}
-        <nav className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-1 sidebar-scrollbar">
+        {/* Navigation Items (Compact & Streamlined - No Scrollbar) */}
+        <nav className="flex-1 min-h-0 overflow-hidden space-y-0.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const hasSub = !!item.subItems;
@@ -142,7 +158,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                   href={item.href}
                   onClick={onMobileClose}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150",
+                    "w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150",
                     isRootActive
                       ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
                       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
@@ -167,7 +183,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                   type="button"
                   onClick={() => toggleSubmenu(item.title)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150",
+                    "w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150",
                     isAnySubActive
                       ? "text-white font-bold bg-slate-800/40"
                       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
@@ -224,7 +240,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
           })}
 
           {/* Sleek Enterprise Pro Badge (Compact, fits within 100vh) */}
-          <div className="pt-2 pb-1">
+          <div className="pt-1">
             <div
               onClick={() =>
                 showToast(
@@ -232,7 +248,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
                   "info"
                 )
               }
-              className="rounded-xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 p-2 border border-blue-500/30 flex items-center justify-between cursor-pointer hover:border-blue-400/60 transition-colors"
+              className="rounded-xl bg-gradient-to-r from-blue-900/40 to-indigo-900/40 p-1.5 border border-blue-500/30 flex items-center justify-between cursor-pointer hover:border-blue-400/60 transition-colors"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <div className="w-5 h-5 rounded-md bg-blue-600/30 border border-blue-400/40 flex items-center justify-center shrink-0">

@@ -19,10 +19,10 @@ export default function CrmFunnel() {
   const wonDealsCount = deals.filter((d) => d.stage === "Won").length;
 
   const stages = [
-    { name: "Mới", count: 119 + newDealsCount, color: "#3B82F6" },
-    { name: "Đã liên hệ", count: 83 + contactedDealsCount, color: "#10B981" },
-    { name: "Đang đàm phán", count: 50 + negotiationDealsCount, color: "#F59E0B" },
-    { name: "Thành công", count: 37 + wonDealsCount, color: "#8B5CF6" },
+    { name: "Mới", count: newDealsCount, color: "#3B82F6" },
+    { name: "Đã liên hệ", count: contactedDealsCount, color: "#10B981" },
+    { name: "Đang đàm phán", count: negotiationDealsCount, color: "#F59E0B" },
+    { name: "Thành công", count: wonDealsCount, color: "#8B5CF6" },
   ];
 
   return (

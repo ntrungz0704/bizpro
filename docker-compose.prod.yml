@@ -1,0 +1,132 @@
+# ==============================================================================
+# BIZPRO+ PRODUCTION DOCKER COMPOSE CONFIGURATION
+# Phase 3C: Multi-stage, zero-leak, isolated single-host production topology
+# ==============================================================================
+
+services:
+  # 1. Isolated PostgreSQL 16 Database (No Host Port Publication)
+  postgres:
+    image: postgres:16-alpine
+    container_name: bizpro_prod_postgres
+    restart: unless-stopped
+    networks:
+      - bizpro_internal
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bizpro_db}
+      POSTGRES_USER: ${POSTGRES_USER:-bizpro_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is mandatory}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 90s
+
+  # 2. Automated Migration Pre-flight Container (Runs once then exits)
+  migration:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bizpro_prod_migration
+    restart: "no"
+    networks:
+      - bizpro_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is mandatory}
+    command: ["npx", "prisma", "migrate", "deploy"]
+
+  # 3. Enterprise NestJS Backend (Production Runtime, Non-root)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bizpro_prod_backend
+    restart: unless-stopped
+    networks:
+      - bizpro_internal
+    expose:
+      - "4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is mandatory}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is mandatory}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is mandatory}
+      AUTH_RESPONSE_ENVELOPE_KEY: ${AUTH_RESPONSE_ENVELOPE_KEY:?AUTH_RESPONSE_ENVELOPE_KEY is mandatory}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      ENABLE_SWAGGER: ${ENABLE_SWAGGER:-false}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # 4. Next.js 15 Standalone Frontend (Non-root, Minimal Image)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bizpro_prod_frontend
+    restart: unless-stopped
+    networks:
+      - bizpro_internal
+    expose:
+      - "3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # 5. Nginx Reverse Proxy (Single Public Entry Point)
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: bizpro_prod_nginx
+    restart: unless-stopped
+    networks:
+      - bizpro_internal
+    ports:
+      - "80:80"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+networks:
+  bizpro_internal:
+    driver: bridge
+    name: bizpro_prod_network
+
+volumes:
+  postgres_data:
+    name: bizpro_prod_postgres_data

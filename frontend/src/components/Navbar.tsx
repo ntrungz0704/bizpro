@@ -56,6 +56,7 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
     products,
     employees,
     deals,
+    leaveRequests,
     showToast,
   } = useApp();
 
@@ -73,9 +74,9 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
   // Profile modal edit state
   const [editProfileForm, setEditProfileForm] = useState({
     name: userProfile.name,
-    phone: userProfile.phone,
+    phone: userProfile.phone || "",
     email: userProfile.email,
-    department: userProfile.department,
+    department: userProfile.department || "",
   });
   const [activeProfileTab, setActiveProfileTab] = useState<"INFO" | "SECURITY">("INFO");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -162,11 +163,59 @@ export default function Navbar({ onMobileMenuToggle }: NavbarProps) {
   useEffect(() => {
     setEditProfileForm({
       name: userProfile.name,
-      phone: userProfile.phone,
+      phone: userProfile.phone || "",
       email: userProfile.email,
-      department: userProfile.department,
+      department: userProfile.department || "",
     });
   }, [userProfile]);
+
+  // Dynamically derive real-time notifications from system state
+  useEffect(() => {
+    const dynamicNotis: NotificationItem[] = [];
+
+    // 1. Pending Leave Requests
+    const pendingLeaves = leaveRequests.filter((r) => r.status === "PENDING");
+    pendingLeaves.slice(0, 2).forEach((l) => {
+      dynamicNotis.push({
+        id: `leave_${l.id}`,
+        title: `${l.employeeName} gửi đơn xin nghỉ ${l.days} ngày (${l.leaveType})`,
+        time: "Vừa xong",
+        href: "/hrm/leave",
+        type: "leave",
+        isRead: false,
+      });
+    });
+
+    // 2. Confirmed or Processing Sales Orders
+    const activeOrders = salesOrders.filter((o) => o.status === "CONFIRMED" || o.status === "PROCESSING");
+    activeOrders.slice(0, 2).forEach((o) => {
+      dynamicNotis.push({
+        id: `order_${o.id}`,
+        title: `Đơn hàng #${o.code} đang xử lý và đã khóa giữ tồn kho`,
+        time: "Hôm nay",
+        href: "/sales/orders",
+        type: "order",
+        isRead: false,
+      });
+    });
+
+    // 3. Low stock products
+    const lowStock = products.filter((p) => (p.onHand - p.reserved) <= p.minStock);
+    lowStock.slice(0, 2).forEach((p) => {
+      dynamicNotis.push({
+        id: `inv_${p.id}`,
+        title: `Sản phẩm "${p.name}" chạm ngưỡng tồn an toàn (Còn ${p.onHand - p.reserved} ${p.uom})`,
+        time: "Cảnh báo",
+        href: "/inventory/products",
+        type: "inventory",
+        isRead: false,
+      });
+    });
+
+    if (dynamicNotis.length > 0) {
+      setNotifications(dynamicNotis);
+    }
+  }, [leaveRequests, salesOrders, products]);
 
   const handleMarkAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));

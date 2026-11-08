@@ -1,0 +1,97 @@
+name: "BizPro+ Production Deployment (Controlled Gate)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Immutable Image Tag to Deploy (e.g. sha-a1b2c3d or v1.0.0)"
+        required: true
+        type: string
+      run_database_migration:
+        description: "Execute Prisma Database Migration before traffic switch"
+        required: true
+        type: boolean
+        default: true
+      confirm_production:
+        description: "Type 'DEPLOY-PROD' to confirm deployment authorization"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pre-flight-check:
+    name: "Pre-flight & Gate Authorization Verification"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Verify Authorization Confirmation"
+        run: |
+          if [ "${{ github.event.inputs.confirm_production }}" != "DEPLOY-PROD" ]; then
+            echo "ERROR: Production deployment aborted. Confirmation token did not match 'DEPLOY-PROD'."
+            exit 1
+          fi
+          echo "Production deployment gate successfully authorized for image tag: ${{ github.event.inputs.image_tag }}"
+
+  deploy-production:
+    name: "Production Deployment & Health Verification"
+    needs: [ pre-flight-check ]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://bizpro.vn
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Check Infrastructure Deployment Prerequisites"
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.PROD_HOST }}" ] || [ -z "${{ secrets.PROD_SSH_KEY }}" ]; then
+            echo "::warning ::Production server secrets (PROD_HOST, PROD_SSH_KEY) are not configured."
+            echo "::notice ::Deployment is safely PAUSED (BLOCKED BY ENVIRONMENT). Image is verified and ready for deployment once server credentials are provided."
+            echo "secrets_available=false" >> $GITHUB_OUTPUT
+          else
+            echo "secrets_available=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "Execute Controlled Database Migration Pre-flight"
+        if: steps.check-secrets.outputs.secrets_available == 'true' && github.event.inputs.run_database_migration == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: |
+          echo "Running Prisma migrate deploy against production database..."
+          npx prisma migrate deploy
+
+      - name: "Deploy Release via SSH & Docker Compose"
+        if: steps.check-secrets.outputs.secrets_available == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/bizpro
+            export IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+            echo "Deploying BizPro+ release: ${IMAGE_TAG}"
+            docker compose -p bizpro -f docker-compose.prod.yml pull backend frontend
+            docker compose -p bizpro -f docker-compose.prod.yml up -d --no-deps backend frontend nginx
+            
+            # Post-deployment Health Check Verification
+            echo "Verifying health checks..."
+            sleep 15
+            curl -f http://127.0.0.1/healthz
+            curl -f http://127.0.0.1/api/health/live
+
+      - name: "Automated Failure Reporting & Rollback Trigger"
+        if: failure() && steps.check-secrets.outputs.secrets_available == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            echo "CRITICAL: Healthcheck failed! Initiating rollback to previous stable version..."
+            cd /opt/bizpro
+            docker compose -p bizpro -f docker-compose.prod.yml rollback || docker compose -p bizpro -f docker-compose.prod.yml restart

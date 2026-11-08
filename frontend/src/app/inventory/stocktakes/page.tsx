@@ -23,7 +23,7 @@ export default function StocktakesPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -48,15 +48,15 @@ export default function StocktakesPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[850px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4">Mã SKU</th>
-                <th className="py-3 px-4">Tên hàng hóa</th>
-                <th className="py-3 px-4 text-center">Tồn sổ sách</th>
-                <th className="py-3 px-4 text-center">Thực đếm</th>
-                <th className="py-3 px-4 text-center">Chênh lệch</th>
-                <th className="py-3 px-4 text-center">Đánh giá</th>
+                <th className="py-3 px-4 min-w-[120px] whitespace-nowrap">Mã SKU</th>
+                <th className="py-3 px-4 min-w-[220px]">Tên hàng hóa</th>
+                <th className="py-3 px-4 min-w-[120px] text-center whitespace-nowrap">Tồn sổ sách</th>
+                <th className="py-3 px-4 min-w-[110px] text-center whitespace-nowrap">Thực đếm</th>
+                <th className="py-3 px-4 min-w-[130px] text-center whitespace-nowrap">Chênh lệch</th>
+                <th className="py-3 px-4 min-w-[130px] text-center whitespace-nowrap">Đánh giá</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">

@@ -1,162 +1,122 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 interface BizProLogoProps {
   variant?: "full" | "icon";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
+  theme?: "dark" | "light";
   className?: string;
+  href?: string;
 }
 
 export default function BizProLogo({
   variant = "full",
   size = "md",
+  theme = "light",
   className = "",
+  href,
 }: BizProLogoProps) {
-  // Dimension mappings
+  const isLight = theme === "light";
+
   const iconSizes = {
     sm: "w-7 h-7",
     md: "w-9 h-9",
     lg: "w-11 h-11",
+    xl: "w-14 h-14",
   };
 
   const textSizes = {
-    sm: "text-base",
+    sm: "text-lg",
     md: "text-xl",
     lg: "text-2xl",
+    xl: "text-3xl",
   };
 
-  return (
-    <div className={`flex items-center gap-3 select-none ${className}`}>
-      {/* Dynamic Geometric Core SVG Icon */}
-      <div
-        className={`${iconSizes[size]} relative flex items-center justify-center shrink-0 drop-shadow-[0_4px_12px_rgba(37,99,235,0.4)] transition-transform duration-300 hover:scale-105`}
+  const logoEmblem = (
+    <div
+      className={`${iconSizes[size]} relative flex items-center justify-center shrink-0 drop-shadow-[0_4px_14px_rgba(37,99,235,0.3)] transition-transform duration-200 group-hover:scale-105`}
+    >
+      <svg
+        viewBox="0 0 48 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full"
       >
-        <svg
-          viewBox="0 0 48 48"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full"
-        >
-          <defs>
-            {/* Top Isometric Facet */}
-            <linearGradient id="topFacet" x1="24" y1="4" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#38BDF8" />
-              <stop offset="100%" stopColor="#2563EB" />
-            </linearGradient>
+        <defs>
+          <linearGradient id={`bp-bg-${theme}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2563EB" />
+            <stop offset="45%" stopColor="#1D4ED8" />
+            <stop offset="100%" stopColor="#0F172A" />
+          </linearGradient>
+          <linearGradient id={`bp-cyan-${theme}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38BDF8" />
+            <stop offset="100%" stopColor="#06B6D4" />
+          </linearGradient>
+        </defs>
 
-            {/* Left Isometric Facet */}
-            <linearGradient id="leftFacet" x1="6" y1="14" x2="24" y2="44" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#1E40AF" />
-              <stop offset="100%" stopColor="#0F172A" />
-            </linearGradient>
+        {/* Outer Squircle Shield */}
+        <rect x="2" y="2" width="44" height="44" rx="12" fill={`url(#bp-bg-${theme})`} />
 
-            {/* Right Isometric Facet */}
-            <linearGradient id="rightFacet" x1="42" y1="14" x2="24" y2="44" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#2563EB" />
-              <stop offset="100%" stopColor="#1D4ED8" />
-            </linearGradient>
+        {/* Precision Modern Capital 'B' Monogram using Fill-Rule Evenodd */}
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M 12 10 C 12 8.895 12.895 8 14 8 L 26 8 C 29.866 8 33 11.134 33 15 C 33 17.55 31.63 19.78 29.58 21 C 32.22 22.28 34 24.97 34 28 C 34 32.418 30.418 36 26 36 L 14 36 C 12.895 36 12 35.105 12 34 L 12 10 Z M 17 13 L 17 19 L 25 19 C 26.657 19 28 17.657 28 16 C 28 14.343 26.657 13 25 13 L 17 13 Z M 17 24 L 17 31 L 26 31 C 27.933 31 29.5 29.433 29.5 27.5 C 29.5 25.567 27.933 24 26 24 L 17 24 Z"
+          fill="white"
+        />
 
-            {/* Glowing Plus Gradient */}
-            <linearGradient id="plusGlow" x1="16" y1="16" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="50%" stopColor="#E0F2FE" />
-              <stop offset="100%" stopColor="#38BDF8" />
-            </linearGradient>
+        {/* Dynamic Glowing Cyan Accent pill inside the lower loop of 'B' */}
+        <circle cx="23.5" cy="27.5" r="2.2" fill={`url(#bp-cyan-${theme})`} />
 
-            {/* Glow Filter */}
-            <filter id="neonBloom" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="1.5" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
+        {/* Integrated Plus '+' Super-Badge Top Right */}
+        <g transform="translate(32, 2)">
+          <circle cx="7" cy="7" r="6.5" fill="#0B132B" stroke="#38BDF8" strokeWidth="1.8" />
+          <path d="M7 4.2V9.8M4.2 7H9.8" stroke="#38BDF8" strokeWidth="1.8" strokeLinecap="round" />
+        </g>
+      </svg>
+    </div>
+  );
 
-          {/* Outer Isometric Hexagon Core */}
-          <polygon
-            points="24,4 42,14 42,34 24,44 6,34 6,14"
-            fill="url(#leftFacet)"
-            stroke="#1E293B"
-            strokeWidth="1"
-          />
+  const content = (
+    <div
+      className={`inline-flex items-center gap-2.5 select-none shrink-0 group cursor-pointer ${className}`}
+    >
+      {logoEmblem}
 
-          {/* Top Facet */}
-          <polygon
-            points="24,4 42,14 24,24 6,14"
-            fill="url(#topFacet)"
-            opacity="0.9"
-          />
-
-          {/* Right Facet */}
-          <polygon
-            points="24,24 42,14 42,34 24,44"
-            fill="url(#rightFacet)"
-            opacity="0.95"
-          />
-
-          {/* Left Facet Highlight */}
-          <polygon
-            points="6,14 24,24 24,44 6,34"
-            fill="url(#leftFacet)"
-          />
-
-          {/* Inner Geometric Shield Overlay */}
-          <polygon
-            points="24,12 34,18 34,30 24,36 14,30 14,18"
-            fill="#0B132B"
-            fillOpacity="0.75"
-            stroke="#38BDF8"
-            strokeWidth="1.2"
-            strokeLinejoin="round"
-          />
-
-          {/* Glowing Plus (+) Core Symbol */}
-          <g filter="url(#neonBloom)">
-            {/* Horizontal Bar */}
-            <rect
-              x="18"
-              y="22.5"
-              width="12"
-              height="3"
-              rx="1.5"
-              fill="url(#plusGlow)"
-            />
-            {/* Vertical Bar */}
-            <rect
-              x="22.5"
-              y="18"
-              width="3"
-              height="12"
-              rx="1.5"
-              fill="url(#plusGlow)"
-            />
-          </g>
-
-          {/* Micro Tech Accents */}
-          <circle cx="24" cy="4" r="1.5" fill="#38BDF8" />
-          <circle cx="42" cy="14" r="1.5" fill="#38BDF8" />
-          <circle cx="42" cy="34" r="1.5" fill="#2563EB" />
-          <circle cx="24" cy="44" r="1.5" fill="#38BDF8" />
-          <circle cx="6" cy="34" r="1.5" fill="#1E40AF" />
-          <circle cx="6" cy="14" r="1.5" fill="#38BDF8" />
-        </svg>
-      </div>
-
-      {/* Typography for Full Variant */}
+      {/* Typography: Wordmark with high-contrast theme support */}
       {variant === "full" && (
-        <div className="flex items-center tracking-tight font-extrabold leading-none">
-          <span className={`${textSizes[size]} text-white font-black tracking-tight`}>
+        <div className="flex items-center tracking-tight leading-none whitespace-nowrap">
+          <span
+            className={`${textSizes[size]} font-black tracking-tight ${
+              isLight ? "text-[#0F172A]" : "text-white"
+            }`}
+          >
             Biz
           </span>
-          <span className={`${textSizes[size]} text-slate-200 font-bold ml-0.5 tracking-tight`}>
+          <span
+            className={`${textSizes[size]} font-black tracking-tight ml-0.5 ${
+              isLight ? "text-primary-container" : "text-[#38BDF8]"
+            }`}
+          >
             Pro
           </span>
-          <span
-            className={`${textSizes[size]} font-black bg-gradient-to-tr from-sky-400 to-blue-500 bg-clip-text text-transparent ml-0.5 drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]`}
-          >
+          <span className="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 rounded-md bg-primary-container text-white text-[11px] font-black uppercase tracking-wider shadow-sm">
             +
           </span>
         </div>
       )}
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="inline-flex items-center">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }

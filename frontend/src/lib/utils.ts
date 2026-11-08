@@ -7,11 +7,12 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Deterministic VND currency formatter to eliminate SSR hydration mismatches across environments
+ * Uses non-breaking space (\u00A0) to prevent the currency symbol (₫) from breaking onto a new line ("rớt chữ").
  */
 export function formatVND(amount: number): string {
-  if (amount === null || amount === undefined || isNaN(amount)) return "0 ₫";
+  if (amount === null || amount === undefined || isNaN(amount)) return "0\u00A0₫";
   const formatted = Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `${formatted} ₫`;
+  return `${formatted}\u00A0₫`;
 }
 
 /**

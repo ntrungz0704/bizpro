@@ -88,10 +88,18 @@ enum ReservationStatus {
 enum SalesOrderStatus {
   DRAFT
   CONFIRMED
+  PROCESSING
+  SHIPPING
   PARTIALLY_FULFILLED
   FULFILLED
   CANCELLED
   ON_HOLD
+}
+
+enum FulfillmentStatus {
+  DRAFT
+  COMPLETED
+  CANCELLED
 }
 
 enum EmploymentStatus {
@@ -175,6 +183,30 @@ enum TransactionStatus {
   CANCELLED
 }
 
+enum SessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+
+  @@map("session_status")
+}
+
+enum TokenFamilyStatus {
+  ACTIVE
+  REVOKED
+
+  @@map("token_family_status")
+}
+
+enum RefreshTokenStatus {
+  ACTIVE
+  ROTATED
+  REVOKED
+  EXPIRED
+
+  @@map("refresh_token_status")
+}
+
 // ==========================================
 // 1. SHARED PLATFORM & SECURITY
 // ==========================================
@@ -196,6 +228,7 @@ model Organization {
 
   // Relations
   users                 User[]
+  sessions              UserSession[]
   roles                 Role[]
   departments           Department[]
   positions             Position[]
@@ -225,6 +258,7 @@ model Organization {
   inventoryTransactions InventoryTransaction[]
   inventoryReservations InventoryReservation[]
   salesOrders           SalesOrder[]
+  fulfillments          Fulfillment[]
   leaveTypes            LeaveType[]
   workShifts            WorkShift[]
   employeeContracts     EmployeeContract[]
@@ -247,12 +281,24 @@ model User {
   createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
+  // Phase 1D Security Fields
+  authVersion            Int       @default(1) @map("auth_version")
+  failedLoginAttempts    Int       @default(0) @map("failed_login_attempts")
+  lockedUntil            DateTime? @map("locked_until") @db.Timestamptz
+  unlockOtpHash          String?   @map("unlock_otp_hash") @db.VarChar(64)
+  unlockOtpExpiresAt     DateTime? @map("unlock_otp_expires_at") @db.Timestamptz
+  unlockOtpAttempts      Int       @default(0) @map("unlock_otp_attempts")
+  lastUnlockOtpSentAt    DateTime? @map("last_unlock_otp_sent_at") @db.Timestamptz
+  passwordChangedAt      DateTime? @map("password_changed_at") @db.Timestamptz
+
   // Relations
   organization         Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   employee             Employee?             @relation("UserEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
   userRoles            UserRole[]
   auditLogs            AuditLog[]
   notifications        Notification[]
+  sessions             UserSession[]
+  tokenFamilies        TokenFamily[]
   uploadedFiles        File[]                @relation("UserUploadedFiles")
   assignedLeads        Lead[]                @relation("UserAssignedLeads")
   assignedDeals        Deal[]                @relation("UserAssignedDeals")
@@ -276,10 +322,99 @@ model User {
   changedHistories     EmployeeHistory[]     @relation("UserChangedHistories")
   dealStageHistories   DealStageHistory[]    @relation("UserChangedDealStages")
   orderStatusHistories SalesOrderStatusHistory[] @relation("UserChangedOrderStatuses")
+  executedFulfillments Fulfillment[]         @relation("UserExecutedFulfillments")
 
   @@unique([organizationId, email])
   @@index([organizationId, status])
   @@map("users")
+}
+
+model UserSession {
+  id                 String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId     String                 @map("organization_id") @db.Uuid
+  userId             String                 @map("user_id") @db.Uuid
+  status             SessionStatus          @default(ACTIVE)
+  deviceId           String?                @map("device_id") @db.VarChar(128)
+  ipAddress          String?                @map("ip_address") @db.VarChar(45)
+  userAgent          String?                @map("user_agent") @db.Text
+  createdAt          DateTime               @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  expiresAt          DateTime               @map("expires_at") @db.Timestamptz
+  revokedAt          DateTime?              @map("revoked_at") @db.Timestamptz
+
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization       Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tokenFamily        TokenFamily?
+  refreshTokens      RefreshTokenRecord[]
+  idempotencyRecords AuthIdempotencyRecord[]
+
+  @@index([userId, status], name: "idx_user_sessions_user_status")
+  @@index([organizationId], name: "idx_user_sessions_org")
+  @@index([expiresAt], name: "idx_user_sessions_expires_at")
+  @@map("user_sessions")
+}
+
+model TokenFamily {
+  id                 String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId          String                 @unique @map("session_id") @db.Uuid
+  userId             String                 @map("user_id") @db.Uuid
+  status             TokenFamilyStatus      @default(ACTIVE)
+  createdAt          DateTime               @default(now()) @map("created_at") @db.Timestamptz
+  revokedAt          DateTime?              @map("revoked_at") @db.Timestamptz
+
+  session            UserSession            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens      RefreshTokenRecord[]
+  idempotencyRecords AuthIdempotencyRecord[]
+
+  @@map("token_families")
+}
+
+model RefreshTokenRecord {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId         String             @map("session_id") @db.Uuid
+  tokenFamilyId     String             @map("token_family_id") @db.Uuid
+  tokenHash         String             @unique @map("token_hash") @db.VarChar(64)
+  sequenceNumber    Int                @map("sequence_number")
+  status            RefreshTokenStatus @default(ACTIVE)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt         DateTime           @map("expires_at") @db.Timestamptz
+  rotatedAt         DateTime?          @map("rotated_at") @db.Timestamptz
+  replacedByTokenId String?            @unique @map("replaced_by_token_id") @db.Uuid
+
+  session           UserSession        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  tokenFamily       TokenFamily        @relation(fields: [tokenFamilyId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenFamilyId, sequenceNumber], name: "uq_refresh_tokens_family_seq")
+  @@unique([id, tokenFamilyId], name: "uq_refresh_tokens_id_family")
+  @@index([tokenFamilyId, status], name: "idx_refresh_tokens_family_status")
+  @@index([sessionId], name: "idx_refresh_tokens_session")
+  @@index([tokenHash], name: "idx_refresh_tokens_hash")
+  @@map("refresh_tokens")
+}
+
+model AuthIdempotencyRecord {
+  id                 String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  idempotencyKey     String      @map("idempotency_key") @db.VarChar(128)
+  sessionId          String      @map("session_id") @db.Uuid
+  tokenFamilyId      String      @map("token_family_id") @db.Uuid
+  requestTokenHash   String      @map("request_token_hash") @db.VarChar(64)
+  endpoint           String      @db.VarChar(255)
+  responseStatusCode Int         @map("response_status_code")
+  responseHeaders    Json        @map("response_headers")
+  encryptedEnvelope  Bytes       @map("encrypted_envelope")
+  keyId              String      @map("key_id") @db.VarChar(64)
+  nonce              Bytes       @db.ByteA
+  authTag            Bytes       @map("auth_tag") @db.ByteA
+  createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt          DateTime    @map("expires_at") @db.Timestamptz
+
+  session            UserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  tokenFamily        TokenFamily @relation(fields: [tokenFamilyId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, idempotencyKey], name: "uq_auth_idempotency_session_key")
+  @@index([expiresAt], name: "idx_auth_idempotency_expires_at")
+  @@map("auth_idempotency_records")
 }
 
 model Role {
@@ -921,6 +1056,7 @@ model Product {
   stockTransferItems    StockTransferItem[]
   stockAdjustmentItems  StockAdjustmentItem[]
   stocktakeItems        StocktakeItem[]
+  fulfillmentItems      FulfillmentItem[]
 
   @@unique([organizationId, sku])
   @@index([organizationId, status])
@@ -950,6 +1086,7 @@ model Warehouse {
   inventoryTransactions InventoryTransaction[]
   inventoryReservations InventoryReservation[]
   salesOrders           SalesOrder[]
+  fulfillments          Fulfillment[]
 
   @@unique([organizationId, code])
   @@map("warehouses")
@@ -1057,6 +1194,7 @@ model StockIssue {
   creator      User             @relation("UserCreatedIssues", fields: [createdBy], references: [id], onDelete: Restrict)
   poster       User?            @relation("UserPostedIssues", fields: [postedBy], references: [id], onDelete: Restrict)
   items        StockIssueItem[]
+  fulfillment  Fulfillment?
 
   @@unique([organizationId, issueCode])
   @@map("stock_issues")
@@ -1284,6 +1422,7 @@ model SalesOrder {
   items               SalesOrderItem[]
   reservations        InventoryReservation[]
   statusHistories     SalesOrderStatusHistory[]
+  fulfillments        Fulfillment[]
   paymentTransactions PaymentTransaction[]
 
   @@unique([organizationId, orderCode])
@@ -1333,6 +1472,48 @@ model SalesOrderStatusHistory {
 
   @@index([salesOrderId, changedAt])
   @@map("sales_order_status_histories")
+}
+
+model Fulfillment {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String            @map("organization_id") @db.Uuid
+  fulfillmentCode String            @map("fulfillment_code") @db.VarChar(50)
+  salesOrderId    String            @map("sales_order_id") @db.Uuid
+  warehouseId     String            @map("warehouse_id") @db.Uuid
+  stockIssueId    String?           @unique @map("stock_issue_id") @db.Uuid
+  status          FulfillmentStatus @default(COMPLETED)
+  trackingNumber  String?           @map("tracking_number") @db.VarChar(100)
+  carrierName     String?           @map("carrier_name") @db.VarChar(100)
+  deliveredAt     DateTime?         @map("delivered_at") @db.Timestamptz
+  note            String?           @db.Text
+  fulfilledBy     String            @map("fulfilled_by") @db.Uuid
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  salesOrder   SalesOrder        @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  warehouse    Warehouse         @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  stockIssue   StockIssue?       @relation(fields: [stockIssueId], references: [id], onDelete: SetNull)
+  executor     User              @relation("UserExecutedFulfillments", fields: [fulfilledBy], references: [id], onDelete: Restrict)
+  items        FulfillmentItem[]
+
+  @@unique([organizationId, fulfillmentCode])
+  @@index([organizationId, salesOrderId])
+  @@map("fulfillments")
+}
+
+model FulfillmentItem {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fulfillmentId String   @map("fulfillment_id") @db.Uuid
+  productId     String   @map("product_id") @db.Uuid
+  quantity      Decimal  @db.Decimal(12, 3)
+
+  fulfillment Fulfillment @relation(fields: [fulfillmentId], references: [id], onDelete: Cascade)
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([fulfillmentId])
+  @@index([productId])
+  @@map("fulfillment_items")
 }
 
 model PaymentTransaction {

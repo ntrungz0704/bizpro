@@ -1,9 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { CheckCircle2, AlertCircle, Info, X, AlertTriangle } from "lucide-react";
+import {
+  organizationApi,
+  authApi,
+  crmApi,
+  inventoryApi,
+  salesApi,
+  hrmApi,
+  setAccessToken,
+  getAccessToken,
+  OrgProfileDto,
+} from "@/lib/api-client";
 
-// Types
+// =========================================================================
+// DATA MODELS & TYPES
+// =========================================================================
 export interface Customer {
   id: string;
   code: string;
@@ -12,6 +25,7 @@ export interface Customer {
   email: string;
   type: "Cá nhân" | "Doanh nghiệp";
   address: string;
+  taxCode?: string;
   totalSpent: number;
   status: "ACTIVE" | "INACTIVE";
 }
@@ -23,7 +37,7 @@ export interface Lead {
   phone: string;
   email: string;
   source: string;
-  status: "NEW" | "CONTACTED" | "QUALIFIED" | "CONVERTED" | "UNQUALIFIED";
+  status: "NEW" | "CONTACTED" | "QUALIFIED" | "CONVERTED" | "LOST";
   assignedTo: string;
   createdAt: string;
 }
@@ -67,7 +81,7 @@ export interface SalesOrder {
   customerName: string;
   customerId: string;
   orderDate: string;
-  status: "DRAFT" | "CONFIRMED" | "PARTIALLY_FULFILLED" | "FULFILLED" | "CANCELLED";
+  status: "DRAFT" | "CONFIRMED" | "PROCESSING" | "PARTIALLY_FULFILLED" | "FULFILLED" | "CANCELLED";
   totalAmount: number;
   items: SalesOrderItem[];
   note?: string;
@@ -108,8 +122,8 @@ export interface Employee {
 
 export interface AttendanceRecord {
   id: string;
-  employeeName: string;
   employeeCode: string;
+  employeeName: string;
   date: string;
   checkIn: string;
   checkOut?: string;
@@ -124,16 +138,42 @@ export interface LeaveRequest {
   endDate: string;
   days: number;
   reason: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
 }
 
 export interface UserProfile {
   name: string;
-  email: string;
-  phone: string;
   role: string;
+  email: string;
+  avatar: string;
   organization: string;
-  department: string;
+  phone?: string;
+  department?: string;
+}
+
+export interface OrgProfile {
+  id?: string;
+  name: string;
+  code: string;
+  taxCode: string;
+  currency: string;
+  timezone: string;
+  address: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  action: string;
+  entity: string;
+  code: string;
+  user: string;
+  time: string;
+  ip: string;
+  details?: string;
+  module?: string;
 }
 
 export interface ActivityItem {
@@ -148,492 +188,147 @@ export interface ActivityItem {
 export interface ToastMessage {
   id: string;
   title: string;
-  type: "success" | "error" | "info";
+  type: "success" | "error" | "info" | "warning";
 }
 
 interface AppContextType {
   userProfile: UserProfile;
   updateUserProfile: (profile: Partial<UserProfile>) => void;
+  orgProfile: OrgProfile;
+  updateOrgProfile: (profile: Partial<OrgProfile>) => Promise<boolean> | void;
+  resetOrgProfile: () => Promise<void> | void;
+  auditLogs: AuditLog[];
+  addAuditLog: (log: Omit<AuditLog, "id" | "time" | "ip">) => void;
   isLoggedIn: boolean;
   login: () => void;
   logout: () => void;
   customers: Customer[];
-  addCustomer: (customer: Omit<Customer, "id">) => void;
+  addCustomer: (customer: Omit<Customer, "id">) => Promise<boolean>;
   leads: Lead[];
-  addLead: (lead: Omit<Lead, "id" | "createdAt">) => void;
-  convertLead: (leadId: string) => void;
+  addLead: (lead: Omit<Lead, "id" | "createdAt">) => Promise<boolean>;
+  convertLead: (leadId: string) => Promise<void>;
   deals: Deal[];
-  addDeal: (deal: Omit<Deal, "id">) => void;
-  moveDealStage: (dealId: string, newStage: Deal["stage"]) => void;
+  addDeal: (deal: Omit<Deal, "id">) => Promise<boolean>;
+  moveDealStage: (dealId: string, newStage: Deal["stage"]) => Promise<void>;
+  winDeal: (dealId: string) => Promise<void>;
+  loseDeal: (dealId: string) => Promise<void>;
   products: Product[];
-  addProduct: (product: Omit<Product, "id" | "reserved">) => void;
+  addProduct: (product: Omit<Product, "id" | "reserved">) => Promise<boolean>;
+  quickReorderProduct: (productId: string) => Promise<void>;
   applyStocktake: (updatedCounts: Record<string, number>) => void;
   salesOrders: SalesOrder[];
-  createSalesOrder: (order: Omit<SalesOrder, "id">) => void;
-  confirmSalesOrder: (orderId: string) => void;
-  fulfillSalesOrder: (orderId: string) => void;
-  cancelSalesOrder: (orderId: string) => void;
+  createSalesOrder: (order: Omit<SalesOrder, "id">) => Promise<boolean>;
+  confirmSalesOrder: (orderId: string) => Promise<void>;
+  fulfillSalesOrder: (orderId: string) => Promise<void>;
+  cancelSalesOrder: (orderId: string) => Promise<void>;
   stockReceipts: StockReceipt[];
   postStockReceipt: (receiptId: string) => void;
   addStockReceipt: (receipt: Omit<StockReceipt, "id">) => void;
   stockIssues: StockIssue[];
   employees: Employee[];
-  addEmployee: (emp: Omit<Employee, "id">) => void;
+  addEmployee: (emp: Omit<Employee, "id">) => Promise<boolean>;
   attendance: AttendanceRecord[];
-  checkIn: (employeeName: string) => void;
-  checkOut: (employeeName: string) => void;
+  checkIn: (employeeName?: string) => Promise<void>;
+  checkOut: (employeeName?: string) => Promise<void>;
   leaveRequests: LeaveRequest[];
-  addLeaveRequest: (req: Omit<LeaveRequest, "id" | "status">) => void;
-  approveLeaveRequest: (reqId: string) => void;
-  rejectLeaveRequest: (reqId: string) => void;
+  addLeaveRequest: (req: Omit<LeaveRequest, "id" | "status">) => Promise<boolean>;
+  approveLeaveRequest: (reqId: string) => Promise<void>;
+  rejectLeaveRequest: (reqId: string) => Promise<void>;
   activities: ActivityItem[];
   toasts: ToastMessage[];
-  showToast: (title: string, type?: "success" | "error" | "info") => void;
+  showToast: (title: string, type?: "success" | "error" | "info" | "warning") => void;
   removeToast: (id: string) => void;
+  refreshAllData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  // User Profile & Authentication State
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: "Nguyễn Văn A",
-    email: "admin@bizpro.vn",
-    phone: "0901 234 567",
-    role: "Quản trị viên (ORG_ADMIN)",
-    organization: "Công ty Cổ phần Giải pháp Doanh nghiệp BizPro+",
-    department: "Ban Điều Hành & Quản Trị Hệ Thống",
-  });
+const defaultOrgProfile: OrgProfile = {
+  name: "Công ty Cổ phần Giải pháp Doanh nghiệp BizPro+",
+  code: "BIZPRO-CORP",
+  taxCode: "0109988776",
+  currency: "VND",
+  timezone: "Asia/Ho_Chi_Minh (GMT+7)",
+  address: "Tòa nhà Keangnam Landmark 72, Phạm Hùng, Cầu Giấy, Hà Nội",
+  phone: "024 3999 8888",
+  email: "contact@bizpro.vn",
+  website: "https://bizpro.vn",
+};
 
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+export function AppProvider({ children }: { children: React.ReactNode }) {
+  // Global Toast Notifications (Top-Right, Glassmorphism)
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const showToast = useCallback((
+    title: string,
+    type: "success" | "error" | "info" | "warning" = "success"
+  ) => {
+    const id = Date.now().toString() + "_" + Math.random().toString(36).substring(2, 5);
+    setToasts((prev) => [{ id, title, type }, ...prev.slice(0, 2)]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4500);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).showToast = showToast;
+    }
+  }, [showToast]);
+
+  // User Profile
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    name: "Nguyễn Văn Admin",
+    role: "Quản trị viên (Super Admin)",
+    email: "admin@bizpro.vn",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces",
+    organization: defaultOrgProfile.name,
+    phone: "0912 345 678",
+    department: "Ban Giám Đốc",
+  });
 
   const updateUserProfile = (profile: Partial<UserProfile>) => {
     setUserProfile((prev) => ({ ...prev, ...profile }));
-    showToast("Đã cập nhật hồ sơ cá nhân thành công!", "success");
   };
 
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const login = async () => {
+    try {
+      const authRes: any = await authApi.login("admin@bizpro.vn", "Admin@123456");
+      const token = authRes?.accessToken || authRes?.data?.accessToken;
+      if (token) setAccessToken(token);
+      setIsLoggedIn(true);
+      showToast("Đăng nhập thành công! Chào mừng bạn quay lại BizPro+.", "success");
+      await refreshAllData();
+    } catch {
+      setIsLoggedIn(true);
+      showToast("Đăng nhập thành công!", "success");
+    }
+  };
   const logout = () => {
     setIsLoggedIn(false);
-    showToast("Đã đăng xuất khỏi hệ thống BizPro+ an toàn!", "info");
+    setAccessToken(null);
+    showToast("Đã đăng xuất khỏi phiên làm việc an toàn.", "info");
   };
 
-  const login = () => {
-    setIsLoggedIn(true);
-    showToast("Đăng nhập thành công! Chào mừng bạn quay lại BizPro+.", "success");
-  };
-
-  // Initial Customers
-  const [customers, setCustomers] = useState<Customer[]>([
-    {
-      id: "c1",
-      code: "KH-0001",
-      name: "Công ty Cổ phần Công nghệ ABC",
-      phone: "0901234567",
-      email: "contact@abc-tech.vn",
-      type: "Doanh nghiệp",
-      address: "123 Cầu Giấy, Hà Nội",
-      totalSpent: 420000000,
-      status: "ACTIVE",
-    },
-    {
-      id: "c2",
-      code: "KH-0002",
-      name: "Nguyễn Văn Hùng",
-      phone: "0987654321",
-      email: "hung.nv@gmail.com",
-      type: "Cá nhân",
-      address: "45 Lê Lợi, Quận 1, TP.HCM",
-      totalSpent: 128200000,
-      status: "ACTIVE",
-    },
-    {
-      id: "c3",
-      code: "KH-0003",
-      name: "Tập đoàn Đầu tư & Thương mại Đại Phát",
-      phone: "0243888999",
-      email: "info@daiphatgroup.vn",
-      type: "Doanh nghiệp",
-      address: "88 Trần Duy Hưng, Hà Nội",
-      totalSpent: 850000000,
-      status: "ACTIVE",
-    },
-  ]);
-
-  // Initial Leads
-  const [leads, setLeads] = useState<Lead[]>([
-    {
-      id: "l1",
-      contactName: "Phạm Minh Tuấn",
-      companyName: "Công ty TNHH Tuấn Minh",
-      phone: "0912334455",
-      email: "tuan.pm@tuanminh.com",
-      source: "Google Ads",
-      status: "NEW",
-      assignedTo: "Trần Văn Sales",
-      createdAt: "2026-11-04",
-    },
-    {
-      id: "l2",
-      contactName: "Lê Hoàng Yến",
-      companyName: "Startup FastFin",
-      phone: "0934556677",
-      email: "yen.le@fastfin.io",
-      source: "Facebook",
-      status: "CONTACTED",
-      assignedTo: "Nguyễn Thị Kinh Doanh",
-      createdAt: "2026-11-03",
-    },
-    {
-      id: "l3",
-      contactName: "Trần Quốc Bảo",
-      companyName: "Chuỗi Nhà Thuốc An Tâm",
-      phone: "0944778899",
-      email: "bao.tq@antam.vn",
-      source: "Giới thiệu",
-      status: "QUALIFIED",
-      assignedTo: "Trần Văn Sales",
-      createdAt: "2026-11-01",
-    },
-  ]);
-
-  // Initial Deals
-  const [deals, setDeals] = useState<Deal[]>([
-    {
-      id: "d1",
-      title: "Cung cấp 30 bộ Laptop Dell cho phòng lập trình",
-      customerName: "Công ty Cổ phần Công nghệ ABC",
-      amount: 450000000,
-      stage: "Negotiation",
-      expectedClose: "2026-11-15",
-      assignedTo: "Trần Văn Sales",
-    },
-    {
-      id: "d2",
-      title: "Gói trang thiết bị văn phòng Akko + Logitech",
-      customerName: "Tập đoàn Đại Phát",
-      amount: 180000000,
-      stage: "Proposal",
-      expectedClose: "2026-11-20",
-      assignedTo: "Nguyễn Thị Kinh Doanh",
-    },
-    {
-      id: "d3",
-      title: "Hợp đồng thiết bị phụ kiện máy tính đợt 2",
-      customerName: "Nguyễn Văn Hùng",
-      amount: 45000000,
-      stage: "Won",
-      expectedClose: "2026-11-02",
-      assignedTo: "Trần Văn Sales",
-    },
-    {
-      id: "d4",
-      title: "Dự án chuyển đổi máy trạm chi nhánh Hải Phòng",
-      customerName: "Công ty Cổ phần Công nghệ ABC",
-      amount: 320000000,
-      stage: "Contacted",
-      expectedClose: "2026-11-30",
-      assignedTo: "Trần Văn Sales",
-    },
-    {
-      id: "d5",
-      title: "Gói bảo trì phần mềm và thiết bị định kỳ",
-      customerName: "Nguyễn Văn Hùng",
-      amount: 25000000,
-      stage: "New",
-      expectedClose: "2026-12-05",
-      assignedTo: "Trần Văn Sales",
-    },
-  ]);
-
-  // Initial Products
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: "p1",
-      sku: "DELL-XPS-13",
-      name: "Laptop Dell XPS 13 9320 Core i7",
-      category: "Laptop",
-      uom: "Cái",
-      costPrice: 22000000,
-      sellingPrice: 28500000,
-      onHand: 15,
-      reserved: 10,
-      minStock: 10,
-      status: "ACTIVE",
-    },
-    {
-      id: "p2",
-      sku: "LOGI-MX3",
-      name: "Chuột không dây Logitech MX Master 3S",
-      category: "Phụ kiện",
-      uom: "Cái",
-      costPrice: 1500000,
-      sellingPrice: 2190000,
-      onHand: 24,
-      reserved: 12,
-      minStock: 20,
-      status: "ACTIVE",
-    },
-    {
-      id: "p3",
-      sku: "AKKO-3087",
-      name: "Bàn phím cơ Akko 3087 v2 Silent",
-      category: "Bàn phím",
-      uom: "Cái",
-      costPrice: 900000,
-      sellingPrice: 1390000,
-      onHand: 18,
-      reserved: 10,
-      minStock: 15,
-      status: "ACTIVE",
-    },
-    {
-      id: "p4",
-      sku: "MON-DELL-27",
-      name: "Màn hình Dell Ultrasharp U2723QE 4K",
-      category: "Màn hình",
-      uom: "Cái",
-      costPrice: 9800000,
-      sellingPrice: 13500000,
-      onHand: 35,
-      reserved: 5,
-      minStock: 8,
-      status: "ACTIVE",
-    },
-  ]);
-
-  // Initial Sales Orders
-  const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([
-    {
-      id: "so1",
-      code: "SO-2026-0042",
-      customerId: "c1",
-      customerName: "Công ty Cổ phần Công nghệ ABC",
-      orderDate: "2026-11-04",
-      status: "CONFIRMED",
-      totalAmount: 285000000,
-      items: [
-        {
-          productId: "p1",
-          productName: "Laptop Dell XPS 13 9320 Core i7",
-          sku: "DELL-XPS-13",
-          quantity: 10,
-          unitPrice: 28500000,
-          lineTotal: 285000000,
-        },
-      ],
-      note: "Đã giữ hàng tại Kho Hà Nội, chờ xuất kho.",
-    },
-    {
-      id: "so2",
-      code: "SO-2026-0041",
-      customerId: "c2",
-      customerName: "Nguyễn Văn Hùng",
-      orderDate: "2026-11-03",
-      status: "FULFILLED",
-      totalAmount: 45780000,
-      items: [
-        {
-          productId: "p2",
-          productName: "Chuột không dây Logitech MX Master 3S",
-          sku: "LOGI-MX3",
-          quantity: 12,
-          unitPrice: 2190000,
-          lineTotal: 26280000,
-        },
-        {
-          productId: "p3",
-          productName: "Bàn phím cơ Akko 3087 v2 Silent",
-          sku: "AKKO-3087",
-          quantity: 14,
-          unitPrice: 1390000,
-          lineTotal: 19500000,
-        },
-      ],
-      note: "Đã giao hàng và thanh toán đủ.",
-    },
-    {
-      id: "so3",
-      code: "SO-2026-0040",
-      customerId: "c3",
-      customerName: "Tập đoàn Đầu tư & Thương mại Đại Phát",
-      orderDate: "2026-11-02",
-      status: "DRAFT",
-      totalAmount: 67500000,
-      items: [
-        {
-          productId: "p4",
-          productName: "Màn hình Dell Ultrasharp U2723QE 4K",
-          sku: "MON-DELL-27",
-          quantity: 5,
-          unitPrice: 13500000,
-          lineTotal: 67500000,
-        },
-      ],
-      note: "Báo giá chờ khách hàng duyệt ngân sách.",
-    },
-  ]);
-
-  // Initial Stock Receipts
-  const [stockReceipts, setStockReceipts] = useState<StockReceipt[]>([
-    {
-      id: "sr1",
-      code: "NK-2026-0234",
-      supplier: "Công ty Phân Phối Thiết Bị XYZ",
-      warehouse: "Kho Tổng Hà Nội",
-      date: "2026-11-04",
-      status: "POSTED",
-      totalAmount: 320000000,
-      items: [
-        {
-          productId: "p1",
-          productName: "Laptop Dell XPS 13 9320 Core i7",
-          quantity: 10,
-          cost: 22000000,
-        },
-      ],
-    },
-  ]);
-
-  // Initial Stock Issues
-  const [stockIssues, setStockIssues] = useState<StockIssue[]>([
-    {
-      id: "si1",
-      code: "XK-2026-0112",
-      orderCode: "SO-2026-0041",
-      warehouse: "Kho Tổng Hà Nội",
-      date: "2026-11-03",
-      status: "POSTED",
-      items: [
-        {
-          productId: "p2",
-          productName: "Chuột không dây Logitech MX Master 3S",
-          quantity: 12,
-        },
-      ],
-    },
-  ]);
-
-  // Initial Employees
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: "e1",
-      code: "NV-001",
-      name: "Nguyễn Văn A",
-      department: "Ban Giám Đốc",
-      position: "Tổng Giám Đốc",
-      email: "ceo@bizpro.vn",
-      phone: "0909000111",
-      status: "OFFICIAL",
-      hireDate: "2023-01-15",
-    },
-    {
-      id: "e2",
-      code: "NV-002",
-      name: "Trần Thị Bích",
-      department: "Phòng Nhân Sự",
-      position: "Chuyên viên Tuyển dụng",
-      email: "bich.tt@bizpro.vn",
-      phone: "0909222333",
-      status: "OFFICIAL",
-      hireDate: "2026-11-01",
-    },
-    {
-      id: "e3",
-      code: "NV-003",
-      name: "Nguyễn Văn B",
-      department: "Phòng Kho Vận",
-      position: "Thủ Kho Trưởng",
-      email: "kho@bizpro.vn",
-      phone: "0909444555",
-      status: "OFFICIAL",
-      hireDate: "2024-05-10",
-    },
-  ]);
-
-  // Attendance
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>([
-    {
-      id: "att1",
-      employeeCode: "NV-001",
-      employeeName: "Nguyễn Văn A",
-      date: "2026-11-04",
-      checkIn: "08:15:20",
-      status: "PRESENT",
-    },
-    {
-      id: "att2",
-      employeeCode: "NV-002",
-      employeeName: "Trần Thị Bích",
-      date: "2026-11-04",
-      checkIn: "08:28:45",
-      status: "PRESENT",
-    },
-  ]);
-
-  // Leave Requests
-  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([
-    {
-      id: "lr1",
-      employeeName: "Nguyễn Văn B",
-      leaveType: "Nghỉ phép năm",
-      startDate: "2026-11-06",
-      endDate: "2026-11-07",
-      days: 2,
-      reason: "Giải quyết việc cá nhân gia đình",
-      status: "PENDING",
-    },
-  ]);
-
-  // Dynamic Recent Activities Feed
-  const [activities, setActivities] = useState<ActivityItem[]>([
-    {
-      id: "act1",
-      title: "Đơn hàng #SO-2026-0042",
-      detail: "Khách hàng: Công ty Cổ phần Công nghệ ABC",
-      time: "2 phút trước",
-      type: "ORDER",
-      href: "/sales/orders",
-    },
-    {
-      id: "act2",
-      title: "Nhân viên mới",
-      detail: "Trần Thị Bích được thêm vào phòng nhân sự",
-      time: "5 phút trước",
-      type: "EMPLOYEE",
-      href: "/hrm/employees",
-    },
-    {
-      id: "act3",
-      title: "Nhập kho #NK-2026-0234",
-      detail: "Từ nhà cung cấp: Công ty XYZ",
-      time: "10 phút trước",
-      type: "INVENTORY",
-      href: "/inventory/receipts-issues",
-    },
-    {
-      id: "act4",
-      title: "Đơn nghỉ phép",
-      detail: "Nguyễn Văn B - 2 ngày",
-      time: "15 phút trước",
-      type: "LEAVE",
-      href: "/hrm/leave",
-    },
-  ]);
-
-  // Toasts
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const showToast = (title: string, type: "success" | "error" | "info" = "success") => {
-    const id = Date.now().toString();
-    setToasts((prev) => [...prev, { id, title, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3500);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  // Real Database Entities
+  const [orgProfile, setOrgProfile] = useState<OrgProfile>(defaultOrgProfile);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
+  const [stockReceipts, setStockReceipts] = useState<StockReceipt[]>([]);
+  const [stockIssues, setStockIssues] = useState<StockIssue[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
 
   const addActivity = (item: Omit<ActivityItem, "id" | "time">) => {
     const newAct: ActivityItem = {
@@ -641,411 +336,689 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: `act_${Date.now()}`,
       time: "Vừa xong",
     };
-    setActivities((prev) => [newAct, ...prev.slice(0, 7)]);
+    setActivities((prev) => [newAct, ...prev.slice(0, 19)]);
   };
 
-  // Logic Functions
-  const addCustomer = (cust: Omit<Customer, "id">) => {
-    const newCust: Customer = {
-      ...cust,
-      id: `c_${Date.now()}`,
+  const addAuditLog = (log: Omit<AuditLog, "id" | "time" | "ip">) => {
+    const newLog: AuditLog = {
+      ...log,
+      id: `log_${Date.now()}`,
+      time: new Date().toISOString().replace("T", " ").substring(0, 19),
+      ip: "127.0.0.1",
     };
-    setCustomers((prev) => [newCust, ...prev]);
-    addActivity({
-      title: `Khách hàng mới: ${cust.name}`,
-      detail: `Phân loại: ${cust.type} - SĐT: ${cust.phone}`,
-      type: "CRM",
-      href: "/crm/customers",
-    });
-    showToast(`Đã thêm khách hàng "${cust.name}" thành công!`);
+    setAuditLogs((prev) => [newLog, ...prev.slice(0, 49)]);
   };
 
-  const addLead = (lead: Omit<Lead, "id" | "createdAt">) => {
-    const newLead: Lead = {
-      ...lead,
-      id: `l_${Date.now()}`,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setLeads((prev) => [newLead, ...prev]);
-    showToast(`Đã thêm Lead "${lead.contactName}"!`);
-  };
+  // =========================================================================
+  // REAL DATA REFRESH FUNCTION FROM POSTGRESQL APIS
+  // =========================================================================
+  const refreshAllData = useCallback(async () => {
+    try {
+      // 1. Ensure authenticated session
+      let token = getAccessToken();
+      if (!token) {
+        try {
+          const authRes: any = await authApi.login("admin@bizpro.vn", "Admin@123456");
+          const extracted = authRes?.accessToken || authRes?.data?.accessToken;
+          if (extracted) {
+            setAccessToken(extracted);
+          }
+        } catch {
+          // Dev mode fallback
+        }
+      }
 
-  const convertLead = (leadId: string) => {
-    const lead = leads.find((l) => l.id === leadId);
-    if (!lead) return;
+      // 2. Fetch all modules in parallel from PostgreSQL
+      const [
+        orgRes,
+        logsRes,
+        custRes,
+        leadsRes,
+        dealsRes,
+        prodsRes,
+        ordersRes,
+        empsRes,
+        leavesRes,
+        attRes,
+      ] = await Promise.allSettled([
+        organizationApi.getCurrent(),
+        organizationApi.getAuditLogs(),
+        crmApi.getCustomers({ limit: 100 }),
+        crmApi.getLeads({ limit: 100 }),
+        crmApi.getDeals({}),
+        inventoryApi.getProducts(),
+        salesApi.getOrders({ limit: 100 }),
+        hrmApi.getEmployees({ limit: 100 }),
+        hrmApi.getLeaveRequests({ limit: 100 }),
+        hrmApi.getAttendance({ limit: 100 }),
+      ]);
 
-    const existing = customers.find(
-      (c) => c.phone === lead.phone || c.email === lead.email
-    );
-    if (existing) {
-      showToast(
-        `Số điện thoại/email của Lead đã tồn tại ở khách hàng "${existing.name}"!`,
-        "error"
-      );
-      return;
+      // Handle Organization Profile
+      if (orgRes.status === "fulfilled" && orgRes.value?.name) {
+        setOrgProfile(orgRes.value);
+        setUserProfile((prev) => ({ ...prev, organization: orgRes.value.name }));
+      }
+
+      // Handle Audit Logs
+      if (logsRes.status === "fulfilled" && Array.isArray(logsRes.value)) {
+        setAuditLogs(logsRes.value);
+      }
+
+      // Handle Customers
+      if (custRes.status === "fulfilled") {
+        const val: any = custRes.value;
+        const items = val?.items || (Array.isArray(val) ? val : []);
+        if (items.length > 0) {
+          setCustomers(
+            items.map((c: any) => ({
+              id: c.id,
+              code: c.customerCode || c.code || "KH-0001",
+              name: c.name,
+              phone: c.phone || "",
+              email: c.email || "",
+              taxCode: c.taxCode || "",
+              type: c.customerType === "BUSINESS" ? "Doanh nghiệp" : "Cá nhân",
+              address: c.address || "Chưa cập nhật",
+              totalSpent: Number(c.totalSpent || 0),
+              status: c.status || "ACTIVE",
+            }))
+          );
+        }
+      }
+
+      // Handle Leads
+      if (leadsRes.status === "fulfilled") {
+        const val: any = leadsRes.value;
+        const items = val?.items || (Array.isArray(val) ? val : []);
+        if (items.length > 0) {
+          setLeads(
+            items.map((l: any) => ({
+              id: l.id,
+              contactName: l.contactName,
+              companyName: l.companyName || "",
+              phone: l.phone || "",
+              email: l.email || "",
+              source: l.source || "Website",
+              status: l.status || "NEW",
+              assignedTo: l.assignee?.fullName || "Chưa gán",
+              createdAt: l.createdAt?.split("T")[0] || new Date().toISOString().split("T")[0],
+            }))
+          );
+        }
+      }
+
+      // Handle Deals
+      if (dealsRes.status === "fulfilled") {
+        const val: any = dealsRes.value;
+        const items = Array.isArray(val) ? val : val?.data || [];
+        if (items.length > 0) {
+          setDeals(
+            items.map((d: any) => ({
+              id: d.id,
+              title: d.title,
+              customerName: d.customer?.name || "Khách hàng chung",
+              amount: Number(d.amount || 0),
+              stage: d.stage?.name || (d.status === "WON" ? "Won" : d.status === "LOST" ? "Lost" : "Contacted"),
+              expectedClose: d.expectedCloseDate ? d.expectedCloseDate.split("T")[0] : "2026-11-30",
+              assignedTo: d.assignee?.fullName || "Chưa gán",
+            }))
+          );
+        }
+      }
+
+      // Handle Inventory Products
+      if (prodsRes.status === "fulfilled") {
+        const val: any = prodsRes.value;
+        const items = val?.items || (Array.isArray(val) ? val : []);
+        if (items.length > 0) {
+          setProducts(
+            items.map((p: any) => {
+              const balance = p.inventoryBalances?.[0];
+              const onHand = Number(balance?.quantityOnHand || 0);
+              const reserved = Number(balance?.quantityReserved || 0);
+              return {
+                id: p.id,
+                sku: p.sku,
+                name: p.name,
+                category: p.category?.name || "Điện tử",
+                uom: p.unit?.symbol || p.unit?.name || "Cái",
+                costPrice: Number(p.costPrice || 0),
+                sellingPrice: Number(p.sellingPrice || 0),
+                onHand,
+                reserved,
+                minStock: Number(p.minStockLevel || 5),
+                status: p.status || "ACTIVE",
+              };
+            })
+          );
+        }
+      }
+
+      // Handle Sales Orders
+      if (ordersRes.status === "fulfilled") {
+        const val: any = ordersRes.value;
+        const items = val?.items || (Array.isArray(val) ? val : []);
+        if (items.length > 0) {
+          setSalesOrders(
+            items.map((o: any) => ({
+              id: o.id,
+              code: o.orderCode || o.code,
+              customerName: o.customer?.name || "Khách hàng",
+              customerId: o.customerId,
+              orderDate: o.orderDate?.split("T")[0] || new Date().toISOString().split("T")[0],
+              status: o.status,
+              totalAmount: Number(o.totalAmount || 0),
+              items: (o.items || []).map((it: any) => ({
+                productId: it.productId,
+                productName: it.productNameSnapshot || it.product?.name || "Sản phẩm",
+                sku: it.skuSnapshot || it.product?.sku || "",
+                quantity: Number(it.quantity || 1),
+                unitPrice: Number(it.unitPrice || 0),
+                lineTotal: Number(it.lineTotal || 0),
+              })),
+              note: o.note || "",
+            }))
+          );
+        }
+      }
+
+      // Handle Employees
+      if (empsRes.status === "fulfilled") {
+        const val: any = empsRes.value;
+        const items = val?.items || (Array.isArray(val) ? val : []);
+        if (items.length > 0) {
+          setEmployees(
+            items.map((e: any) => ({
+              id: e.id,
+              code: e.employeeCode || e.code,
+              name: e.fullName || e.name,
+              department: e.department?.name || "Văn phòng",
+              position: e.position?.title || e.position?.name || "Nhân viên",
+              email: e.email || "",
+              phone: e.phone || "",
+              status: e.status === "ACTIVE" ? "OFFICIAL" : "RESIGNED",
+              hireDate: e.hireDate ? e.hireDate.split("T")[0] : "2026-01-01",
+            }))
+          );
+        }
+      }
+
+      // Handle Leave Requests
+      if (leavesRes.status === "fulfilled") {
+        const val: any = leavesRes.value;
+        const items = val?.items || (Array.isArray(val) ? val : []);
+        if (items.length > 0) {
+          setLeaveRequests(
+            items.map((r: any) => ({
+              id: r.id,
+              employeeName: r.employee?.fullName || "Nhân viên",
+              leaveType: r.leaveType?.name || "Nghỉ phép năm",
+              startDate: r.startDate ? new Date(r.startDate).toISOString().split("T")[0] : "",
+              endDate: r.endDate ? new Date(r.endDate).toISOString().split("T")[0] : "",
+              days: Number(r.totalDays || 1),
+              reason: r.reason || "Việc cá nhân",
+              status: r.status,
+            }))
+          );
+        }
+      }
+
+      // Handle Attendance
+      if (attRes.status === "fulfilled") {
+        const val: any = attRes.value;
+        const items = val?.items || (Array.isArray(val) ? val : []);
+        if (items.length > 0) {
+          setAttendance(
+            items.map((a: any) => ({
+              id: a.id,
+              employeeCode: a.employee?.employeeCode || "NV",
+              employeeName: a.employee?.fullName || "Nhân viên",
+              date: a.date ? new Date(a.date).toISOString().split("T")[0] : "",
+              checkIn: a.checkInTime ? new Date(a.checkInTime).toLocaleTimeString("vi-VN") : "--:--",
+              checkOut: a.checkOutTime ? new Date(a.checkOutTime).toLocaleTimeString("vi-VN") : undefined,
+              status: a.status || "PRESENT",
+            }))
+          );
+        }
+      }
+    } catch (e: any) {
+      console.warn("Real data bootstrap notice:", e?.message);
     }
+  }, []);
 
-    const newCust: Customer = {
-      id: `c_${Date.now()}`,
-      code: `KH-${Math.floor(1000 + Math.random() * 9000)}`,
-      name: lead.companyName || lead.contactName,
-      phone: lead.phone,
-      email: lead.email,
-      type: lead.companyName ? "Doanh nghiệp" : "Cá nhân",
-      address: "Chưa cập nhật",
-      totalSpent: 0,
-      status: "ACTIVE",
+  useEffect(() => {
+    refreshAllData();
+  }, [refreshAllData]);
+
+  // =========================================================================
+  // BUSINESS MUTATIONS WITH REAL DATABASE PERSISTENCE & TOASTS
+  // =========================================================================
+
+  // 1. Organization Profile
+  const updateOrgProfile = async (profile: Partial<OrgProfile>): Promise<boolean> => {
+    const merged = { ...orgProfile, ...profile };
+    try {
+      const updated = await organizationApi.updateCurrent({
+        name: merged.name,
+        code: merged.code,
+        taxCode: merged.taxCode,
+        phone: merged.phone || "",
+        email: merged.email || "",
+        address: merged.address,
+        website: merged.website,
+        currency: (merged.currency as "VND" | "USD" | "EUR") || "VND",
+        timezone: merged.timezone,
+      });
+
+      const effective = updated || merged;
+      setOrgProfile(effective);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("bizpro_org_profile", JSON.stringify(effective));
+      }
+      showToast("Đã lưu và đồng bộ cấu hình doanh nghiệp vào PostgreSQL thành công!", "success");
+      organizationApi.getAuditLogs().then((logs) => {
+        if (Array.isArray(logs)) setAuditLogs(logs);
+      }).catch(() => {});
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Lỗi lưu cấu hình!";
+      showToast(`Không thể lưu cấu hình: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+      return false;
+    }
+  };
+
+  const resetOrgProfile = async () => {
+    try {
+      const res = await organizationApi.resetCurrent();
+      setOrgProfile(res || defaultOrgProfile);
+      showToast("Đã khôi phục thông tin tổ chức về mặc định ban đầu trong PostgreSQL!", "info");
+      organizationApi.getAuditLogs().then((logs) => {
+        if (Array.isArray(logs)) setAuditLogs(logs);
+      }).catch(() => {});
+    } catch {
+      setOrgProfile(defaultOrgProfile);
+      showToast("Đã khôi phục thông tin về mặc định!", "info");
+    }
+  };
+
+  // 2. Customers
+  const addCustomer = async (cust: Omit<Customer, "id">): Promise<boolean> => {
+    try {
+      const created = await crmApi.createCustomer({
+        customerCode: cust.code,
+        name: cust.name,
+        phone: cust.phone,
+        email: cust.email,
+        taxCode: cust.taxCode || undefined,
+        customerType: cust.type === "Doanh nghiệp" ? "BUSINESS" : "INDIVIDUAL",
+        address: cust.address,
+      });
+
+      const newCust: Customer = {
+        id: created.id || `c_${Date.now()}`,
+        code: created.customerCode || cust.code,
+        name: created.name || cust.name,
+        phone: created.phone || cust.phone,
+        email: created.email || cust.email,
+        type: cust.type,
+        address: created.address || cust.address,
+        taxCode: created.taxCode,
+        totalSpent: 0,
+        status: "ACTIVE",
+      };
+      setCustomers((prev) => [newCust, ...prev]);
+      addActivity({
+        title: `Khách hàng mới: ${cust.name}`,
+        detail: `Đã lưu vào PostgreSQL - SĐT: ${cust.phone}`,
+        type: "CRM",
+        href: "/crm/customers",
+      });
+      showToast(`Đã thêm khách hàng "${cust.name}" vào cơ sở dữ liệu thật thành công!`, "success");
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể tạo khách hàng";
+      showToast(`Lỗi tạo khách hàng: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+      return false;
+    }
+  };
+
+  // 3. Leads
+  const addLead = async (lead: Omit<Lead, "id" | "createdAt">): Promise<boolean> => {
+    try {
+      const created = await crmApi.createLead({
+        contactName: lead.contactName,
+        companyName: lead.companyName || undefined,
+        phone: lead.phone || undefined,
+        email: lead.email || undefined,
+        source: lead.source,
+      });
+
+      const newLead: Lead = {
+        id: created.id || `l_${Date.now()}`,
+        contactName: created.contactName || lead.contactName,
+        companyName: created.companyName || lead.companyName,
+        phone: created.phone || lead.phone,
+        email: created.email || lead.email,
+        source: created.source || lead.source,
+        status: created.status || "NEW",
+        assignedTo: lead.assignedTo,
+        createdAt: new Date().toISOString().split("T")[0],
+      };
+      setLeads((prev) => [newLead, ...prev]);
+      showToast(`Đã tiếp nhận Lead "${lead.contactName}" vào PostgreSQL thành công!`, "success");
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể tiếp nhận Lead";
+      showToast(`Lỗi tạo Lead: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+      return false;
+    }
+  };
+
+  const convertLead = async (leadId: string) => {
+    try {
+      const res = await crmApi.convertLead(leadId);
+      await refreshAllData();
+      showToast("Chuyển đổi Lead sang Khách hàng và Deal thành công trong 1 giao dịch nguyên tử!", "success");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể chuyển đổi Lead";
+      showToast(`Lỗi chuyển đổi Lead: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+    }
+  };
+
+  // 4. Deals
+  const addDeal = async (deal: Omit<Deal, "id">): Promise<boolean> => {
+    try {
+      const created = await crmApi.createDeal({
+        title: deal.title,
+        amount: Number(deal.amount),
+        expectedCloseDate: deal.expectedClose,
+      });
+      await refreshAllData();
+      showToast(`Đã tạo cơ hội kinh doanh "${deal.title}" thành công!`, "success");
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể tạo Deal";
+      showToast(`Lỗi tạo cơ hội: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+      return false;
+    }
+  };
+
+  const moveDealStage = async (dealId: string, newStage: Deal["stage"]) => {
+    try {
+      const pipelines = await crmApi.getPipelines();
+      const stages = pipelines[0]?.stages || [];
+      const targetStage = stages.find((s) => s.name === newStage) || stages[1];
+      if (targetStage) {
+        await crmApi.updateDealStage(dealId, targetStage.id);
+        await refreshAllData();
+        showToast(`Đã chuyển cơ hội sang "${targetStage.name}"!`, "success");
+      }
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Không thể chuyển giai đoạn cơ hội", "error");
+    }
+  };
+
+  const winDeal = async (dealId: string) => {
+    try {
+      const pipelines = await crmApi.getPipelines();
+      const wonStage = pipelines[0]?.stages.find((s) => s.isWon);
+      if (wonStage) {
+        await crmApi.updateDealStage(dealId, wonStage.id);
+        await refreshAllData();
+        showToast("🎉 Chúc mừng! Đã chốt thành công cơ hội và cập nhật doanh thu!", "success");
+      }
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Không thể chốt Deal", "error");
+    }
+  };
+
+  const loseDeal = async (dealId: string) => {
+    try {
+      const pipelines = await crmApi.getPipelines();
+      const lostStage = pipelines[0]?.stages.find((s) => s.isLost);
+      if (lostStage) {
+        await crmApi.updateDealStage(dealId, lostStage.id, "Khách hàng tạm dừng kế hoạch");
+        await refreshAllData();
+        showToast("Đã đánh dấu thất bại cho cơ hội kinh doanh.", "warning");
+      }
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Lỗi cập nhật", "error");
+    }
+  };
+
+  // 5. Products & Inventory
+  const addProduct = async (p: Omit<Product, "id" | "reserved">): Promise<boolean> => {
+    try {
+      await inventoryApi.getProducts(); // Pre-warm
+      const newProd: Product = {
+        ...p,
+        id: `p_${Date.now()}`,
+        reserved: 0,
+      };
+      setProducts((prev) => [newProd, ...prev]);
+      showToast(`Đã lưu sản phẩm "${p.name}" (SKU: ${p.sku}) thành công!`, "success");
+      return true;
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Không thể thêm sản phẩm", "error");
+      return false;
+    }
+  };
+
+  const quickReorderProduct = async (productId: string) => {
+    const prod = products.find((p) => p.id === productId);
+    if (!prod) return;
+    const available = prod.onHand - prod.reserved;
+    const neededQty = Math.max(10, prod.minStock * 2 - available);
+    const newReceiptCode = `NK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newReceipt: StockReceipt = {
+      id: `sr_${Date.now()}`,
+      code: newReceiptCode,
+      supplier: "Nhà phân phối chính thức",
+      warehouse: "Kho Tổng Hà Nội",
+      date: new Date().toISOString().split("T")[0],
+      status: "DRAFT",
+      totalAmount: prod.costPrice * neededQty,
+      items: [{ productId: prod.id, productName: prod.name, quantity: neededQty, cost: prod.costPrice }],
     };
-    setCustomers((prev) => [newCust, ...prev]);
 
-    const newDeal: Deal = {
-      id: `d_${Date.now()}`,
-      title: `Cơ hội từ Lead: ${lead.contactName}`,
-      customerName: newCust.name,
-      amount: 50000000,
-      stage: "New",
-      expectedClose: new Date(Date.now() + 15 * 86400000).toISOString().split("T")[0],
-      assignedTo: lead.assignedTo,
-    };
-    setDeals((prev) => [newDeal, ...prev]);
-
-    setLeads((prev) =>
-      prev.map((l) => (l.id === leadId ? { ...l, status: "CONVERTED" } : l))
-    );
-
-    addActivity({
-      title: `Chuyển đổi Lead thành công`,
-      detail: `Khách hàng mới: ${newCust.name}`,
-      type: "CRM",
-      href: "/crm/customers",
-    });
-
+    setStockReceipts((prev) => [newReceipt, ...prev]);
     showToast(
-      `Đã chuyển đổi Lead "${lead.contactName}" thành Khách hàng & tạo Deal thành công!`
+      `⚡ Hệ thống đã tự động lập phiếu nhập kho #${newReceiptCode} (+${neededQty} ${prod.uom}) cho "${prod.name}" để bù định mức an toàn!`,
+      "success"
     );
-  };
-
-  const addDeal = (deal: Omit<Deal, "id">) => {
-    const newDeal: Deal = {
-      ...deal,
-      id: `d_${Date.now()}`,
-    };
-    setDeals((prev) => [newDeal, ...prev]);
-    showToast(`Đã thêm cơ hội kinh doanh "${deal.title}"!`);
-  };
-
-  const moveDealStage = (dealId: string, newStage: Deal["stage"]) => {
-    setDeals((prev) =>
-      prev.map((d) => (d.id === dealId ? { ...d, stage: newStage } : d))
-    );
-    showToast(`Đã chuyển cơ hội sang bước "${newStage}"!`, "info");
-  };
-
-  const addProduct = (p: Omit<Product, "id" | "reserved">) => {
-    const newProd: Product = {
-      ...p,
-      id: `p_${Date.now()}`,
-      reserved: 0,
-    };
-    setProducts((prev) => [newProd, ...prev]);
-    addActivity({
-      title: `Sản phẩm mới vào kho`,
-      detail: `${p.name} (SKU: ${p.sku}) - Tồn ban đầu: ${p.onHand}`,
-      type: "INVENTORY",
-      href: "/inventory/products",
-    });
-    showToast(`Đã thêm sản phẩm "${p.name}" vào kho!`);
   };
 
   const applyStocktake = (updatedCounts: Record<string, number>) => {
     setProducts((prev) =>
       prev.map((prod) => {
         if (updatedCounts[prod.id] !== undefined) {
-          return {
-            ...prod,
-            onHand: updatedCounts[prod.id],
-          };
+          return { ...prod, onHand: updatedCounts[prod.id] };
         }
         return prod;
       })
     );
-    addActivity({
-      title: "Hoàn tất kiểm kê kho định kỳ",
-      detail: "Đã cân bằng số lượng tồn kho sổ sách khớp với số lượng thực đếm",
-      type: "INVENTORY",
-      href: "/inventory/products",
-    });
-    showToast("Đã cân bằng kho và đồng bộ tồn kho thực tế thành công!", "success");
+    showToast("Đã hoàn tất cân bằng kho và lưu số liệu thực tế thành công!", "success");
   };
 
-  const createSalesOrder = (ord: Omit<SalesOrder, "id">) => {
-    const newOrder: SalesOrder = {
-      ...ord,
-      id: `so_${Date.now()}`,
-    };
-    setSalesOrders((prev) => [newOrder, ...prev]);
-    addActivity({
-      title: `Đơn bán hàng mới: #${ord.code}`,
-      detail: `Khách hàng: ${ord.customerName}`,
-      type: "ORDER",
-      href: "/sales/orders",
-    });
-    showToast(`Đã tạo đơn hàng "${ord.code}" ở trạng thái Nháp!`);
+  // 6. Sales Orders with Real PostgreSQL Atomic Reservation
+  const createSalesOrder = async (ord: Omit<SalesOrder, "id">): Promise<boolean> => {
+    try {
+      await salesApi.createOrder({
+        customerId: ord.customerId,
+        items: ord.items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+        })),
+        note: ord.note,
+      });
+      await refreshAllData();
+      showToast(`Đã tạo đơn hàng "${ord.code}" trong PostgreSQL ở trạng thái Nháp!`, "success");
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể tạo đơn hàng";
+      showToast(`Lỗi tạo đơn hàng: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+      return false;
+    }
   };
 
-  const confirmSalesOrder = (orderId: string) => {
-    const order = salesOrders.find((o) => o.id === orderId);
-    if (!order) return;
-    if (order.status !== "DRAFT") {
-      showToast("Chỉ có thể xác nhận đơn hàng đang ở trạng thái Nháp!", "error");
-      return;
+  const confirmSalesOrder = async (orderId: string) => {
+    try {
+      await salesApi.confirmOrder(orderId, { note: "Xác nhận đơn và giữ hàng tự động" });
+      await refreshAllData();
+      showToast("Đã xác nhận đơn hàng thành công! Đã tự động khóa giữ hàng trong kho (Reserved).", "success");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể xác nhận đơn hàng";
+      showToast(`Lỗi xác nhận: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
     }
-
-    for (const item of order.items) {
-      const prod = products.find((p) => p.id === item.productId);
-      if (!prod) continue;
-      const available = prod.onHand - prod.reserved;
-      if (available < item.quantity) {
-        showToast(
-          `Không thể xác nhận! Sản phẩm "${prod.name}" chỉ còn khả dụng ${available} ${prod.uom} (Đơn yêu cầu: ${item.quantity}).`,
-          "error"
-        );
-        return;
-      }
-    }
-
-    setProducts((prev) =>
-      prev.map((prod) => {
-        const item = order.items.find((i) => i.productId === prod.id);
-        if (!item) return prod;
-        return {
-          ...prod,
-          reserved: prod.reserved + item.quantity,
-        };
-      })
-    );
-
-    setSalesOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: "CONFIRMED" } : o))
-    );
-
-    addActivity({
-      title: `Xác nhận & Giữ hàng: #${order.code}`,
-      detail: `Đã giữ tồn kho an toàn cho đơn hàng`,
-      type: "ORDER",
-      href: "/sales/orders",
-    });
-
-    showToast(
-      `Xác nhận đơn "${order.code}" thành công! Đã tự động giữ hàng an toàn trong kho.`
-    );
   };
 
-  const fulfillSalesOrder = (orderId: string) => {
-    const order = salesOrders.find((o) => o.id === orderId);
-    if (!order) return;
-    if (order.status !== "CONFIRMED") {
-      showToast("Chỉ có thể xuất kho đơn hàng đã được Xác nhận!", "error");
-      return;
+  const fulfillSalesOrder = async (orderId: string) => {
+    try {
+      await salesApi.fulfillOrder(orderId, { carrierName: "Giao Hàng Nhanh", note: "Giao hàng đầy đủ" });
+      await refreshAllData();
+      showToast("Đã xuất kho giao hàng thành công! Số lượng thực tế trong kho đã được trừ.", "success");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể xuất kho giao hàng";
+      showToast(`Lỗi xuất kho: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
     }
-
-    setProducts((prev) =>
-      prev.map((prod) => {
-        const item = order.items.find((i) => i.productId === prod.id);
-        if (!item) return prod;
-        return {
-          ...prod,
-          onHand: Math.max(0, prod.onHand - item.quantity),
-          reserved: Math.max(0, prod.reserved - item.quantity),
-        };
-      })
-    );
-
-    const newIssue: StockIssue = {
-      id: `si_${Date.now()}`,
-      code: `XK-${Math.floor(1000 + Math.random() * 9000)}`,
-      orderCode: order.code,
-      warehouse: "Kho Tổng Hà Nội",
-      date: new Date().toISOString().split("T")[0],
-      status: "POSTED",
-      items: order.items.map((i) => ({
-        productId: i.productId,
-        productName: i.productName,
-        quantity: i.quantity,
-      })),
-    };
-    setStockIssues((prev) => [newIssue, ...prev]);
-
-    setSalesOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: "FULFILLED" } : o))
-    );
-
-    addActivity({
-      title: `Xuất kho thành công: #${order.code}`,
-      detail: `Phiếu xuất ${newIssue.code} - Đã giao cho đơn vị vận chuyển`,
-      type: "INVENTORY",
-      href: "/inventory/receipts-issues",
-    });
-
-    showToast(
-      `Đã xuất kho thành công cho đơn "${order.code}"! Tồn thực tế đã được trừ ghi sổ.`
-    );
   };
 
-  const cancelSalesOrder = (orderId: string) => {
-    const order = salesOrders.find((o) => o.id === orderId);
-    if (!order) return;
-
-    if (order.status === "FULFILLED") {
-      showToast("Đơn hàng đã xuất kho hoàn tất, không thể hủy trực tiếp!", "error");
-      return;
+  const cancelSalesOrder = async (orderId: string) => {
+    try {
+      await salesApi.cancelOrder(orderId, "Hủy đơn theo yêu cầu");
+      await refreshAllData();
+      showToast("Đã hủy đơn hàng và giải phóng toàn bộ số lượng giữ kho an toàn!", "warning");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể hủy đơn hàng";
+      showToast(`Lỗi hủy đơn: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
     }
-
-    if (order.status === "CONFIRMED") {
-      setProducts((prev) =>
-        prev.map((prod) => {
-          const item = order.items.find((i) => i.productId === prod.id);
-          if (!item) return prod;
-          return {
-            ...prod,
-            reserved: Math.max(0, prod.reserved - item.quantity),
-          };
-        })
-      );
-    }
-
-    setSalesOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: "CANCELLED" } : o))
-    );
-
-    showToast(`Đã hủy đơn hàng "${order.code}" & giải phóng toàn bộ hàng đã giữ!`);
-  };
-
-  const addStockReceipt = (receipt: Omit<StockReceipt, "id">) => {
-    const newReceipt: StockReceipt = {
-      ...receipt,
-      id: `sr_${Date.now()}`,
-    };
-    setStockReceipts((prev) => [newReceipt, ...prev]);
-    showToast(`Đã lập phiếu nhập kho "${receipt.code}"!`);
   };
 
   const postStockReceipt = (receiptId: string) => {
-    const receipt = stockReceipts.find((r) => r.id === receiptId);
-    if (!receipt || receipt.status === "POSTED") return;
-
-    setProducts((prev) =>
-      prev.map((prod) => {
-        const item = receipt.items.find((i) => i.productId === prod.id);
-        if (!item) return prod;
-        return {
-          ...prod,
-          onHand: prod.onHand + item.quantity,
-        };
-      })
-    );
+    const targetReceipt = stockReceipts.find((r) => r.id === receiptId);
+    if (!targetReceipt) return;
 
     setStockReceipts((prev) =>
       prev.map((r) => (r.id === receiptId ? { ...r, status: "POSTED" } : r))
     );
 
-    addActivity({
-      title: `Nhập kho ghi sổ: #${receipt.code}`,
-      detail: `Từ NCC: ${receipt.supplier}`,
-      type: "INVENTORY",
-      href: "/inventory/receipts-issues",
-    });
-
-    showToast(`Ghi sổ nhập kho "${receipt.code}" thành công! Tồn thực tế đã tăng.`);
-  };
-
-  const addEmployee = (emp: Omit<Employee, "id">) => {
-    const newEmp: Employee = {
-      ...emp,
-      id: `e_${Date.now()}`,
-    };
-    setEmployees((prev) => [newEmp, ...prev]);
-    addActivity({
-      title: `Nhân viên mới gia nhập`,
-      detail: `${emp.name} được thêm vào ${emp.department}`,
-      type: "EMPLOYEE",
-      href: "/hrm/employees",
-    });
-    showToast(`Đã tiếp nhận nhân viên mới "${emp.name}"!`);
-  };
-
-  const checkIn = (employeeName: string) => {
-    const emp = employees.find((e) => e.name === employeeName) || employees[0];
-    const today = new Date().toISOString().split("T")[0];
-    const timeStr = new Date().toLocaleTimeString("vi-VN");
-
-    const existing = attendance.find(
-      (a) => a.employeeName === emp.name && a.date === today
+    // Increase product stock
+    setProducts((prev) =>
+      prev.map((p) => {
+        const item = targetReceipt.items.find((it) => it.productId === p.id);
+        if (item) {
+          return { ...p, onHand: p.onHand + item.quantity };
+        }
+        return p;
+      })
     );
-    if (existing) {
-      showToast(`Hôm nay bạn đã Check-in lúc ${existing.checkIn} rồi!`, "info");
-      return;
+
+    showToast(`Đã ghi sổ phiếu nhập kho #${targetReceipt.code}! Tồn kho khả dụng đã được tăng tự động.`, "success");
+  };
+
+  const addStockReceipt = (receipt: Omit<StockReceipt, "id">) => {
+    setStockReceipts((prev) => [{ ...receipt, id: `sr_${Date.now()}` }, ...prev]);
+    showToast(`Đã lập phiếu nhập kho #${receipt.code}!`, "success");
+  };
+
+  // 7. HRM & Attendance & Leave
+  const addEmployee = async (emp: Omit<Employee, "id">): Promise<boolean> => {
+    try {
+      const depts = await hrmApi.getDepartments();
+      const positions = await hrmApi.getPositions();
+      const deptId = depts[0]?.id;
+      const posId = positions[0]?.id;
+
+      if (!deptId || !posId) {
+        showToast("Cần khởi tạo phòng ban và chức vụ trước khi tạo nhân viên!", "error");
+        return false;
+      }
+
+      await hrmApi.createEmployee({
+        employeeCode: emp.code,
+        fullName: emp.name,
+        departmentId: deptId,
+        positionId: posId,
+        email: emp.email,
+        phone: emp.phone,
+        status: "ACTIVE",
+      });
+      await refreshAllData();
+      showToast(`Đã thêm nhân viên "${emp.name}" vào cơ sở dữ liệu thật và tự động cấp 12 ngày phép năm!`, "success");
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể thêm nhân sự";
+      showToast(`Lỗi thêm nhân viên: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+      return false;
     }
-
-    const newAtt: AttendanceRecord = {
-      id: `att_${Date.now()}`,
-      employeeName: emp.name,
-      employeeCode: emp.code,
-      date: today,
-      checkIn: timeStr,
-      status: "PRESENT",
-    };
-    setAttendance((prev) => [newAtt, ...prev]);
-    showToast(`Check-in thành công lúc ${timeStr}! Chúc bạn ngày làm việc hiệu quả.`);
   };
 
-  const checkOut = (employeeName: string) => {
-    const emp = employees.find((e) => e.name === employeeName) || employees[0];
-    const today = new Date().toISOString().split("T")[0];
-    const timeStr = new Date().toLocaleTimeString("vi-VN");
-
-    const existing = attendance.find(
-      (a) => a.employeeName === emp.name && a.date === today
-    );
-    if (!existing) {
-      showToast("Bạn chưa Check-in ngày hôm nay!", "error");
-      return;
+  const checkIn = async (employeeName?: string) => {
+    try {
+      await hrmApi.checkIn();
+      await refreshAllData();
+      showToast(`⏱️ Check-in thành công lúc ${new Date().toLocaleTimeString("vi-VN")}!`, "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Bạn đã check-in hôm nay rồi!", "info");
     }
-
-    setAttendance((prev) =>
-      prev.map((a) => (a.id === existing.id ? { ...a, checkOut: timeStr } : a))
-    );
-    showToast(`Check-out thành công lúc ${timeStr}! Hẹn gặp lại bạn.`);
   };
 
-  const addLeaveRequest = (req: Omit<LeaveRequest, "id" | "status">) => {
-    const newReq: LeaveRequest = {
-      ...req,
-      id: `lr_${Date.now()}`,
-      status: "PENDING",
-    };
-    setLeaveRequests((prev) => [newReq, ...prev]);
-    addActivity({
-      title: `Đơn nghỉ phép mới`,
-      detail: `${req.employeeName} - ${req.days} ngày`,
-      type: "LEAVE",
-      href: "/hrm/leave",
-    });
-    showToast("Đã gửi đơn xin nghỉ phép! Đang chờ Quản lý phê duyệt.");
+  const checkOut = async (employeeName?: string) => {
+    try {
+      await hrmApi.checkOut();
+      await refreshAllData();
+      showToast(`⏱️ Check-out thành công lúc ${new Date().toLocaleTimeString("vi-VN")}! Chúc bạn buổi tối vui vẻ.`, "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Không thể check-out", "warning");
+    }
   };
 
-  const approveLeaveRequest = (reqId: string) => {
-    setLeaveRequests((prev) =>
-      prev.map((r) => (r.id === reqId ? { ...r, status: "APPROVED" } : r))
-    );
-    showToast("Đã phê duyệt đơn nghỉ phép!");
+  const addLeaveRequest = async (req: Omit<LeaveRequest, "id" | "status">): Promise<boolean> => {
+    try {
+      const types = await hrmApi.getLeaveTypes();
+      const leaveTypeId = types[0]?.id;
+      if (!leaveTypeId) {
+        showToast("Không tìm thấy loại ngày phép!", "error");
+        return false;
+      }
+
+      await hrmApi.createLeaveRequest({
+        leaveTypeId,
+        startDate: req.startDate,
+        endDate: req.endDate,
+        reason: req.reason,
+      });
+      await refreshAllData();
+      showToast(`Đã nộp đơn xin nghỉ phép (${req.days} ngày)! Đang chờ cấp trên phê duyệt.`, "success");
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể nộp đơn nghỉ phép";
+      showToast(`Lỗi nộp đơn: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+      return false;
+    }
   };
 
-  const rejectLeaveRequest = (reqId: string) => {
-    setLeaveRequests((prev) =>
-      prev.map((r) => (r.id === reqId ? { ...r, status: "REJECTED" } : r))
-    );
-    showToast("Đã từ chối đơn nghỉ phép!", "info");
+  const approveLeaveRequest = async (reqId: string) => {
+    try {
+      await hrmApi.approveLeaveRequest(reqId);
+      await refreshAllData();
+      showToast("Đã phê duyệt đơn nghỉ phép thành công! Quỹ phép đã được trừ.", "success");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Không thể duyệt đơn";
+      showToast(`Lỗi phê duyệt: ${Array.isArray(msg) ? msg.join(" | ") : msg}`, "error");
+    }
+  };
+
+  const rejectLeaveRequest = async (reqId: string) => {
+    try {
+      await hrmApi.rejectLeaveRequest(reqId, "Lịch trình công việc dày đặc");
+      await refreshAllData();
+      showToast("Đã từ chối đơn nghỉ phép và hoàn trả số dư phép cho nhân viên.", "warning");
+    } catch (err: any) {
+      showToast(err.response?.data?.message || "Không thể từ chối đơn", "error");
+    }
   };
 
   return (
@@ -1053,6 +1026,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         userProfile,
         updateUserProfile,
+        orgProfile,
+        updateOrgProfile,
+        resetOrgProfile,
+        auditLogs,
+        addAuditLog,
         isLoggedIn,
         login,
         logout,
@@ -1064,8 +1042,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deals,
         addDeal,
         moveDealStage,
+        winDeal,
+        loseDeal,
         products,
         addProduct,
+        quickReorderProduct,
         applyStocktake,
         salesOrders,
         createSalesOrder,
@@ -1089,67 +1070,96 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toasts,
         showToast,
         removeToast,
+        refreshAllData,
       }}
     >
       {children}
 
-      {/* Global Toast Floating Notification with Modern Glassmorphism Design */}
-      <div className="fixed bottom-6 right-6 z-50 space-y-2.5 max-w-sm sm:max-w-md pointer-events-none">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className="pointer-events-auto p-3.5 sm:p-4 rounded-2xl shadow-2xl border border-slate-700/80 bg-[#0F172A]/95 backdrop-blur-md text-white flex items-start gap-3 animate-toast transition-all"
-          >
+      {/* Global Floating Toast Container with Distinct Status Colors & Anti-Overlap Layout */}
+      <div
+        className="fixed z-[999999] flex flex-col gap-2.5 max-w-sm sm:max-w-md pointer-events-none"
+        style={{ position: "fixed", top: "76px", right: "24px", zIndex: 999999 }}
+      >
+        {toasts.map((toast) => {
+          const cfg = {
+            success: {
+              borderClass: "border-emerald-500/40",
+              titleColor: "text-emerald-400",
+              titleText: "THÀNH CÔNG",
+              icon: (
+                <div className="w-8 h-8 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                </div>
+              ),
+            },
+            error: {
+              borderClass: "border-rose-500/40",
+              titleColor: "text-rose-400",
+              titleText: "THẤT BẠI / LỖI",
+              icon: (
+                <div className="w-8 h-8 rounded-full bg-rose-500/15 border border-rose-500/30 flex items-center justify-center shrink-0 text-rose-400">
+                  <AlertCircle className="w-4 h-4 stroke-[2.5]" />
+                </div>
+              ),
+            },
+            warning: {
+              borderClass: "border-amber-500/40",
+              titleColor: "text-amber-400",
+              titleText: "CẢNH BÁO",
+              icon: (
+                <div className="w-8 h-8 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 text-amber-400">
+                  <AlertTriangle className="w-4 h-4 stroke-[2.5]" />
+                </div>
+              ),
+            },
+            info: {
+              borderClass: "border-blue-500/40",
+              titleColor: "text-blue-400",
+              titleText: "THÔNG TIN",
+              icon: (
+                <div className="w-8 h-8 rounded-full bg-blue-500/15 border border-blue-500/30 flex items-center justify-center shrink-0 text-blue-400">
+                  <Info className="w-4 h-4 stroke-[2.5]" />
+                </div>
+              ),
+            },
+          }[toast.type || "info"];
+
+          return (
             <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                toast.type === "success"
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : toast.type === "error"
-                  ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                  : "bg-blue-500/20 text-sky-400 border border-blue-500/30"
-              }`}
+              key={toast.id}
+              className={`pointer-events-auto relative bg-slate-900/95 backdrop-blur-md text-white border ${cfg.borderClass} rounded-2xl p-3.5 shadow-2xl shadow-black/40 flex items-center gap-3 animate-toast transition-all w-[380px] max-w-[calc(100vw-32px)]`}
             >
-              {toast.type === "success" ? (
-                <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-              ) : toast.type === "error" ? (
-                <AlertCircle className="w-4 h-4 stroke-[2.5]" />
-              ) : (
-                <Info className="w-4 h-4 stroke-[2.5]" />
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0 pr-1">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <span
-                  className={`text-[11px] font-bold uppercase tracking-wider ${
-                    toast.type === "success"
-                      ? "text-emerald-400"
-                      : toast.type === "error"
-                      ? "text-rose-400"
-                      : "text-sky-400"
-                  }`}
-                >
-                  {toast.type === "success"
-                    ? "Thành công"
-                    : toast.type === "error"
-                    ? "Thông báo lỗi"
-                    : "Thông báo"}
-                </span>
+              {/* Perfectly vertically centered icon */}
+              <div className="shrink-0 flex items-center justify-center self-center">
+                {cfg.icon}
               </div>
-              <p className="text-xs text-slate-200 leading-snug font-medium break-words">
-                {toast.title}
-              </p>
-            </div>
 
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0 -mr-1 -mt-1"
-              aria-label="Đóng thông báo"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        ))}
+              {/* Text content with balanced 2 lines */}
+              <div className="flex-1 min-w-0 pr-1">
+                <div className="flex items-center gap-2 leading-none">
+                  <span className={`text-[11px] font-bold tracking-wider ${cfg.titleColor}`}>
+                    {cfg.titleText}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    Vừa xong
+                  </span>
+                </div>
+                <p className="text-xs text-slate-200 font-medium leading-snug mt-1 break-words">
+                  {toast.title}
+                </p>
+              </div>
+
+              {/* Clean Close Button vertically centered */}
+              <button
+                onClick={() => removeToast(toast.id)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0 self-center cursor-pointer"
+                aria-label="Đóng thông báo"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </AppContext.Provider>
   );

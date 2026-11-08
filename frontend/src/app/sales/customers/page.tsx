@@ -18,7 +18,7 @@ export default function SalesCustomersPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -72,6 +72,9 @@ export default function SalesCustomersPage() {
             <tbody className="divide-y divide-slate-100 text-xs">
               {filtered.map((cust) => {
                 const custOrders = salesOrders.filter((o) => o.customerId === cust.id);
+                const realSpent = custOrders
+                  .filter((o) => o.status === "CONFIRMED" || o.status === "FULFILLED")
+                  .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
                 return (
                   <tr key={cust.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4 font-bold text-blue-600">{cust.code}</td>
@@ -83,11 +86,11 @@ export default function SalesCustomersPage() {
                       </span>
                     </td>
                     <td className="py-3.5 px-4 font-bold text-slate-900">
-                      {formatVND(cust.totalSpent || 285000000)}
+                      {formatVND(realSpent || cust.totalSpent || 0)}
                     </td>
                     <td className="py-3.5 px-4 text-slate-600">
                       <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                        <CreditCard className="w-3 h-3" /> 500.000.000đ
+                        <CreditCard className="w-3 h-3" /> Hạn mức: {formatVND(500000000)}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">

@@ -1,28 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import { formatVND } from "@/lib/utils";
 import { BarChart3, Download, Printer, TrendingUp, PackageCheck, Users } from "lucide-react";
+import { reportsApi } from "@/lib/api-client";
 
 export default function ReportsPage() {
   const { salesOrders, products, customers, employees, showToast } = useApp();
+  const [reportData, setReportData] = useState<any>(null);
 
-  const totalRevenue = salesOrders
+  useEffect(() => {
+    reportsApi.getDashboardOverview()
+      .then((data) => setReportData(data))
+      .catch((err) => console.warn("Could not load report overview:", err));
+  }, []);
+
+  const totalRevenue = reportData?.summary?.totalRevenue ?? salesOrders
     .filter((o) => o.status !== "CANCELLED")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
+    .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
 
-  const totalInventoryValue = products.reduce(
-    (sum, p) => sum + p.onHand * p.costPrice,
+  const totalInventoryValue = reportData?.summary?.totalInventoryValue ?? products.reduce(
+    (sum, p) => sum + (Number(p.onHand) || 0) * (Number(p.costPrice) || 0),
     0
   );
+
+  const displayCustomersCount = reportData?.summary?.totalCustomers ?? customers.length;
+  const displayEmployeesCount = reportData?.summary?.totalEmployees ?? employees.length;
 
   const handleExport = (type: string) => {
     showToast(`Đã xuất báo cáo ${type} thành công! Tệp tin đã tải về máy.`);
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -92,7 +103,7 @@ export default function ReportsPage() {
           <div>
             <p className="text-xs text-slate-400 font-medium">Quy mô nhân sự & Khách hàng</p>
             <h3 className="text-2xl font-extrabold text-slate-900 mt-0.5">
-              {employees.length} NV / {customers.length} KH
+              {displayEmployeesCount} NV / {displayCustomersCount} KH
             </h3>
             <span className="text-[11px] text-purple-600 font-medium">
               100% hồ sơ đã chuẩn hóa

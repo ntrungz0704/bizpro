@@ -1,12 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 describe('Database Invariants & Constraints (Integration)', () => {
   let app: INestApplication;
-  let prisma: PrismaService;
+  let prisma: PrismaClient;
   let orgAId: string;
   let orgBId: string;
   let warehouseId: string;
@@ -22,8 +22,19 @@ describe('Database Invariants & Constraints (Integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    prisma = app.get(PrismaService);
     await app.init();
+
+    // Use superuser connection to test database-level invariants directly (CHECK constraints, foreign keys, triggers)
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url:
+            process.env.DATABASE_SUPERUSER_URL ||
+            'postgresql://bizpro_user:bizpro_password@localhost:5432/bizpro_db?schema=public',
+        },
+      },
+    });
+    await prisma.$connect();
 
     // Setup base tenant and product data for testing
     orgAId = randomUUID();

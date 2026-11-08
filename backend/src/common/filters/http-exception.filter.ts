@@ -29,6 +29,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let error = 'Internal Server Error';
     let message: string | string[] = 'An unexpected error occurred';
+    let code: string | undefined = undefined;
+    let extraFields: Record<string, unknown> = {};
 
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
@@ -43,11 +45,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
       ) {
         const resObj = exceptionResponse as Record<string, unknown>;
         message = (resObj.message as string | string[]) || (resObj.status as string) || exception.message;
+        code = (resObj.code as string) || undefined;
         if (typeof resObj.error === 'string') {
           error = resObj.error;
         } else {
-          error = exception.name || 'Http Exception';
+          error = (resObj.code as string) || exception.name || 'Http Exception';
         }
+        const { message: _m, error: _e, statusCode: _s, ...rest } = resObj;
+        extraFields = rest;
       }
     } else if (exception instanceof Error) {
       this.logger.error(
@@ -61,11 +66,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       this.logger.error(`Unknown Exception: ${JSON.stringify(exception)}`);
     }
 
-    const errorPayload: ErrorResponseEnvelope = {
+    const errorPayload: Record<string, any> = {
       success: false,
       statusCode,
       error,
       message,
+      ...(code ? { code } : {}),
+      ...extraFields,
       timestamp: new Date().toISOString(),
       path: request ? request.url : '',
     };
