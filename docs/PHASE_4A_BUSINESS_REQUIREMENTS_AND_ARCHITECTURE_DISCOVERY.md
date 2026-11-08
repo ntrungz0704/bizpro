@@ -12,7 +12,7 @@
 | Nguyên Tắc Quản Trị | Cam Kết Thực Hiện (Revision 30) |
 |---|---|
 | **Zero Application Code Changes** | Tuyệt đối không thay đổi mã nguồn ứng dụng trong `src/` hoặc các file backend/frontend phục vụ Phase 4A. |
-| **Zero Prisma Schema Changes** | `prisma/schema.prisma` được giữ nguyên trạng thái đóng băng 100%. |
+| **Zero Prisma Schema Changes** | `backend/prisma/schema.prisma` được giữ nguyên trạng thái đóng băng 100% (Xác nhận là nguồn schema chuẩn duy nhất của toàn bộ hệ thống, không tồn tại schema trùng lặp tại thư mục gốc). |
 | **Zero Database Migrations** | Không thực thi bất kỳ câu lệnh SQL DDL/DML nào trên cơ sở dữ liệu PostgreSQL. Mọi mã nguồn là bản đặc tả kỹ thuật độc lập. |
 | **Phase 1A–3F & OPS-01/02/03 Frozen** | Toàn bộ 13 phân hệ đã nghiệm thu và 3 điều kiện tiền cắt chuyển (S3 Backup, TLS, Secrets) được bảo lưu nguyên vẹn. |
 | **Preserved Findings Locked** | Các finding đã được Auditor phê duyệt (**B-01, C-01, C-03, D-01, D-02, E-02**) giữ nguyên trạng thái `PASS / PRESERVED`. |
