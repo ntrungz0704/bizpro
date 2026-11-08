@@ -461,9 +461,9 @@ export default function HomePage() {
                     Trung Tâm Phân Tích Kinh Doanh BI
                   </div>
                   <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
-                    Ra quyết định tức thời <br />
+                    Hỗ trợ ra quyết định <br />
                     <span className="bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent">
-                      dựa trên dữ liệu thực tế 24/7.
+                      theo mô hình dữ liệu quản trị đa chiều.
                     </span>
                   </h2>
                   <p className="text-sm text-slate-300 leading-relaxed">
@@ -474,7 +474,7 @@ export default function HomePage() {
                     <div className="p-3.5 rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-md">
                       <div className="text-xs font-bold text-white">So sánh doanh thu đa chi nhánh</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
-                        Hà Nội (48%), TP.HCM (38%), Đà Nẵng (14%) cập nhật theo từng giây giao dịch.
+                        Hà Nội (48%), TP.HCM (38%), Đà Nẵng (14%) — Tỷ trọng doanh số mô phỏng mẫu theo từng chi nhánh.
                       </div>
                     </div>
 
@@ -489,17 +489,23 @@ export default function HomePage() {
 
                 {/* Big Analytics Chart Preview */}
                 <div className="lg:col-span-7 bg-white/[0.06] border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+                  {/* Demo simulation banner */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold mb-4">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                    <span>MÔ PHỎNG MINH HỌA — Dữ liệu giả lập demo, không phải số liệu đo lường vận hành thực tế.</span>
+                  </div>
+
                   <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
                     <div>
                       <div className="text-base font-bold text-white">
-                        Báo Cáo Tăng Trưởng Doanh Số Q3
+                        Báo Cáo Tăng Trưởng Doanh Số Q3 (Mô Phỏng)
                       </div>
                       <div className="text-xs text-slate-400">
-                        Đơn vị: Triệu VNĐ (Dữ liệu hợp nhất thời gian thực)
+                        Đơn vị: Triệu VNĐ (Số liệu mô phỏng minh họa — Dashboard Demo)
                       </div>
                     </div>
                     <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold">
-                      +24.8% YoY
+                      +24.8% YoY (Minh họa mẫu)
                     </span>
                   </div>
 
@@ -536,18 +542,18 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* KPI Stat Cards */}
+                  {/* KPI Stat Cards (Demo Simulation) */}
                   <div className="grid grid-cols-3 gap-3 pt-6 text-center">
                     <div className="p-3 rounded-xl bg-white/[0.04] border border-white/5">
-                      <span className="text-[11px] text-slate-400 block">Biên Lợi Nhuận</span>
+                      <span className="text-[11px] text-slate-400 block">Biên Lợi Nhuận (Mô phỏng)</span>
                       <span className="text-base font-bold text-white mt-0.5 block">34.2%</span>
                     </div>
                     <div className="p-3 rounded-xl bg-white/[0.04] border border-white/5">
-                      <span className="text-[11px] text-slate-400 block">Chi phí CAC</span>
+                      <span className="text-[11px] text-slate-400 block">Chi phí CAC (Giả lập)</span>
                       <span className="text-base font-bold text-emerald-400 mt-0.5 block">142.000 ₫</span>
                     </div>
                     <div className="p-3 rounded-xl bg-white/[0.04] border border-white/5">
-                      <span className="text-[11px] text-slate-400 block">Giá Trị LTV</span>
+                      <span className="text-[11px] text-slate-400 block">Giá Trị LTV (Giả lập)</span>
                       <span className="text-base font-bold text-sky-400 mt-0.5 block">12.8 Tr ₫</span>
                     </div>
                   </div>
@@ -676,7 +682,7 @@ export default function HomePage() {
                 <span>•</span>
                 <span>✓ Hỗ trợ chuyển đổi dữ liệu từ Excel miễn phí</span>
                 <span>•</span>
-                <span>✓ Đội ngũ chuyên gia hỗ trợ 24/7 tại Việt Nam</span>
+                <span>✓ Đội ngũ chuyên viên tư vấn hỗ trợ nghiệp vụ tại Việt Nam</span>
               </div>
             </div>
           </section>

@@ -42,19 +42,19 @@ Khi doanh nghiệp mở rộng từ một cửa hàng đơn lẻ lên mô hình 
 
 ---
 
-### 2.2. Mô hình 2: Giao dịch giữa các Pháp nhân độc lập trong cùng Tập đoàn (Công ty Mẹ - Con theo VAS 25 & TT 202/2014)
+### 2.2. Mô hình 2A: Pháp nhân độc lập Mẹ - Con trong cùng Tập đoàn (VAS 25 & TT 202/2014)
 
-Đối với các đơn vị thành viên có **tư cách pháp nhân độc lập** (công ty mẹ, công ty con, công ty liên kết):
-- **Tài khoản thanh toán thương mại:** Mua bán giữa hai pháp nhân độc lập phải tuân thủ Luật Thương mại và lập Hóa đơn GTGT hợp pháp. Quan hệ công nợ được phản ánh qua **TK 131** (*Phải thu của khách hàng*) và **TK 331** (*Phải trả cho người bán*). Tuyệt đối **KHÔNG** sử dụng TK 136/336 cho các giao dịch thương mại giữa hai pháp nhân độc lập.
+Áp dụng cho các công ty con thuộc phạm vi hợp nhất, trong đó công ty mẹ nắm quyền kiểm soát (>50% quyền biểu quyết hoặc nắm quyền chi phối trực tiếp/gián tiếp theo VAS 25 / IFRS 10).
+
+- **Tài khoản thanh toán thương mại:** Mua bán giữa hai pháp nhân độc lập tuân thủ Luật Thương mại và lập Hóa đơn GTGT hợp pháp. Quan hệ công nợ được phản ánh qua **TK 131** (*Phải thu của khách hàng*) và **TK 331** (*Phải trả cho người bán*). Tuyệt đối **KHÔNG** sử dụng TK 136/336 cho các giao dịch thương mại giữa hai pháp nhân độc lập.
 - **Tài khoản doanh thu theo Thông tư 200/2014/TT-BTC:**
   - Bán hàng hóa: Dùng **TK 5111** (*Doanh thu bán hàng hóa*).
   - Bán thành phẩm sản xuất: Dùng **TK 5112** (*Doanh thu bán các thành phẩm*).
   - Cung cấp dịch vụ: Dùng **TK 5113** (*Doanh thu cung cấp dịch vụ*).
   - *(Lưu ý chuẩn mực: TK 5112 là tài khoản doanh thu bán thành phẩm, không phải tài khoản doanh thu nội bộ dùng chung cho mọi giao dịch mua bán hàng hóa)*.
 
-#### Bút toán loại trừ khi lập Báo cáo tài chính hợp nhất theo Thông tư 202/2014/TT-BTC:
-
-Quy trình loại trừ giao dịch nội bộ tập đoàn (*Intercompany Transaction Elimination Engine*) được phân loại cụ thể theo 4 trường hợp nghiệp vụ:
+#### Bút toán loại trừ khi lập Báo cáo tài chính hợp nhất theo phương pháp hợp nhất từng dòng (Thông tư 202/2014/TT-BTC):
+Phương pháp hợp nhất từng dòng (*Line-by-line consolidation*) cộng toàn bộ 100% doanh thu, chi phí, tài sản và công nợ của công ty mẹ và các công ty con. Quy trình loại trừ giao dịch nội bộ (*Intercompany Transaction Elimination Engine*) triệt tiêu toàn bộ 100% tác động của các giao dịch nội bộ này:
 
 ```
 [Công ty Mẹ (Pháp nhân A)]              [Công ty Con (Pháp nhân B)]
@@ -71,7 +71,7 @@ Quy trình loại trừ giao dịch nội bộ tập đoàn (*Intercompany Trans
 ```
 
 1. **Trường hợp A — Hàng bán nội bộ đã được bán hết ra bên thứ ba ngoài tập đoàn trong kỳ:**
-   - Toàn bộ doanh thu và giá vốn nội bộ bị triệt tiêu để tránh ghi nhận trùng lặp:
+   - Toàn bộ doanh thu và giá vốn nội bộ bị triệt tiêu 100% để tránh ghi nhận trùng lặp:
      $$\text{Nợ TK 511 (Doanh thu bán hàng nội bộ tập đoàn)} \quad / \quad \text{Có TK 632 (Giá vốn hàng bán nội bộ)}$$
    - *(Kết quả: Không còn lãi chưa thực hiện trong giá trị hàng tồn kho cuối kỳ)*.
 
@@ -86,9 +86,25 @@ Quy trình loại trừ giao dịch nội bộ tập đoàn (*Intercompany Trans
    - Giá vốn tương ứng với phần hàng đã bán ra ngoài: Có TK 632.
    - Phần lãi chưa thực hiện của lượng hàng còn tồn kho cuối kỳ: Có TK 156.
 
-4. **Trường hợp D — Bù trừ và triệt tiêu số dư công nợ tương hỗ giữa các pháp nhân độc lập:**
+4. **Trường hợp D — Bù trừ và triệt tiêu số dư công nợ tương hỗ giữa các công ty con và công ty mẹ:**
    - Triệt tiêu số dư công nợ phải thu / phải trả nội bộ giữa hai pháp nhân tại ngày kết thúc kỳ kế toán:
      $$\text{Nợ TK 331 (Phải trả người bán nội bộ tập đoàn)} \quad / \quad \text{Có TK 131 (Phải thu khách hàng nội bộ tập đoàn)}$$
+
+---
+
+### 2.3. Mô hình 2B: Giao dịch với Công ty Liên kết (Kế toán theo Phương pháp Vốn chủ sở hữu — VAS 07 & TT 202/2014)
+
+Áp dụng cho các khoản đầu tư vào công ty liên kết, trong đó tập đoàn có **ảnh hưởng đáng kể** nhưng **không có quyền kiểm soát** (thông thường nắm giữ từ 20% đến dưới 50% quyền biểu quyết theo VAS 07 và Thông tư 202/2014/TT-BTC Chương IV).
+
+- **Phân định rõ ranh giới phương pháp kế toán:**
+  - **TUYỆT ĐỐI KHÔNG hợp nhất từng dòng:** Báo cáo tài chính hợp nhất của tập đoàn **không** cộng gộp từng dòng doanh thu, chi phí, tài sản hay nợ phải trả của công ty liên kết vào bảng tổng hợp tập đoàn như công ty con.
+  - **Phương pháp Vốn chủ sở hữu (Equity Method):** Khoản đầu tư vào công ty liên kết được ghi nhận ban đầu theo giá gốc, sau đó định kỳ được điều chỉnh tăng/giảm theo tỷ lệ sở hữu của tập đoàn trong lãi/lỗ thuần sau thuế của công ty liên kết (phản ánh vào chỉ tiêu *"Lãi hoặc lỗ trong công ty liên doanh, liên kết"* trên Báo cáo kết quả hoạt động kinh doanh hợp nhất).
+- **Quy tắc xử lý giao dịch thương mại giữa Tập đoàn và Công ty Liên kết:**
+  - Giao dịch mua bán giữa tập đoàn và công ty liên kết được xem là giao dịch với các bên liên quan theo Chuẩn mực VAS 26.
+  - **KHÔNG áp dụng engine triệt tiêu 100% công nợ hay doanh thu:** Không bù trừ số dư công nợ TK 131/TK 331 hay triệt tiêu 100% TK 511/TK 632 như công ty con.
+  - **Loại trừ lãi/lỗ chưa thực hiện theo tỷ lệ sở hữu:** 
+    * Trong giao dịch bán xuôi (*Downstream — Nhà đầu tư bán cho bên liên kết*) hoặc bán ngược (*Upstream — Bên liên kết bán cho nhà đầu tư*), nếu hàng hóa/tài sản chưa được bán ra bên thứ ba độc lập ngoài tập đoàn, thì **chỉ loại trừ phần lãi/lỗ chưa thực hiện tương ứng với tỷ lệ sở hữu của tập đoàn** trong công ty liên kết.
+    * Giá trị lãi chưa thực hiện được điều chỉnh giảm trừ vào khoản đầu tư vào bên liên kết và giảm trừ vào chỉ tiêu chia sẻ lợi nhuận từ công ty liên kết, chứ không điều chỉnh trực tiếp vào hàng tồn kho hay doanh thu thuần của bên liên kết ngoài tập đoàn.
 
 ---
 
@@ -178,12 +194,17 @@ enum ReorderTriggerStatus {
 }
 
 // Bảng cấu hình chính sách kiểm soát tồn kho theo SKU và Kho hàng
+// Phân cấp danh mục sản phẩm (Product Hierarchy):
+// - productId: Mã định danh sản phẩm cha (Parent Product ID - ví dụ: iPhone 15 Pro, Áo Polo Nam)
+// - skuCode: Mã biến thể đơn vị lưu kho độc lập (Variant/SKU Code - ví dụ: IP15P-128-BLK, POLO-WHT-L)
+// Grain chuẩn: OrganizationId × ProductId × SkuCode × WarehouseId
+// Thiết kế đảm bảo nhiều biến thể SKU của cùng 1 sản phẩm cha cùng tồn tại độc lập trong 1 kho hàng
 model SkuInventoryPolicy {
   id                   String               @id @default(uuid())
   organizationId       String
-  productId            String               // Dimension: Sản phẩm
-  skuCode              String               // Mã SKU cụ thể
-  warehouseId          String               // Dimension: Kho hàng
+  productId            String               // Dimension: Sản phẩm cha (Parent Product ID)
+  skuCode              String               // Dimension: Mã biến thể SKU lưu kho cụ thể (Variant/SKU Code)
+  warehouseId          String               // Dimension: Kho hàng vật lý (Warehouse ID)
   analysisPeriodDays   Int                  @default(60) // Chu kỳ phân tích (ngày)
   averageDailyDemand   Float                @default(0.0) // d_bar
   demandStdDev         Float                @default(0.0) // sigma_d
@@ -197,18 +218,21 @@ model SkuInventoryPolicy {
   status               ReorderTriggerStatus @default(SUFFICIENT)
   updatedAt            DateTime             @updatedAt
 
-  @@unique([organizationId, productId, warehouseId])
+  // Khóa duy nhất đa chiều: Kết hợp productId, skuCode và warehouseId
+  @@unique([organizationId, productId, skuCode, warehouseId])
 }
 
 // Bảng tổng hợp Lợi nhuận đóng góp cấp SKU và Kênh bán (BI Analytical Aggregate Grain)
-// Grain chuẩn: OrganizationId × PeriodDate × ChannelCode × ProductId
+// Phân cấp danh mục sản phẩm: Phân tích hiệu quả kinh tế độc lập cho từng biến thể SKU của sản phẩm cha
+// Grain chuẩn: OrganizationId × PeriodDate × ChannelCode × ProductId × SkuCode
+// Thiết kế đảm bảo nhiều SKU cùng sản phẩm cha bán trên cùng 1 kênh trong cùng 1 kỳ được ghi nhận riêng biệt
 model ProductChannelProfitabilityAggregate {
   id                          String   @id @default(uuid())
   organizationId              String
   periodDate                  DateTime // Ngày hạch toán (YYYY-MM-DD)
   channelCode                 String   // SHOPEE, TIKTOK, LAZADA, DIRECT_STORE, B2B_PORTAL
-  productId                   String   // Dimension: Sản phẩm
-  skuCode                     String   // Dimension: Mã SKU cụ thể
+  productId                   String   // Dimension: Sản phẩm cha (Parent Product ID)
+  skuCode                     String   // Dimension: Mã biến thể SKU cụ thể (Variant/SKU Code)
   grossRevenue                Decimal  @db.Decimal(18, 2) // Doanh thu gộp
   sellerDiscountsAndVouchers  Decimal  @db.Decimal(18, 2) // Giảm giá & voucher người bán
   netRevenue                  Decimal  @db.Decimal(18, 2) // Doanh thu thuần
@@ -221,7 +245,8 @@ model ProductChannelProfitabilityAggregate {
   contributionMargin          Decimal  @db.Decimal(18, 2) // Lợi nhuận đóng góp (Contribution Margin)
   contributionMarginPercentage Float    // Tỷ suất biên lợi nhuận đóng góp
 
-  @@unique([organizationId, periodDate, channelCode, productId])
+  // Khóa duy nhất kết hợp cả productId và skuCode cho từng kênh bán và chu kỳ kế toán
+  @@unique([organizationId, periodDate, channelCode, productId, skuCode])
 }
 ```
 
