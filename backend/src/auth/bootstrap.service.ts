@@ -159,6 +159,23 @@ export class BootstrapService implements OnApplicationBootstrap {
           });
           this.logger.log(`Created default Admin user: ${adminUser.email}`);
         }
+      } else if (process.env.NODE_ENV === 'production') {
+        // In production, check if existing admin is still using known default password
+        const isDefaultPassword = await this.cryptoService.comparePassword('Admin@123456', adminUser.passwordHash);
+        if (isDefaultPassword) {
+          if (process.env.INITIAL_ADMIN_PASSWORD) {
+            const newHash = await this.cryptoService.hashPassword(process.env.INITIAL_ADMIN_PASSWORD);
+            await tx.user.update({
+              where: { id: adminUser.id },
+              data: { passwordHash: newHash },
+            });
+            this.logger.log('Production security: Rotated default admin password using INITIAL_ADMIN_PASSWORD.');
+          } else {
+            this.logger.error(
+              'CRITICAL PRODUCTION WARNING: Admin account admin@bizpro.vn is retaining known default credentials! Set INITIAL_ADMIN_PASSWORD immediately.',
+            );
+          }
+        }
       }
 
       // 5. Ensure Standard User exists for development / testing only

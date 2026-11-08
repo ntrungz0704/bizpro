@@ -49,18 +49,10 @@ export class DepartmentService implements OnApplicationBootstrap {
   }
 
   async getDepartments(orgId?: string) {
-    let targetOrgId = orgId;
-    if (!targetOrgId) {
-      const defaultOrg = await this.prisma.runInSystemContext((tx) =>
-        tx.organization.findFirst({ where: { code: 'BIZPRO-CORP' } }),
-      );
-      targetOrgId = defaultOrg?.id;
-    }
-    if (!targetOrgId) return [];
-
-    return this.prisma.runInTenantContext(targetOrgId, async (tx) => {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
+    return this.prisma.runInTenantContext(orgId, async (tx) => {
       return tx.department.findMany({
-        where: { organizationId: targetOrgId },
+        where: { organizationId: orgId },
         include: {
           subDepartments: true,
           _count: {
@@ -73,20 +65,10 @@ export class DepartmentService implements OnApplicationBootstrap {
   }
 
   async createDepartment(orgId: string | undefined, dto: CreateDepartmentDto) {
-    let targetOrgId = orgId;
-    if (!targetOrgId) {
-      const defaultOrg = await this.prisma.runInSystemContext((tx) =>
-        tx.organization.findFirst({ where: { code: 'BIZPRO-CORP' } }),
-      );
-      targetOrgId = defaultOrg?.id;
-    }
-    if (!targetOrgId) {
-      throw new NotFoundException('Organization not found');
-    }
-
-    return this.prisma.runInTenantContext(targetOrgId, async (tx) => {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
+    return this.prisma.runInTenantContext(orgId, async (tx) => {
       const existing = await tx.department.findFirst({
-        where: { organizationId: targetOrgId, code: dto.code },
+        where: { organizationId: orgId, code: dto.code.toUpperCase() },
       });
       if (existing) {
         throw new BadRequestException(`Phòng ban với mã ${dto.code} đã tồn tại trong tổ chức`);
@@ -94,7 +76,7 @@ export class DepartmentService implements OnApplicationBootstrap {
 
       return tx.department.create({
         data: {
-          organizationId: targetOrgId,
+          organizationId: orgId,
           name: dto.name,
           code: dto.code.toUpperCase(),
           parentDepartmentId: dto.parentDepartmentId || null,
@@ -106,18 +88,12 @@ export class DepartmentService implements OnApplicationBootstrap {
   }
 
   async updateDepartment(orgId: string | undefined, id: string, dto: UpdateDepartmentDto) {
-    let targetOrgId = orgId;
-    if (!targetOrgId) {
-      const defaultOrg = await this.prisma.runInSystemContext((tx) =>
-        tx.organization.findFirst({ where: { code: 'BIZPRO-CORP' } }),
-      );
-      targetOrgId = defaultOrg?.id;
-    }
-    if (!targetOrgId) throw new NotFoundException('Organization not found');
-
-    return this.prisma.runInTenantContext(targetOrgId, async (tx) => {
-      const dept = await tx.department.findUnique({ where: { id } });
-      if (!dept) throw new NotFoundException('Không tìm thấy phòng ban');
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
+    return this.prisma.runInTenantContext(orgId, async (tx) => {
+      const dept = await tx.department.findFirst({
+        where: { id, organizationId: orgId },
+      });
+      if (!dept) throw new NotFoundException('Không tìm thấy phòng ban trong tổ chức');
 
       return tx.department.update({
         where: { id },
@@ -131,14 +107,14 @@ export class DepartmentService implements OnApplicationBootstrap {
     });
   }
 
-  async deleteDepartment(id: string) {
-    const deptOrg = await this.prisma.runInSystemContext(async (tx) => {
-      const d = await tx.department.findUnique({ where: { id }, select: { organizationId: true } });
-      return d?.organizationId;
-    });
-    if (!deptOrg) throw new NotFoundException('Không tìm thấy phòng ban');
+  async deleteDepartment(orgId: string | undefined, id: string) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
+    return this.prisma.runInTenantContext(orgId, async (tx) => {
+      const dept = await tx.department.findFirst({
+        where: { id, organizationId: orgId },
+      });
+      if (!dept) throw new NotFoundException('Không tìm thấy phòng ban trong tổ chức');
 
-    return this.prisma.runInTenantContext(deptOrg, async (tx) => {
       return tx.department.delete({ where: { id } });
     });
   }

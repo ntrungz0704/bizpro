@@ -256,14 +256,10 @@ export class RbacService implements OnApplicationBootstrap {
   }
 
   async getRoles(orgId?: string) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const targetOrg = orgId
-        ? { id: orgId }
-        : await tx.organization.findFirst({ where: { code: 'BIZPRO-CORP' } });
-      if (!targetOrg) return [];
-
       return tx.role.findMany({
-        where: { organizationId: targetOrg.id },
+        where: { organizationId: orgId },
         include: {
           rolePermissions: {
             include: {
@@ -280,18 +276,10 @@ export class RbacService implements OnApplicationBootstrap {
   }
 
   async createRole(orgId: string | undefined, dto: CreateRoleDto) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      let targetOrgId = orgId;
-      if (!targetOrgId) {
-        const defaultOrg = await tx.organization.findFirst({ where: { code: 'BIZPRO-CORP' } });
-        targetOrgId = defaultOrg?.id;
-      }
-      if (!targetOrgId) {
-        throw new NotFoundException('Organization not found');
-      }
-
       const existing = await tx.role.findFirst({
-        where: { organizationId: targetOrgId, code: dto.code },
+        where: { organizationId: orgId, code: dto.code },
       });
       if (existing) {
         throw new BadRequestException(`Role with code ${dto.code} already exists in this organization`);
@@ -299,7 +287,7 @@ export class RbacService implements OnApplicationBootstrap {
 
       return tx.role.create({
         data: {
-          organizationId: targetOrgId,
+          organizationId: orgId,
           name: dto.name,
           code: dto.code.toUpperCase(),
           description: dto.description,
@@ -310,9 +298,10 @@ export class RbacService implements OnApplicationBootstrap {
   }
 
   async updateRole(orgId: string | undefined, roleId: string, dto: UpdateRoleDto) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const role = await tx.role.findUnique({ where: { id: roleId } });
-      if (!role) throw new NotFoundException('Role not found');
+      const role = await tx.role.findFirst({ where: { id: roleId, organizationId: orgId } });
+      if (!role) throw new NotFoundException('Không tìm thấy vai trò trong tổ chức');
 
       return tx.role.update({
         where: { id: roleId },
@@ -332,10 +321,11 @@ export class RbacService implements OnApplicationBootstrap {
     });
   }
 
-  async updateRolePermissions(roleId: string, permissionIds: string[]) {
+  async updateRolePermissions(orgId: string | undefined, roleId: string, permissionIds: string[]) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const role = await tx.role.findUnique({ where: { id: roleId } });
-      if (!role) throw new NotFoundException('Role not found');
+      const role = await tx.role.findFirst({ where: { id: roleId, organizationId: orgId } });
+      if (!role) throw new NotFoundException('Không tìm thấy vai trò trong tổ chức');
 
       // Clear existing
       await tx.rolePermission.deleteMany({ where: { roleId } });
@@ -362,10 +352,23 @@ export class RbacService implements OnApplicationBootstrap {
     });
   }
 
-  async assignUserRoles(userId: string, roleIds: string[]) {
+  async assignUserRoles(orgId: string | undefined, userId: string, roleIds: string[]) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const user = await tx.user.findUnique({ where: { id: userId } });
-      if (!user) throw new NotFoundException('User not found');
+      const user = await tx.user.findFirst({ where: { id: userId, organizationId: orgId } });
+      if (!user) throw new NotFoundException('Không tìm thấy người dùng trong tổ chức');
+
+      if (roleIds && roleIds.length > 0) {
+        const matchingRolesCount = await tx.role.count({
+          where: {
+            id: { in: roleIds },
+            organizationId: orgId,
+          },
+        });
+        if (matchingRolesCount !== roleIds.length) {
+          throw new BadRequestException('Một hoặc nhiều vai trò không thuộc tổ chức của người dùng');
+        }
+      }
 
       await tx.userRole.deleteMany({ where: { userId } });
 

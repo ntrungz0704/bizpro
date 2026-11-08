@@ -15,19 +15,23 @@ import { Request } from 'express';
 import { OrganizationService } from './organization.service';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../rbac/guards/permissions.guard';
+import { RequirePermissions } from '../rbac/decorators/permissions.decorator';
 
 @Controller('organization')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 
   @Get('current')
+  @RequirePermissions('organization.read')
   async getCurrent(@Req() req: Request) {
     const user = (req as any).user;
     return this.organizationService.getCurrent(user?.organizationId);
   }
 
   @Patch('current')
+  @RequirePermissions('organization.update')
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -49,6 +53,7 @@ export class OrganizationController {
   }
 
   @Post('reset')
+  @RequirePermissions('settings.manage')
   @HttpCode(HttpStatus.OK)
   async resetCurrent(@Req() req: Request) {
     const user = (req as any).user;
@@ -63,6 +68,7 @@ export class OrganizationController {
   }
 
   @Get('audit-logs')
+  @RequirePermissions('audit_logs.read')
   async getAuditLogs(@Req() req: Request) {
     const user = (req as any).user;
     return this.organizationService.getAuditLogs(user?.organizationId);

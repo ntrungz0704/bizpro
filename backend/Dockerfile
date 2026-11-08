@@ -53,7 +53,7 @@ USER nodejs
 EXPOSE 4000
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:4000/api/health/live || exit 1
+  CMD curl -f http://localhost:4000/api/health/ready || exit 1
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/main.js"]

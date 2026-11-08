@@ -12,14 +12,10 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getUsers(orgId?: string) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const targetOrg = orgId
-        ? { id: orgId }
-        : await tx.organization.findFirst({ where: { code: 'BIZPRO-CORP' } });
-      if (!targetOrg) return [];
-
       return tx.user.findMany({
-        where: { organizationId: targetOrg.id },
+        where: { organizationId: orgId },
         select: {
           id: true,
           organizationId: true,
@@ -42,10 +38,11 @@ export class UserService {
     });
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string, orgId?: string) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const user = await tx.user.findUnique({
-        where: { id },
+      const user = await tx.user.findFirst({
+        where: { id, organizationId: orgId },
         select: {
           id: true,
           organizationId: true,
@@ -63,7 +60,7 @@ export class UserService {
           },
         },
       });
-      if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+      if (!user) throw new NotFoundException('Không tìm thấy người dùng trong tổ chức');
       return user;
     });
   }
@@ -75,19 +72,28 @@ export class UserService {
     ipAddress?: string,
     userAgent?: string,
   ) {
+    if (!orgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      let targetOrgId = orgId;
-      if (!targetOrgId) {
-        const defaultOrg = await tx.organization.findFirst({ where: { code: 'BIZPRO-CORP' } });
-        targetOrgId = defaultOrg?.id;
-      }
-      if (!targetOrgId) throw new NotFoundException('Organization not found');
+      const targetOrgId = orgId;
 
       const existing = await tx.user.findFirst({
         where: { email: dto.email.toLowerCase() },
       });
       if (existing) {
         throw new BadRequestException('Email này đã được sử dụng');
+      }
+
+      // Validate assigned roles belong to targetOrgId
+      if (dto.roleIds && dto.roleIds.length > 0) {
+        const matchingRolesCount = await tx.role.count({
+          where: {
+            id: { in: dto.roleIds },
+            organizationId: targetOrgId,
+          },
+        });
+        if (matchingRolesCount !== dto.roleIds.length) {
+          throw new BadRequestException('Một hoặc nhiều vai trò không thuộc tổ chức này');
+        }
       }
 
       const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -112,7 +118,7 @@ export class UserService {
           })),
         });
       } else {
-        // Default to STAFF role
+        // Default to STAFF role of this organization
         const staffRole = await tx.role.findFirst({
           where: { organizationId: targetOrgId, code: 'STAFF' },
         });
@@ -167,13 +173,30 @@ export class UserService {
   async updateUser(
     id: string,
     dto: UpdateUserDto,
+    callerOrgId?: string,
     actorId?: string,
     ipAddress?: string,
     userAgent?: string,
   ) {
+    if (!callerOrgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const user = await tx.user.findUnique({ where: { id } });
-      if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+      const user = await tx.user.findFirst({
+        where: { id, organizationId: callerOrgId },
+      });
+      if (!user) throw new NotFoundException('Không tìm thấy người dùng trong tổ chức');
+
+      // Validate assigned roles belong to callerOrgId
+      if (dto.roleIds !== undefined && dto.roleIds.length > 0) {
+        const matchingRolesCount = await tx.role.count({
+          where: {
+            id: { in: dto.roleIds },
+            organizationId: callerOrgId,
+          },
+        });
+        if (matchingRolesCount !== dto.roleIds.length) {
+          throw new BadRequestException('Một hoặc nhiều vai trò không thuộc tổ chức này');
+        }
+      }
 
       const updated = await tx.user.update({
         where: { id },
@@ -235,13 +258,17 @@ export class UserService {
   async updateUserStatus(
     id: string,
     dto: UpdateUserStatusDto,
+    callerOrgId?: string,
     actorId?: string,
     ipAddress?: string,
     userAgent?: string,
   ) {
+    if (!callerOrgId) throw new BadRequestException('Yêu cầu định danh tổ chức hợp lệ');
     return this.prisma.runInSystemContext(async (tx) => {
-      const user = await tx.user.findUnique({ where: { id } });
-      if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+      const user = await tx.user.findFirst({
+        where: { id, organizationId: callerOrgId },
+      });
+      if (!user) throw new NotFoundException('Không tìm thấy người dùng trong tổ chức');
 
       const updated = await tx.user.update({
         where: { id },
