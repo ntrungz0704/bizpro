@@ -458,7 +458,7 @@ export default function HomePage() {
                 <div className="lg:col-span-5 space-y-4">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider">
                     <BarChart3 className="w-3.5 h-3.5" />
-                    Trung Tâm Phân Tích Kinh Doanh BI
+                    Trung Tâm Phân Tích Kinh Doanh BI (Mô Phỏng Giao Diện)
                   </div>
                   <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
                     Hỗ trợ ra quyết định <br />
@@ -467,21 +467,21 @@ export default function HomePage() {
                     </span>
                   </h2>
                   <p className="text-sm text-slate-300 leading-relaxed">
-                    Không còn phải chờ đến cuối tháng để kế toán gửi báo cáo. Mọi chỉ số về tỷ suất lợi nhuận gộp, lưu chuyển dòng tiền và hiệu suất chi nhánh được hiển thị trực tiếp.
+                    Định hướng tối ưu hóa việc phân tích tài chính cuối kỳ. Minh họa giao diện theo dõi tỷ suất lợi nhuận gộp, lưu chuyển dòng tiền và hiệu suất chi nhánh (Mục tiêu thiết kế kiến trúc BI).
                   </p>
 
                   <div className="space-y-3 pt-2">
                     <div className="p-3.5 rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-md">
-                      <div className="text-xs font-bold text-white">So sánh doanh thu đa chi nhánh</div>
+                      <div className="text-xs font-bold text-white">Minh họa so sánh doanh thu đa chi nhánh</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
                         Hà Nội (48%), TP.HCM (38%), Đà Nẵng (14%) — Tỷ trọng doanh số mô phỏng mẫu theo từng chi nhánh.
                       </div>
                     </div>
 
                     <div className="p-3.5 rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-md">
-                      <div className="text-xs font-bold text-white">Cảnh báo sai lệch dòng tiền tức thì</div>
+                      <div className="text-xs font-bold text-white">Mô phỏng phát hiện cảnh báo sai lệch dòng tiền</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
-                        Tự động phát hiện chi phí vượt định mức ngân sách của từng phòng ban.
+                        Kịch bản thiết kế kiểm soát chi phí vượt định mức ngân sách của từng phòng ban (Năng lực mục tiêu).
                       </div>
                     </div>
                   </div>
