@@ -84,7 +84,7 @@ export default function CustomersPage() {
     ].map((brand) => (
       <div
         key={brand.name}
-        className="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
+        className="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 select-none group"
       >
         <div className="w-9 h-9 rounded-xl bg-primary-fixed/60 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
           <span className="material-symbols-outlined text-[20px]">{brand.icon}</span>

@@ -156,18 +156,21 @@ export default function FaqPage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl bg-surface-container-lowest border border-surface-container shadow-sm overflow-hidden transition-all duration-200"
+                  className={`rounded-2xl bg-surface-container-lowest border shadow-xs overflow-hidden transition-all duration-200 ${
+                    isOpen ? "border-primary/50 shadow-md ring-2 ring-primary/10" : "border-surface-container hover:border-slate-300"
+                  }`}
                 >
                   <button
                     type="button"
                     onClick={() => toggleItem(idx)}
-                    className="w-full p-space-lg md:p-6 text-left flex items-center justify-between gap-space-md hover:bg-surface-container-low/50 transition-colors"
+                    className="w-full p-space-lg md:p-6 text-left flex items-center justify-between gap-space-md hover:bg-surface-container-low/50 transition-colors select-none"
+                    aria-expanded={isOpen}
                   >
                     <span className="font-title-md text-title-md font-semibold text-on-surface">
                       {faq.q}
                     </span>
                     <span
-                      className={`material-symbols-outlined text-primary text-[24px] shrink-0 transition-transform duration-200 ${
+                      className={`material-symbols-outlined text-primary text-[24px] shrink-0 transition-transform duration-300 ${
                         isOpen ? "rotate-180" : ""
                       }`}
                     >
@@ -175,11 +178,17 @@ export default function FaqPage() {
                     </span>
                   </button>
 
-                  {isOpen && (
-                    <div className="px-space-lg md:px-6 pb-space-lg text-on-surface-variant font-body-md text-body-md leading-relaxed border-t border-surface-container/60 pt-space-sm animate-fade-in">
-                      {faq.a}
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-space-lg md:px-6 pb-space-lg text-on-surface-variant font-body-md text-body-md leading-relaxed border-t border-surface-container/60 pt-space-sm">
+                        {faq.a}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}

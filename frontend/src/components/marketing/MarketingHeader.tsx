@@ -95,6 +95,30 @@ export default function MarketingHeader() {
                     Chấm công, KPI và tính lương tự động
                   </div>
                 </Link>
+                <Link
+                  href="/features/accounting"
+                  className="p-space-sm rounded-lg hover:bg-surface-container-low transition-colors block"
+                >
+                  <div className="font-body-md-medium text-body-md-medium text-on-surface flex items-center justify-between">
+                    <span>Kế toán &amp; Tài chính</span>
+                    <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold">TT 200</span>
+                  </div>
+                  <div className="font-caption text-caption text-on-surface-variant">
+                    Định khoản kép, sổ cái &amp; đối soát công nợ
+                  </div>
+                </Link>
+                <Link
+                  href="/features/omnichannel"
+                  className="p-space-sm rounded-lg hover:bg-surface-container-low transition-colors block"
+                >
+                  <div className="font-body-md-medium text-body-md-medium text-on-surface flex items-center justify-between">
+                    <span>Đa kênh &amp; Vận chuyển</span>
+                    <span className="text-[10px] bg-orange-50 text-orange-700 px-1.5 py-0.5 rounded font-bold">Shopee/TikTok</span>
+                  </div>
+                  <div className="font-caption text-caption text-on-surface-variant">
+                    Đồng bộ sàn TMĐT &amp; 4 hãng giao vận
+                  </div>
+                </Link>
               </div>
             </div>
           </div>
@@ -256,6 +280,20 @@ export default function MarketingHeader() {
               className="px-5 py-1.5 rounded-lg text-xs text-on-surface-variant hover:text-primary block"
             >
               Nhân sự &amp; Tiền lương
+            </Link>
+            <Link
+              href="/features/accounting"
+              className="px-5 py-1.5 rounded-lg text-xs text-on-surface-variant hover:text-primary flex items-center justify-between"
+            >
+              <span>Kế toán &amp; Tài chính (TT 200)</span>
+              <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1 py-0.2 rounded font-bold">Mới</span>
+            </Link>
+            <Link
+              href="/features/omnichannel"
+              className="px-5 py-1.5 rounded-lg text-xs text-on-surface-variant hover:text-primary flex items-center justify-between"
+            >
+              <span>Đa kênh &amp; Vận chuyển</span>
+              <span className="text-[10px] bg-orange-100 text-orange-700 px-1 py-0.2 rounded font-bold">Mới</span>
             </Link>
           </div>
 

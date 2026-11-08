@@ -147,15 +147,15 @@ export default function FeaturesPage() {
 <section className="py-24 bg-surface-container-low" id="phan-he">
 <div className="max-w-7xl mx-auto px-margin">
 <div className="max-w-3xl mb-16">
-<span className="font-label-md text-label-md uppercase tracking-wider text-primary font-bold">Tổng quan 4 trụ cột vận hành</span>
+<span className="font-label-md text-label-md uppercase tracking-wider text-primary font-bold">Tổng quan 6 trụ cột vận hành toàn diện</span>
 <h2 className="font-headline-lg text-headline-lg font-bold text-on-surface mt-space-xs mb-space-md">
           Mọi phân hệ bạn cần. Được thiết kế ăn khớp tuyệt đối.
         </h2>
 <p className="font-body-lg text-body-lg text-on-surface-variant">
-          Thay thế ít nhất 5 phần mềm rời rạc bằng bộ giải pháp all-in-one được tinh chỉnh chuyên sâu theo hành vi thương mại và sản xuất Việt Nam.
+          Thay thế hoàn toàn 6 phần mềm rời rạc bằng bộ giải pháp all-in-one thống nhất theo quy chuẩn thương mại, sản xuất và kế toán Việt Nam.
         </p>
 </div>
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
 {/* Module 1 */}
 <div className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
 <div>
@@ -172,10 +172,10 @@ export default function FeaturesPage() {
 <li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-primary text-[18px]">check_circle</span> Phân công chăm sóc tự động</li>
 </ul>
 </div>
-<a className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-primary hover:text-on-primary-fixed-variant" href="#crm-deep">
-<span>Chi tiết phân hệ CRM</span>
+<Link className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-primary hover:text-on-primary-fixed-variant" href="/features/crm">
+<span>Khám phá chi tiết CRM</span>
 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-</a>
+</Link>
 </div>
 {/* Module 2 */}
 <div className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -193,10 +193,10 @@ export default function FeaturesPage() {
 <li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-secondary text-[18px]">check_circle</span> Cảnh báo tồn tối thiểu & hết hạn</li>
 </ul>
 </div>
-<a className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-secondary hover:text-on-surface" href="#kho-deep">
-<span>Chi tiết quản lý kho</span>
+<Link className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-secondary hover:text-on-surface" href="/features/inventory">
+<span>Khám phá chi tiết Kho hàng</span>
 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-</a>
+</Link>
 </div>
 {/* Module 3 */}
 <div className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -214,10 +214,10 @@ export default function FeaturesPage() {
 <li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-tertiary text-[18px]">check_circle</span> Báo cáo doanh thu & tỷ suất lãi gộp</li>
 </ul>
 </div>
-<a className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-tertiary hover:text-on-tertiary-fixed-variant" href="#don-hang-deep">
-<span>Chi tiết xử lý đơn hàng</span>
+<Link className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-tertiary hover:text-on-tertiary-fixed-variant" href="/features/sales-order">
+<span>Khám phá chi tiết Đơn hàng</span>
 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-</a>
+</Link>
 </div>
 {/* Module 4 */}
 <div className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -235,10 +235,58 @@ export default function FeaturesPage() {
 <li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-primary text-[18px]">check_circle</span> Đánh giá KPI & tính hoa hồng chuẩn xác</li>
 </ul>
 </div>
-<a className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-primary hover:text-on-primary-fixed-variant" href="#hrm-deep">
-<span>Chi tiết phân hệ HRM</span>
+<Link className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-primary hover:text-on-primary-fixed-variant" href="/features/hrm">
+<span>Khám phá chi tiết HRM</span>
 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-</a>
+</Link>
+</div>
+{/* Module 5 */}
+<div className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow border-2 border-indigo-100">
+<div>
+<div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700 mb-space-lg">
+<span className="material-symbols-outlined text-[24px]">account_balance</span>
+</div>
+<div className="flex items-center justify-between mb-space-xs">
+<h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">5. Kế toán & Tài chính</h3>
+<span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-bold">TT 200/133</span>
+</div>
+<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg">Định khoản kép tự động, sổ cái tổng hợp & khóa sổ bảo mật.</p>
+<ul className="space-y-space-sm text-on-surface font-body-md text-body-md">
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-indigo-600 text-[18px]">check_circle</span> Sổ nhật ký chung & Bảng cân đối PS</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-indigo-600 text-[18px]">check_circle</span> Phân định Doanh thu chuẩn VAS 14 / IFRS 15</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-indigo-600 text-[18px]">check_circle</span> Khóa sổ kỳ kế toán & Audit Trail</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-indigo-600 text-[18px]">check_circle</span> Báo cáo B01-DN, B02-DN, B03-DN</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-indigo-600 text-[18px]">check_circle</span> Đối soát công nợ tuổi nợ AR/AP</li>
+</ul>
+</div>
+<Link className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-indigo-700 hover:text-indigo-800" href="/features/accounting">
+<span>Khám phá phân hệ Kế toán</span>
+<span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+</Link>
+</div>
+{/* Module 6 */}
+<div className="bg-surface-container-lowest rounded-2xl p-space-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow border-2 border-orange-100">
+<div>
+<div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-700 mb-space-lg">
+<span className="material-symbols-outlined text-[24px]">hub</span>
+</div>
+<div className="flex items-center justify-between mb-space-xs">
+<h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">6. Đa kênh & Vận chuyển</h3>
+<span className="text-[10px] bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full font-bold">TMĐT & 4 Hãng</span>
+</div>
+<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg">Đồng bộ tồn kho tức thời Shopee, TikTok Shop, Lazada & giao vận.</p>
+<ul className="space-y-space-sm text-on-surface font-body-md text-body-md">
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-orange-600 text-[18px]">check_circle</span> Đồng bộ đa sàn 2 chiều &lt; 50ms</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-orange-600 text-[18px]">check_circle</span> Khóa giữ hàng Atomic chống bán âm</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-orange-600 text-[18px]">check_circle</span> So sánh cước GHTK, GHN, Viettel Post</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-orange-600 text-[18px]">check_circle</span> In vận đơn hàng loạt khổ nhiệt A6</li>
+<li className="flex items-center gap-space-xs"><span className="material-symbols-outlined text-orange-600 text-[18px]">check_circle</span> Tự động đối soát COD & tiền sàn</li>
+</ul>
+</div>
+<Link className="mt-space-xl inline-flex items-center gap-space-xs font-body-md-medium text-body-md-medium text-orange-700 hover:text-orange-800" href="/features/omnichannel">
+<span>Khám phá Đa kênh &amp; Vận chuyển</span>
+<span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+</Link>
 </div>
 </div>
 </div>
