@@ -71,11 +71,11 @@ const ACCOUNTING_SCENARIOS: AccountingScenario[] = [
   {
     id: "vendor-purchase",
     title: "3. Nhập kho nguyên vật liệu từ Nhà cung cấp",
-    event: "Nhập 500 linh kiện từ Tân Phát Tech, kèm hóa đơn GTGT 8% theo Nghị định 72/2024",
-    standardNote: "Ghi nhận giá gốc hàng tồn kho theo hóa đơn đầu vào, theo dõi chi tiết công nợ phải trả NCC 331.",
+    event: "Nhập 500 linh kiện từ Tân Phát Tech, kèm hóa đơn GTGT 8% (theo Nghị định 174/2025/NĐ-CP & NQ 204/2025/QH15 cho mặt hàng đủ điều kiện giảm thuế)",
+    standardNote: "Ghi nhận giá gốc hàng tồn kho theo hóa đơn đầu vào, theo dõi chi tiết công nợ phải trả NCC 331. Thuế suất 8% áp dụng theo danh mục đủ điều kiện đến 31/12/2026.",
     lines: [
       { accountCode: "1561", accountName: "Hàng hóa tồn kho (Kho Linh kiện)", debit: 50000000, credit: 0, note: "Nhập kho theo Phiếu nhập #PNK-0842" },
-      { accountCode: "1331", accountName: "Thuế GTGT được khấu trừ (8%)", debit: 4000000, credit: 0, note: "Thuế GTGT đầu vào theo Nghị định 72" },
+      { accountCode: "1331", accountName: "Thuế GTGT được khấu trừ (8%)", debit: 4000000, credit: 0, note: "Thuế GTGT đầu vào theo NĐ 174/2025 cho nhóm đủ điều kiện" },
       { accountCode: "331", accountName: "Phải trả cho người bán (Tân Phát Tech)", debit: 0, credit: 54000000, note: "Hạn thanh toán 30 ngày (Net 30)" },
     ],
   },

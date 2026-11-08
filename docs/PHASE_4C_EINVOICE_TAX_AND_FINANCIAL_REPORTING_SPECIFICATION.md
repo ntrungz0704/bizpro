@@ -7,7 +7,7 @@
 **Cơ sở pháp lý:** 
 - Nghị định số 123/2020/NĐ-CP của Chính phủ quy định về hóa đơn, chứng từ.
 - Thông tư số 78/2021/TT-BTC của Bộ Tài chính hướng dẫn thực hiện một số điều của Luật Quản lý thuế.
-- Nghị định số 72/2024/NĐ-CP quy định chính sách giảm thuế giá trị gia tăng (GTGT 8%).
+- Nghị quyết số 204/2025/QH15 của Quốc hội và Nghị định số 174/2025/NĐ-CP của Chính phủ quy định chính sách giảm thuế giá trị gia tăng (GTGT 8%, hiệu lực đến hết ngày 31/12/2026, áp dụng cho các nhóm hàng hóa/dịch vụ đủ điều kiện theo phụ lục, loại trừ viễn thông, tài chính, ngân hàng, chứng khoán, bảo hiểm, bất động sản, kim loại, sản phẩm hóa chất...).
 - Chuẩn mực Kế toán Việt Nam số 14 (VAS 14 - Doanh thu và thu nhập khác) và Chuẩn mực Báo cáo Tài chính Quốc tế (IFRS 15).
 **Quy chế bảo vệ hệ thống:** 
 - **100% SPEC-ONLY:** Tuyệt đối không thay đổi mã nguồn backend, frontend runtime hoặc can thiệp database đã đóng băng (Phase 1A–3F FROZEN).
@@ -49,7 +49,7 @@ Theo quy định hiện hành của Luật Thuế GTGT và các Nghị định g
 | :--- | :---: | :--- | :--- |
 | **VAT_0** | 0% | Thông tư 219/2013/TT-BTC | Hàng hóa, dịch vụ xuất khẩu ra nước ngoài hoặc khu phi thuế quan |
 | **VAT_5** | 5% | Thông tư 219/2013/TT-BTC | Nước sạch, thuốc y tế, thiết bị trường học, nông sản sơ chế |
-| **VAT_8** | 8% | Nghị định 72/2024/NĐ-CP | Nhóm hàng hóa, dịch vụ đang áp dụng 10% được giảm 2% theo Nghị quyết Quốc hội |
+| **VAT_8** | 8% | Nghị quyết 204/2025/QH15 & Nghị định 174/2025/NĐ-CP (hiệu lực đến 31/12/2026) | Hàng hóa, dịch vụ đang áp dụng 10% đủ điều kiện giảm 2% (có danh mục loại trừ cụ thể) |
 | **VAT_10** | 10% | Thuế suất phổ thông | Các nhóm hàng hóa, dịch vụ không thuộc diện miễn, 0%, 5% hoặc giảm 8% |
 | **VAT_EXEMPT** | Không chịu thuế | Điều 4 Thông tư 219/2013/TT-BTC | Sản phẩm trồng trọt, chăn nuôi chưa chế biến, phần mềm máy tính, chuyển quyền sử dụng đất |
 | **VAT_NOT_DECLARED** | Không phải kê khai | Điều 5 Thông tư 219/2013/TT-BTC | Khoản bồi thường, tiền thưởng, tiền hỗ trợ, chuyển nhượng dự án đầu tư |

@@ -176,19 +176,43 @@ CREATE TABLE shipping_fulfillments (
 ### 4.1. Xác thực Chữ ký Webhook (HMAC-SHA256)
 Mọi webhook từ đối tác TMĐT đều phải trải qua bước xác thực chữ ký trước khi xử lý payload:
 ```typescript
-// Đặc tả thuật toán xác thực chữ ký TikTok Shop & Shopee
+// Đặc tả thuật toán xác thực chữ ký an toàn (Robust Fail-Closed HMAC Verification)
+import crypto from 'node:crypto';
+
 export function verifyChannelWebhookSignature(
-  rawBody: Buffer,
-  receivedSignature: string,
-  secretKey: string
+  rawBody: Buffer | null | undefined,
+  receivedSignature: string | null | undefined,
+  secretKey: string | null | undefined
 ): boolean {
-  const hmac = crypto.createHmac('sha256', secretKey);
-  hmac.update(rawBody);
-  const calculatedSignature = hmac.digest('hex');
-  return crypto.timingSafeEqual(
-    Buffer.from(receivedSignature, 'utf8'),
-    Buffer.from(calculatedSignature, 'utf8')
-  );
+  // 1. Kiểm tra đầu vào fail-closed: Không xử lý nếu thiếu tham số
+  if (!rawBody || !Buffer.isBuffer(rawBody) || !receivedSignature || typeof receivedSignature !== 'string' || !secretKey) {
+    return false;
+  }
+
+  // 2. Chuẩn hóa định dạng chữ ký hex 64 ký tự (SHA-256 digest)
+  const normalizedReceived = receivedSignature.trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(normalizedReceived)) {
+    return false;
+  }
+
+  try {
+    const hmac = crypto.createHmac('sha256', secretKey);
+    hmac.update(rawBody);
+    const calculatedSignature = hmac.digest('hex');
+
+    const bufReceived = Buffer.from(normalizedReceived, 'utf8');
+    const bufCalculated = Buffer.from(calculatedSignature, 'utf8');
+
+    // 3. Bảo vệ an toàn độ dài buffer trước timingSafeEqual để ngăn chặn RangeError exception
+    if (bufReceived.length !== bufCalculated.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(bufReceived, bufCalculated);
+  } catch {
+    // Fail-closed an toàn: Trả về false đối với mọi lỗi giải mã hoặc ngoại lệ không lường trước
+    return false;
+  }
 }
 ```
 

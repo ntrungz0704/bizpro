@@ -16,14 +16,25 @@ export default function CustomersPage() {
 <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
 <div className="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-primary-fixed text-on-primary-fixed mb-space-lg">
 <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-<span className="font-label-sm text-label-sm uppercase tracking-wider">Khách hàng &amp; Câu chuyện thành công</span>
+<span className="font-label-sm text-label-sm uppercase tracking-wider">Khách hàng &amp; Kịch bản thực tế mô phỏng</span>
 </div>
 <h1 className="font-display text-display-mobile lg:text-display text-on-surface max-w-4xl tracking-tight mb-space-lg">
         Đồng hành cùng doanh nghiệp trên hành trình vận hành hiệu quả
       </h1>
-<p className="font-body-lg text-body-lg text-secondary max-w-3xl mb-space-xl">
-        Tìm hiểu cách hơn 2.500+ doanh nghiệp Việt Nam tại nhiều lĩnh vực chuẩn hóa dòng chảy dữ liệu, tinh gọn bộ máy và tối ưu biên lợi nhuận cùng hệ sinh thái BizPro+.
+<p className="font-body-lg text-body-lg text-secondary max-w-3xl mb-space-lg">
+        Tìm hiểu cách các doanh nghiệp Việt Nam tại nhiều lĩnh vực chuẩn hóa dòng chảy dữ liệu, tinh gọn bộ máy và tối ưu biên lợi nhuận cùng hệ sinh thái BizPro+.
       </p>
+
+{/* Transparency & Demo Persona Banner */}
+<div className="w-full max-w-4xl mx-auto mb-space-xl p-4 rounded-2xl bg-amber-50/90 border border-amber-200/90 text-left flex items-start gap-3 text-xs text-amber-900 leading-relaxed shadow-xs select-none">
+  <span className="material-symbols-outlined text-[20px] text-amber-600 shrink-0 mt-0.5">info</span>
+  <div>
+    <span className="font-bold uppercase tracking-wider block mb-0.5 text-amber-800">
+      Thông báo minh bạch dữ liệu (Illustrative Persona &amp; Demo Showcase)
+    </span>
+    Các chỉ số vận hành (99.8% độ chính xác, 3.5x tốc độ xử lý đơn), kịch bản tình huống (Case Studies) và phát biểu chia sẻ trên trang này được xây dựng dựa trên kịch bản nghiệp vụ mô phỏng nhằm minh họa năng lực xử lý quy trình của BizPro+ cho các mô hình bán lẻ &amp; phân phối Việt Nam. Nhằm bảo đảm cam kết bảo mật thông tin (NDA) và quyền riêng tư theo pháp luật, hệ thống không công bố danh tính hoặc số liệu tài chính nhạy cảm của khách hàng doanh nghiệp khi chưa có văn bản chấp thuận chính thức.
+  </div>
+</div>
 <div className="flex flex-col sm:flex-row items-center gap-space-md mb-20">
 <a className="w-full sm:w-auto inline-flex items-center justify-center px-space-xl py-3 rounded-lg bg-primary-container text-on-primary font-body-md-medium text-body-md-medium hover:bg-primary transition-colors shadow-sm" href="#featured-case">
           Khám phá câu chuyện tiêu biểu
@@ -110,15 +121,15 @@ export default function CustomersPage() {
 <div className="lg:col-span-7 flex flex-col items-start pr-0 lg:pr-space-lg">
 <div className="inline-flex items-center gap-space-xs px-space-md py-1 rounded-full bg-secondary-container text-on-secondary-fixed mb-space-md">
 <span className="material-symbols-outlined text-[14px]">storefront</span>
-<span className="font-label-sm text-label-sm tracking-wide uppercase">Tiêu điểm chuyển đổi số — Retail &amp; Omnichannel</span>
+<span className="font-label-sm text-label-sm tracking-wide uppercase font-semibold">Kịch bản nghiệp vụ mô phỏng — Retail &amp; Omnichannel Persona</span>
 </div>
 <h2 className="font-headline-lg text-headline-lg-mobile lg:text-headline-lg text-on-surface mb-space-md leading-tight">
-            Chuỗi Bán lẻ Thời trang V-Style: Quản trị đồng bộ 18 cửa hàng &amp; 3 sàn TMĐT trên một màn hình duy nhất
+            Kịch bản Chuỗi Thời trang V-Style: Quản trị đồng bộ 18 cửa hàng &amp; 3 sàn TMĐT trên một màn hình duy nhất
           </h2>
 <div className="flex flex-wrap items-center gap-space-md py-space-sm mb-space-md text-secondary font-label-md text-label-md">
-<span className="inline-flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">domain</span> 18 showroom toàn quốc</span>
+<span className="inline-flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">domain</span> Kịch bản 18 showroom</span>
 <span className="text-outline-variant">•</span>
-<span className="inline-flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">groups</span> 85 nhân sự</span>
+<span className="inline-flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">groups</span> 85 nhân sự mô phỏng</span>
 <span className="text-outline-variant">•</span>
 <span className="inline-flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">inventory_2</span> 12.000 SKU hoạt động</span>
 </div>
@@ -146,12 +157,16 @@ export default function CustomersPage() {
 </div>
 </div>
 {/* Customer Quote */}
-<div className="p-space-lg bg-surface-container-low rounded-xl w-full">
+<div className="p-space-lg bg-surface-container-low rounded-xl w-full border border-surface-container/60">
+<div className="text-[11px] text-amber-700 font-semibold mb-2 flex items-center gap-1">
+  <span className="material-symbols-outlined text-[14px]">info</span>
+  <span>Phát biểu mô phỏng theo kịch bản trải nghiệm giải pháp SME</span>
+</div>
 <p className="font-body-md text-body-md text-on-surface italic mb-space-sm">
               “Trước đây mỗi đợt sale là nỗi ám ảnh đối soát và kiểm kho. Với BizPro+, ban lãnh đạo nhìn thấy doanh thu và tồn kho chuẩn xác từng giây từ điện thoại.”
             </p>
 <div className="font-body-md-medium text-body-md-medium text-on-surface">Ông Trần Quốc Bảo</div>
-<div className="font-caption text-caption text-secondary">Giám đốc Điều hành V-Style</div>
+<div className="font-caption text-caption text-secondary">Đại diện kịch bản Chuỗi Bán lẻ Thời trang V-Style</div>
 </div>
 </div>
 {/* Right Visual Mockup Panel */}
@@ -496,11 +511,14 @@ export default function CustomersPage() {
 {/* Testimonials Wall */}
 <section className="w-full bg-surface-container-low py-20 px-margin">
 <div className="max-w-7xl mx-auto">
-<div className="text-center max-w-2xl mx-auto mb-space-xl">
-<span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Góc nhìn lãnh đạo</span>
+<div className="text-center max-w-3xl mx-auto mb-space-xl">
+<span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold">Góc nhìn vận hành (Kịch bản mô phỏng)</span>
 <h2 className="font-headline-lg text-headline-lg-mobile lg:text-headline-lg text-on-surface mt-1 tracking-tight">
-          Lãnh đạo nói gì về BizPro+
+          Trải nghiệm giải pháp theo từng mô hình doanh nghiệp
         </h2>
+<p className="font-caption text-caption text-secondary mt-2">
+  Dưới đây là các kịch bản phản hồi mô phỏng theo khảo sát thực tế bài toán vận hành của doanh nghiệp vừa và nhỏ (SME) Việt Nam.
+</p>
 </div>
 <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
 {/* Testimonial 1 */}
@@ -523,7 +541,7 @@ export default function CustomersPage() {
 </div>
 <div>
 <div className="font-title-md text-title-md font-semibold text-on-surface">Chị Phạm Mai Lan</div>
-<div className="font-caption text-caption text-secondary">Giám đốc Vận hành SunBaby</div>
+<div className="font-caption text-caption text-secondary">Đại diện kịch bản Chuỗi Mẹ &amp; Bé SunBaby (Mô phỏng)</div>
 </div>
 </div>
 </div>
@@ -547,7 +565,7 @@ export default function CustomersPage() {
 </div>
 <div>
 <div className="font-title-md text-title-md font-semibold text-on-surface">Anh Nguyễn Văn Hưng</div>
-<div className="font-caption text-caption text-secondary">CEO Tân Phát Tech</div>
+<div className="font-caption text-caption text-secondary">Đại diện kịch bản Phân phối Tân Phát Tech (Mô phỏng)</div>
 </div>
 </div>
 </div>
@@ -571,7 +589,7 @@ export default function CustomersPage() {
 </div>
 <div>
 <div className="font-title-md text-title-md font-semibold text-on-surface">Chị Lê Thanh Trúc</div>
-<div className="font-caption text-caption text-secondary">Kế toán trưởng LogiTech Á Châu</div>
+<div className="font-caption text-caption text-secondary">Đại diện kịch bản Tài chính LogiTech Á Châu (Mô phỏng)</div>
 </div>
 </div>
 </div>
