@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   ShoppingCart,
@@ -25,6 +25,7 @@ import MarketingHeader from "@/components/marketing/MarketingHeader";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 
 export default function SalesOrderFeaturePage() {
+  const [activeStage, setActiveStage] = useState<number>(2);
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-amber-100 selection:text-amber-800">
       <MarketingHeader />
@@ -58,7 +59,7 @@ export default function SalesOrderFeaturePage() {
 
                 <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
                   Quản lý đơn hàng chặt chẽ tương tự Shopee và TikTok. 
-                  Tự động khóa giữ tồn kho, tính thuế VAT 10%, đối soát công nợ và tra cứu mã vận chuyển GHN, GHTK trực tiếp.
+                  Tự động khóa giữ tồn kho, tính thuế GTGT 8%/10% theo quy định, đối soát công nợ và hỗ trợ tra cứu mã vận chuyển đa hãng (Mục tiêu thiết kế kiến trúc).
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -82,21 +83,27 @@ export default function SalesOrderFeaturePage() {
                 <div className="pt-6 border-t border-slate-200/70 grid grid-cols-3 gap-4">
                   <div>
                     <div className="text-xl sm:text-2xl font-black text-slate-900">3.2x</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Tốc độ xử lý đơn</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Tốc độ (Mục tiêu hiệu suất)</div>
                   </div>
                   <div>
                     <div className="text-xl sm:text-2xl font-black text-slate-900">0 Sai sót</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Trong khâu đóng gói</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Đóng gói (Mục tiêu kiểm soát)</div>
                   </div>
                   <div>
                     <div className="text-xl sm:text-2xl font-black text-slate-900">99.8%</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Giao hàng đúng hẹn</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Đúng hẹn (Cam kết SLA mẫu)</div>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Visual Sales Order Mockup Card */}
               <div className="lg:col-span-6 relative">
+                {/* Simulation Disclaimer Badge */}
+                <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 px-3 py-1.5 rounded-lg mb-3 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span>MÔ PHỎNG MINH HỌA — Dữ liệu đơn hàng giả lập demo, không kết nối hệ thống runtime.</span>
+                </div>
+
                 <div className="relative mx-auto max-w-[640px] rounded-2xl bg-white p-4 sm:p-6 shadow-[0_20px_50px_rgba(217,119,6,0.08)] border border-amber-100 transition-all">
                   
                   <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100">
@@ -153,73 +160,159 @@ export default function SalesOrderFeaturePage() {
         </section>
 
         {/* =========================================================================
-            2. THE 5-STAGE SEQUENTIAL LIFECYCLE (Chi Tiết 5 Bước)
+            2. THE 5-STAGE SEQUENTIAL LIFECYCLE (Interactive Simulator)
             ========================================================================= */}
         <section className="py-20 bg-white border-y border-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
+            <div className="text-center max-w-3xl mx-auto space-y-3 mb-10">
               <span className="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200/60">
                 Chuẩn Hóa Vận Hành
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                5 Giai đoạn khép kín, tuyệt đối không nhảy cóc
+                Mô Phỏng 5 Giai Đoạn Đơn Hàng Tuần Tự
               </h2>
               <p className="text-slate-600 text-base">
-                Mỗi bước yêu cầu điều kiện kiểm tra nghiêm ngặt về tồn kho và chữ ký xác nhận của các bộ phận liên quan.
+                Mỗi giai đoạn kiểm soát chặt chẽ điều kiện tồn kho, chứng từ phiếu xuất và chuẩn mực ghi nhận doanh thu kế toán.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="bg-[#F8FAFC] rounded-2xl p-5 border border-slate-200 space-y-2">
-                <span className="w-8 h-8 rounded-full bg-slate-200 text-slate-800 font-black text-xs flex items-center justify-center">
-                  1
+            {/* Simulation Disclaimer Banner */}
+            <div className="max-w-4xl mx-auto mb-8 flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 text-xs font-medium">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span>MÔ PHỎNG MINH HỌA — Nhấp vào từng bước để theo dõi luồng tác động tồn kho và hạch toán kế toán.</span>
+              </div>
+              <span className="text-[10px] text-amber-700 uppercase font-bold tracking-wider hidden sm:inline">Interactive Demo</span>
+            </div>
+
+            {/* 5 Step Selector Buttons */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+              {[
+                { step: 1, title: "1. Nháp (DRAFT)", color: "slate" },
+                { step: 2, title: "2. Xác Nhận (CONFIRMED)", color: "blue" },
+                { step: 3, title: "3. Đóng Gói (PROCESSING)", color: "amber" },
+                { step: 4, title: "4. Đang Giao (SHIPPING)", color: "indigo" },
+                { step: 5, title: "5. Hoàn Tất (FULFILLED)", color: "emerald" },
+              ].map((item) => (
+                <button
+                  key={item.step}
+                  type="button"
+                  onClick={() => setActiveStage(item.step)}
+                  className={`p-3.5 rounded-2xl text-left border transition-all ${
+                    activeStage === item.step
+                      ? "bg-amber-600 text-white border-amber-600 shadow-md scale-[1.02]"
+                      : "bg-[#F8FAFC] text-slate-700 border-slate-200 hover:border-amber-300"
+                  }`}
+                >
+                  <div className="text-[11px] font-bold opacity-80">Bước {item.step}</div>
+                  <div className="text-xs font-extrabold mt-0.5">{item.title}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* Interactive Stage Detail Card */}
+            <div className="max-w-4xl mx-auto bg-[#F8FAFC] border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-200 mb-6">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-extrabold text-xs flex items-center justify-center">
+                    {activeStage}
+                  </span>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-base sm:text-lg">
+                      {activeStage === 1 && "Giai đoạn 1: Lập Đơn Nháp (DRAFT)"}
+                      {activeStage === 2 && "Giai đoạn 2: Khách Xác Nhận Chốt Mua (CONFIRMED)"}
+                      {activeStage === 3 && "Giai đoạn 3: Thủ Kho Đóng Gói (PROCESSING)"}
+                      {activeStage === 4 && "Giai đoạn 4: Bàn Giao Vận Chuyển (SHIPPING)"}
+                      {activeStage === 5 && "Giai đoạn 5: Giao Hàng Thành Công (FULFILLED)"}
+                    </h3>
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      Trạng thái hệ thống: {activeStage === 1 ? "DRAFT" : activeStage === 2 ? "CONFIRMED" : activeStage === 3 ? "PROCESSING" : activeStage === 4 ? "SHIPPING" : "FULFILLED"}
+                    </div>
+                  </div>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                  {activeStage === 1 && "Chưa tác động kho"}
+                  {activeStage === 2 && "Khóa giữ tồn khả dụng"}
+                  {activeStage === 3 && "In phiếu xuất kho PXK"}
+                  {activeStage === 4 && "Đã cấp mã vận đơn"}
+                  {activeStage === 5 && "Doanh thu VAS 14 / IFRS 15"}
                 </span>
-                <h4 className="font-bold text-slate-900 text-sm">Giai Đoạn 1: Đơn Nháp (DRAFT)</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Nhân viên kinh doanh chọn mặt hàng, áp dụng bảng giá sỉ và gửi báo giá tham khảo. Chưa giữ tồn kho.
-                </p>
               </div>
 
-              <div className="bg-[#F8FAFC] rounded-2xl p-5 border border-blue-200 bg-blue-50/10 space-y-2">
-                <span className="w-8 h-8 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center">
-                  2
-                </span>
-                <h4 className="font-bold text-blue-900 text-sm">Giai Đoạn 2: Xác Nhận (CONFIRMED)</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Khách chốt mua. Hệ thống kiểm tra số dư tồn khả dụng và tự động khóa giữ hàng trong kho.
-                </p>
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                <div className="space-y-3">
+                  <div className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Tác Động Tồn Kho & Chứng Từ</div>
+                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1.5">
+                    {activeStage === 1 && (
+                      <>
+                        <div className="font-bold text-slate-800">Tồn kho: Không thay đổi</div>
+                        <p className="text-slate-500 leading-relaxed">Nhân viên kinh doanh khảo giá, tạo báo giá gửi khách hàng. Chưa trừ và chưa khóa giữ hàng trong kho.</p>
+                      </>
+                    )}
+                    {activeStage === 2 && (
+                      <>
+                        <div className="font-bold text-blue-700">Tồn kho: Khóa giữ nguyên tử (Atomic Lock)</div>
+                        <p className="text-slate-500 leading-relaxed">Kiểm tra tức thời số dư tồn khả dụng. Tự động chuyển 50 SKU sang trạng thái đã khóa giữ, ngăn ngừa bán âm.</p>
+                      </>
+                    )}
+                    {activeStage === 3 && (
+                      <>
+                        <div className="font-bold text-amber-700">Chứng từ: Phát hành Phiếu xuất kho #PXK</div>
+                        <p className="text-slate-500 leading-relaxed">Thủ kho in phiếu đóng gói, quét mã vạch GS1-128 kiểm đếm thực tế và niêm phong thùng hàng.</p>
+                      </>
+                    )}
+                    {activeStage === 4 && (
+                      <>
+                        <div className="font-bold text-indigo-700">Vận đơn: Liên thông API Đơn vị giao hàng</div>
+                        <p className="text-slate-500 leading-relaxed">Bàn giao bưu tá GHN / GHTK / Viettel Post. Hệ thống theo dõi trạng thái di chuyển qua Webhook.</p>
+                      </>
+                    )}
+                    {activeStage === 5 && (
+                      <>
+                        <div className="font-bold text-emerald-700">Tồn kho: Trừ tồn kho thực tế vĩnh viễn</div>
+                        <p className="text-slate-500 leading-relaxed">Khách hàng ký nhận biên bản giao hàng. Trừ chính thức vào Sổ thẻ kho và giải phóng lượng hàng đã khóa giữ.</p>
+                      </>
+                    )}
+                  </div>
+                </div>
 
-              <div className="bg-[#F8FAFC] rounded-2xl p-5 border border-amber-200 bg-amber-50/10 space-y-2">
-                <span className="w-8 h-8 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">
-                  3
-                </span>
-                <h4 className="font-bold text-amber-900 text-sm">Giai Đoạn 3: Đóng Gói (PROCESSING)</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Thủ kho in phiếu xuất, kiểm tra hàng hóa theo mã vạch và đóng thùng dán nhãn niêm phong.
-                </p>
-              </div>
-
-              <div className="bg-[#F8FAFC] rounded-2xl p-5 border border-indigo-200 bg-indigo-50/10 space-y-2">
-                <span className="w-8 h-8 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center">
-                  4
-                </span>
-                <h4 className="font-bold text-indigo-900 text-sm">Giai Đoạn 4: Đang Giao (SHIPPING)</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Bàn giao cho bưu tá các hãng vận chuyển GHN, GHTK. Cập nhật mã vận đơn để khách theo dõi vị trí.
-                </p>
-              </div>
-
-              <div className="bg-[#F8FAFC] rounded-2xl p-5 border border-emerald-200 bg-emerald-50/10 space-y-2">
-                <span className="w-8 h-8 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center">
-                  5
-                </span>
-                <h4 className="font-bold text-emerald-900 text-sm">Giai Đoạn 5: Hoàn Tất (FULFILLED)</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Khách đã nhận hàng và thanh toán đủ. Trừ tồn kho thực tế vĩnh viễn và ghi nhận doanh thu kế toán.
-                </p>
+                <div className="space-y-3">
+                  <div className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Hạch Toán Kế Toán & Doanh Thu</div>
+                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1.5 font-mono text-[11px]">
+                    {activeStage === 1 && (
+                      <div className="text-slate-500 font-sans">
+                        Chưa phát sinh bút toán kế toán tài chính. Đơn hàng lưu tại phân hệ Bán hàng để theo dõi tiến độ cơ hội.
+                      </div>
+                    )}
+                    {activeStage === 2 && (
+                      <div className="text-slate-500 font-sans">
+                        Chưa đủ điều kiện ghi nhận doanh thu (theo VAS 14 & IFRS 15 vì quyền kiểm soát hàng hóa chưa được bàn giao cho khách).
+                      </div>
+                    )}
+                    {activeStage === 3 && (
+                      <div className="text-slate-500 font-sans">
+                        Xuất kho phục vụ giao hàng. Hàng hóa chuyển từ trạng thái tồn tại kho sang hàng đang đi đường (TK 157 nếu áp dụng).
+                      </div>
+                    )}
+                    {activeStage === 4 && (
+                      <div className="text-slate-600 font-sans">
+                        Theo dõi công nợ thu hộ COD qua bưu tá vận chuyển. Đối soát dòng tiền thu hộ định kỳ.
+                      </div>
+                    )}
+                    {activeStage === 5 && (
+                      <div className="space-y-1">
+                        <div className="text-emerald-700 font-bold font-sans">Ghi nhận Doanh thu & Giá vốn chính thức:</div>
+                        <div className="text-slate-700">• Nợ TK 131: Phải thu KH / Tiền COD</div>
+                        <div className="text-slate-700">• Có TK 5111: Doanh thu bán hàng</div>
+                        <div className="text-slate-700">• Có TK 33311: Thuế GTGT đầu ra (8%/10%)</div>
+                        <div className="text-slate-700">• Nợ TK 632 / Có TK 156: Trị giá vốn hàng xuất bán</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
         </section>
 
@@ -284,11 +377,11 @@ export default function SalesOrderFeaturePage() {
               Chính Sách Giá Linh Hoạt
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Tự động tính thuế VAT 10% và chiết khấu theo cấp đại lý
+              Tự động tính thuế GTGT 8%/10% và chiết khấu theo cấp đại lý
             </h2>
             <p className="text-slate-600 text-base max-w-2xl mx-auto">
               Hệ thống tự động áp dụng biểu phí chiết khấu riêng cho Đại lý Cấp 1, Cấp 2 hoặc Khách hàng thân thiết. 
-              Mọi đơn hàng xuất hóa đơn đều được tính toán chính xác tiền thuế giá trị gia tăng VAT 10% theo quy định tài chính.
+              Mọi đơn hàng xuất hóa đơn đều được tính toán chính xác tiền thuế GTGT (8% hoặc 10% tùy theo quy định phân loại hàng hóa của Nghị định 174/2025/NĐ-CP và Nghị quyết 204/2025/QH15).
             </p>
           </div>
         </section>
