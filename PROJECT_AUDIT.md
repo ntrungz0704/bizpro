@@ -207,7 +207,10 @@ bizpro/
   - Added `PermissionsGuard` and granular `@RequirePermissions` across all Inventory endpoints (`inventory.products.read`, `inventory.products.write`, `inventory.stock.read`, `inventory.stock.manage`).
   - Unauthenticated requests return `401 Unauthorized`; authenticated requests without matching permission return `403 Forbidden`.
 - **SEC-05 - Production Bootstrap Security & Credential Protection (RESOLVED & VERIFIED):**
-  - Added startup detection in `BootstrapService` for production mode: checks if persistent admin user is retaining known default credentials (`Admin@123456`) and logs an urgent security alert or rotates using `INITIAL_ADMIN_PASSWORD`.
+  - **Existing Default Admin Deactivation (Fail-Closed):** In production (`NODE_ENV === 'production'`), if the persistent admin account retains the known default password (`Admin@123456`) and `INITIAL_ADMIN_PASSWORD` is absent, `BootstrapService` automatically deactivates the account (`status: 'INACTIVE'`) and logs a critical security alert.
+  - **Password Rotation:** If `INITIAL_ADMIN_PASSWORD` is explicitly configured in production, the admin password hash is securely rotated using Argon2id and status remains `ACTIVE`.
+  - **Missing Admin Protection:** If no admin user exists in production and `INITIAL_ADMIN_PASSWORD` is missing, `BootstrapService` strictly skips automatic default admin provisioning and default role creation, preventing any default credentials from entering the database.
+  - **Foundational Seeding Preserved:** Organization and system permission catalog seeding continue to complete safely without interruption.
   - Configured `INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}` in `docker-compose.prod.yml`.
 - **SEC-06 - Prisma Migration Safety (RESOLVED & VERIFIED):**
   - Relocated `sql_patches/` to `backend/prisma/sql_patches/` (strictly outside `backend/prisma/migrations/`), ensuring `npx prisma validate` and `npx prisma migrate status` run cleanly without interpreting SQL patch folders as malformed migrations.
@@ -282,16 +285,17 @@ The backend includes extensive integration, E2E, and targeted security test suit
     - Denies database role `SUPER_ADMIN` / `ORG_ADMIN` bypass when role belongs to a different organization (403).
     - Denies database role `SUPER_ADMIN` / `ORG_ADMIN` bypass when role organizationId or caller organizationId is missing/null (fail-closed check).
     - Allows database role `SUPER_ADMIN` / `ORG_ADMIN` bypass when role belongs to caller organization.
-- `src/auth/bootstrap.service.spec.ts`: **5/5 TESTS PASSING (100%)**
+- `src/auth/bootstrap.service.spec.ts`: **6/6 TESTS PASSING (100%)**
   - Scenario 1: Production + Default Password + Missing `INITIAL_ADMIN_PASSWORD` -> Fail-closed account deactivation (`status: 'INACTIVE'`).
   - Scenario 2: Production + Default Password + Provided `INITIAL_ADMIN_PASSWORD` -> Password hash rotated with Argon2id & status remains `ACTIVE`.
   - Scenario 3: Production + Non-Default Password -> Existing admin credentials preserved, no deactivation.
   - Scenario 4: Development Environment -> Default credentials permitted without deactivation.
-  - Scenario 5: Missing Admin in Production without `INITIAL_ADMIN_PASSWORD` -> Aborts default admin creation, no default credential seeded.
+  - Scenario 5: Missing Admin in Production without `INITIAL_ADMIN_PASSWORD` -> Aborts default admin & role creation, no default credential seeded.
+  - Scenario 6: Missing Admin in Production WITH `INITIAL_ADMIN_PASSWORD` -> Provisions roles and admin user safely.
 - `test/security-http-pipeline.e2e-spec.ts`: **15/15 TESTS PASSING (100%)**
   - 10 Unauthenticated requests across CRM, Inventory, Users, Departments, RBAC, Organization controllers return HTTP 401 Unauthorized.
   - 5 Authenticated requests lacking explicit permissions return HTTP 403 Forbidden.
-- Total Backend Unit Test Suite (`npm test`): **49/49 PASSING across 6 suites** (`security-isolation`, `bootstrap.service`, `crypto.service`, `env.validation`, `http-exception.filter`, `transform-response.interceptor`).
+- Total Backend Unit Test Suite (`npm test`): **50/50 PASSING across 6 suites** (`security-isolation`, `bootstrap.service`, `crypto.service`, `env.validation`, `http-exception.filter`, `transform-response.interceptor`).
 - Integration & E2E Suites:
   - `auth.e2e-spec.ts`: Authentication, registration, JWT refresh cycles.
   - `database-invariants.e2e-spec.ts`: Foreign key cascades, schema constraints, unique indices.
@@ -409,8 +413,8 @@ The BizPro+ codebase has successfully resolved all verified security blockers, t
 - **Tenant Isolation & RBAC Hardening:** Enforced at both database RLS and NestJS application service/controller layers with zero cross-tenant leakage. `PermissionsGuard` enforces fail-closed organization-scoped admin access (`callerOrgId === role.organizationId`).
 - **Production Admin Bootstrap Security:** Fail-closed account deactivation (`status: 'INACTIVE'`) if default password is used without `INITIAL_ADMIN_PASSWORD`; safe hash rotation when provided.
 - **Build Verification:** Backend `nest build` PASS (Exit Code 0); Frontend `next build` PASS (Exit Code 0, 46 static pages generated); `tsc --noEmit` PASS (0 errors).
-- **Test Evidence (64/64 Tests PASS):**
-  - Backend Unit Tests: 49/49 PASS across 6 suites (including 26 Security Isolation tests and 5 Bootstrap regression tests).
+- **Test Evidence (65/65 Tests PASS):**
+  - Backend Unit Tests: 50/50 PASS across 6 suites (including 26 Security Isolation tests and 6 Bootstrap regression tests).
   - Backend E2E Tests: 15/15 PASS (10 endpoints returning 401 for unauthenticated requests, 5 endpoints returning 403 for unauthorized requests).
 - **Governance Integrity:** All frozen deliverables (Phase 1A–3F, OPS-01/02/03) and Phase 4A spec-only boundaries preserved intact.
 

@@ -72,70 +72,77 @@ export class BootstrapService implements OnApplicationBootstrap {
         });
       }
 
-      // 3. Ensure Default Roles for Organization exist
-      let adminRole = await tx.role.findFirst({
-        where: { organizationId: org.id, code: 'ADMIN' },
-      });
+      // 3. Admin & User Provisioning Guard for Production
+      const isProdWithoutInitialPassword =
+        process.env.NODE_ENV === 'production' && !process.env.INITIAL_ADMIN_PASSWORD;
 
-      if (!adminRole) {
-        adminRole = await tx.role.create({
-          data: {
-            organizationId: org.id,
-            name: 'Quản trị viên hệ thống',
-            code: 'ADMIN',
-            description: 'Toàn quyền quản trị tổ chức và phân quyền',
-            isSystem: true,
-          },
-        });
-        this.logger.log(`Created ADMIN role for Org ${org.code}`);
-      }
+      let adminRole: any = null;
+      let userRole: any = null;
 
-      let userRole = await tx.role.findFirst({
-        where: { organizationId: org.id, code: 'USER' },
-      });
-
-      if (!userRole) {
-        userRole = await tx.role.create({
-          data: {
-            organizationId: org.id,
-            name: 'Nhân viên',
-            code: 'USER',
-            description: 'Quyền tác nghiệp tiêu chuẩn',
-            isSystem: false,
-          },
-        });
-        this.logger.log(`Created USER role for Org ${org.code}`);
-      }
-
-      // Bind permissions to Admin Role
-      const allPerms = await tx.permission.findMany();
-      for (const p of allPerms) {
-        await tx.rolePermission.upsert({
-          where: {
-            roleId_permissionId: {
-              roleId: adminRole.id,
-              permissionId: p.id,
-            },
-          },
-          update: {},
-          create: {
-            roleId: adminRole.id,
-            permissionId: p.id,
-          },
-        });
-      }
-
-      // 4. Ensure Default Admin User exists (Dev / Staging, or when explicitly configured in production)
       let adminUser = await tx.user.findFirst({
         where: { email: 'admin@bizpro.vn' },
       });
 
-      if (!adminUser) {
-        if (process.env.NODE_ENV === 'production' && !process.env.INITIAL_ADMIN_PASSWORD) {
-          this.logger.warn(
-            'Production security guard: INITIAL_ADMIN_PASSWORD is not set. Skipping automatic admin provisioning.',
-          );
-        } else {
+      if (!adminUser && isProdWithoutInitialPassword) {
+        this.logger.warn(
+          'Production security guard: INITIAL_ADMIN_PASSWORD is not configured and no admin exists. Skipping default admin and role provisioning to prevent insecure credentials.',
+        );
+      } else {
+        // Ensure Default Roles exist
+        adminRole = await tx.role.findFirst({
+          where: { organizationId: org.id, code: 'ADMIN' },
+        });
+
+        if (!adminRole) {
+          adminRole = await tx.role.create({
+            data: {
+              organizationId: org.id,
+              name: 'Quản trị viên hệ thống',
+              code: 'ADMIN',
+              description: 'Toàn quyền quản trị tổ chức và phân quyền',
+              isSystem: true,
+            },
+          });
+          this.logger.log(`Created ADMIN role for Org ${org.code}`);
+        }
+
+        userRole = await tx.role.findFirst({
+          where: { organizationId: org.id, code: 'USER' },
+        });
+
+        if (!userRole) {
+          userRole = await tx.role.create({
+            data: {
+              organizationId: org.id,
+              name: 'Nhân viên',
+              code: 'USER',
+              description: 'Quyền tác nghiệp tiêu chuẩn',
+              isSystem: false,
+            },
+          });
+          this.logger.log(`Created USER role for Org ${org.code}`);
+        }
+
+        // Bind permissions to Admin Role
+        const allPerms = await tx.permission.findMany();
+        for (const p of allPerms) {
+          await tx.rolePermission.upsert({
+            where: {
+              roleId_permissionId: {
+                roleId: adminRole.id,
+                permissionId: p.id,
+              },
+            },
+            update: {},
+            create: {
+              roleId: adminRole.id,
+              permissionId: p.id,
+            },
+          });
+        }
+
+        // Provision admin user if missing
+        if (!adminUser) {
           const initialPassword = process.env.INITIAL_ADMIN_PASSWORD || 'Admin@123456';
           const passwordHash = await this.cryptoService.hashPassword(initialPassword);
           adminUser = await tx.user.create({
@@ -158,27 +165,27 @@ export class BootstrapService implements OnApplicationBootstrap {
             },
           });
           this.logger.log(`Created default Admin user: ${adminUser.email}`);
-        }
-      } else if (process.env.NODE_ENV === 'production') {
-        // In production, check if existing admin is still using known default password
-        const isDefaultPassword = await this.cryptoService.comparePassword('Admin@123456', adminUser.passwordHash);
-        if (isDefaultPassword) {
-          if (process.env.INITIAL_ADMIN_PASSWORD) {
-            const newHash = await this.cryptoService.hashPassword(process.env.INITIAL_ADMIN_PASSWORD);
-            await tx.user.update({
-              where: { id: adminUser.id },
-              data: { passwordHash: newHash, status: 'ACTIVE' },
-            });
-            this.logger.log('Production security: Rotated default admin password using INITIAL_ADMIN_PASSWORD.');
-          } else {
-            // Strict fail-closed: deactivate default admin account to prevent exploitation of default credentials
-            await tx.user.update({
-              where: { id: adminUser.id },
-              data: { status: 'INACTIVE' },
-            });
-            this.logger.error(
-              'CRITICAL PRODUCTION FAIL-CLOSED: Default admin account admin@bizpro.vn retained known default credentials without INITIAL_ADMIN_PASSWORD. Account has been automatically deactivated (INACTIVE).',
-            );
+        } else if (process.env.NODE_ENV === 'production') {
+          // In production, check if existing admin is still using known default password
+          const isDefaultPassword = await this.cryptoService.comparePassword('Admin@123456', adminUser.passwordHash);
+          if (isDefaultPassword) {
+            if (process.env.INITIAL_ADMIN_PASSWORD) {
+              const newHash = await this.cryptoService.hashPassword(process.env.INITIAL_ADMIN_PASSWORD);
+              await tx.user.update({
+                where: { id: adminUser.id },
+                data: { passwordHash: newHash, status: 'ACTIVE' },
+              });
+              this.logger.log('Production security: Rotated default admin password using INITIAL_ADMIN_PASSWORD.');
+            } else {
+              // Strict fail-closed: deactivate default admin account to prevent exploitation of default credentials
+              await tx.user.update({
+                where: { id: adminUser.id },
+                data: { status: 'INACTIVE' },
+              });
+              this.logger.error(
+                'CRITICAL PRODUCTION FAIL-CLOSED: Default admin account admin@bizpro.vn retained known default credentials without INITIAL_ADMIN_PASSWORD. Account has been automatically deactivated (INACTIVE).',
+              );
+            }
           }
         }
       }

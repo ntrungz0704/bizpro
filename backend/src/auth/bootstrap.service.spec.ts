@@ -38,12 +38,12 @@ describe('BootstrapService - Production Admin Credential Security', () => {
         },
         role: {
           findFirst: jest.fn().mockResolvedValue({ id: 'role-admin', code: 'SUPER_ADMIN' }),
-          create: jest.fn(),
+          create: jest.fn().mockResolvedValue({ id: 'new-role-id', code: 'ADMIN' }),
           upsert: jest.fn().mockResolvedValue({ id: 'role-admin', code: 'SUPER_ADMIN' }),
         },
         user: {
           findFirst: jest.fn(),
-          create: jest.fn(),
+          create: jest.fn().mockResolvedValue({ id: 'new-admin-id', email: 'admin@bizpro.vn' }),
           update: jest.fn(),
         },
         userRole: {
@@ -141,21 +141,38 @@ describe('BootstrapService - Production Admin Credential Security', () => {
     expect(mockPrisma._tx.user.update).not.toHaveBeenCalled();
   });
 
-  it('Scenario 5: Missing Admin in Production without INITIAL_ADMIN_PASSWORD -> Aborts default admin creation to prevent default credentials', async () => {
+  it('Scenario 5: Missing Admin in Production without INITIAL_ADMIN_PASSWORD -> Aborts default admin & role creation', async () => {
     process.env.NODE_ENV = 'production';
     delete process.env.INITIAL_ADMIN_PASSWORD;
 
-    // Admin user does not exist in database
+    // Admin user and roles do not exist in database
     mockPrisma._tx.user.findFirst.mockResolvedValue(null);
+    mockPrisma._tx.role.findFirst.mockResolvedValue(null);
 
     await bootstrapService.bootstrapCoreData();
 
-    // Must NOT create default admin user with Admin@123456
+    // Must NOT create default admin user or default roles
     expect(mockPrisma._tx.user.create).not.toHaveBeenCalled();
     expect(mockPrisma._tx.userRole.create).not.toHaveBeenCalled();
+    expect(mockPrisma._tx.role.create).not.toHaveBeenCalled();
     expect(mockCrypto.hashPassword).not.toHaveBeenCalledWith('Admin@123456');
 
-    // But valid seed data (e.g. default organization and permissions) must still complete
+    // But valid foundational seed data (Organization and Permissions) must still complete
     expect(mockPrisma._tx.permission.upsert).toHaveBeenCalled();
+  });
+
+  it('Scenario 6: Missing Admin in Production WITH INITIAL_ADMIN_PASSWORD -> Provisions roles and admin safely', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.INITIAL_ADMIN_PASSWORD = 'NewProdAdminPassword2026!';
+
+    mockPrisma._tx.user.findFirst.mockResolvedValue(null);
+    mockPrisma._tx.role.findFirst.mockResolvedValue(null);
+
+    await bootstrapService.bootstrapCoreData();
+
+    expect(mockCrypto.hashPassword).toHaveBeenCalledWith('NewProdAdminPassword2026!');
+    expect(mockPrisma._tx.user.create).toHaveBeenCalled();
+    expect(mockPrisma._tx.role.create).toHaveBeenCalled();
+    expect(mockPrisma._tx.userRole.create).toHaveBeenCalled();
   });
 });
