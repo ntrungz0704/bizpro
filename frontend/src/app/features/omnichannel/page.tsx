@@ -140,6 +140,138 @@ const CHANNEL_SCENARIOS: ChannelOrderScenario[] = [
   },
 ];
 
+
+interface PlatformFeeConfig {
+  name: string;
+  paymentFeePct: number;
+  fixedFeePct: number;
+  serviceFeePct: number;
+  badge: string;
+}
+
+const PLATFORM_CONFIGS: Record<string, PlatformFeeConfig> = {
+  shopee: {
+    name: "Shopee Mall",
+    paymentFeePct: 2.5,
+    fixedFeePct: 7.5,
+    serviceFeePct: 5.0,
+    badge: "bg-orange-100 text-orange-800 border-orange-200",
+  },
+  tiktok: {
+    name: "TikTok Shop",
+    paymentFeePct: 2.5,
+    fixedFeePct: 6.0,
+    serviceFeePct: 4.5,
+    badge: "bg-slate-900 text-white border-slate-700",
+  },
+  lazada: {
+    name: "Lazada LazMall",
+    paymentFeePct: 2.5,
+    fixedFeePct: 7.0,
+    serviceFeePct: 4.0,
+    badge: "bg-blue-100 text-blue-800 border-blue-200",
+  },
+};
+
+function PlatformFeeSimulator() {
+  const [platform, setPlatform] = useState<string>("shopee");
+  const [sellingPrice, setSellingPrice] = useState<number>(500000);
+  const [voucherDiscount, setVoucherDiscount] = useState<number>(30000);
+
+  const cfg = PLATFORM_CONFIGS[platform];
+  const buyerPaid = Math.max(0, sellingPrice - voucherDiscount);
+
+  const paymentFee = Math.round(buyerPaid * (cfg.paymentFeePct / 100));
+  const fixedFee = Math.round(sellingPrice * (cfg.fixedFeePct / 100));
+  const serviceFee = Math.round(sellingPrice * (cfg.serviceFeePct / 100));
+  const totalPlatformFees = paymentFee + fixedFee + serviceFee;
+  const netSellerPayout = Math.max(0, buyerPaid - totalPlatformFees);
+
+  return (
+    <div className="max-w-4xl mx-auto bg-[#F8FAFC] rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-md">
+      {/* Platform Selector Buttons */}
+      <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+        {Object.entries(PLATFORM_CONFIGS).map(([key, item]) => (
+          <button
+            key={key}
+            onClick={() => setPlatform(key)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+              platform === key
+                ? "bg-orange-600 text-white border-orange-600 shadow-md"
+                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            {item.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Input Controls */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-700">Giá bán niêm yết (VNĐ):</label>
+          <input
+            type="number"
+            step="10000"
+            min="10000"
+            value={sellingPrice}
+            onChange={(e) => setSellingPrice(Number(e.target.value) || 0)}
+            className="w-full text-sm font-semibold p-2.5 rounded-xl border border-slate-300 bg-white"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-700">Trợ giá / Voucher người bán đồng tài trợ (VNĐ):</label>
+          <input
+            type="number"
+            step="5000"
+            min="0"
+            value={voucherDiscount}
+            onChange={(e) => setVoucherDiscount(Number(e.target.value) || 0)}
+            className="w-full text-sm font-semibold p-2.5 rounded-xl border border-slate-300 bg-white"
+          />
+        </div>
+      </div>
+
+      {/* Fee Breakdown Table */}
+      <div className="bg-white rounded-xl p-5 border border-slate-200 space-y-3 text-xs mb-6">
+        <div className="flex justify-between py-1 border-b border-slate-100">
+          <span className="text-slate-600">Khách hàng thực trả (Sau voucher):</span>
+          <span className="font-bold text-slate-900">{buyerPaid.toLocaleString("vi-VN")} đ</span>
+        </div>
+        <div className="flex justify-between py-1 border-b border-slate-100">
+          <span className="text-slate-600">1. Phí thanh toán ({cfg.paymentFeePct}% trên giá khách trả):</span>
+          <span className="font-bold text-rose-600">-{paymentFee.toLocaleString("vi-VN")} đ</span>
+        </div>
+        <div className="flex justify-between py-1 border-b border-slate-100">
+          <span className="text-slate-600">2. Phí cố định hoa hồng ({cfg.fixedFeePct}% trên giá niêm yết):</span>
+          <span className="font-bold text-rose-600">-{fixedFee.toLocaleString("vi-VN")} đ</span>
+        </div>
+        <div className="flex justify-between py-1 border-b border-slate-100">
+          <span className="text-slate-600">3. Phí dịch vụ Freeship / Extra ({cfg.serviceFeePct}%):</span>
+          <span className="font-bold text-rose-600">-{serviceFee.toLocaleString("vi-VN")} đ</span>
+        </div>
+        <div className="flex justify-between py-1.5 border-t border-slate-200">
+          <span className="font-bold text-slate-800">Tổng các khoản phí sàn khấu trừ:</span>
+          <span className="font-bold text-rose-700">-{totalPlatformFees.toLocaleString("vi-VN")} đ ({((totalPlatformFees / sellingPrice) * 100).toFixed(1)}%)</span>
+        </div>
+      </div>
+
+      {/* Net Payout Highlight Box */}
+      <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
+        <div>
+          <div className="text-xs uppercase tracking-wider font-semibold opacity-90">Tiền Về Ví Thực Nhận (Net Payout):</div>
+          <div className="text-2xl font-black mt-0.5">{netSellerPayout.toLocaleString("vi-VN")} VNĐ</div>
+        </div>
+        <div className="text-right text-xs opacity-90">
+          <div>Tỷ lệ giữ lại: <strong>{((netSellerPayout / sellingPrice) * 100).toFixed(1)}%</strong></div>
+          <div>Tự động đối soát vào TK 131 / TK 112</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OmnichannelFeaturePage() {
   const [activeTab, setActiveTab] = useState<string>("shopee");
 
@@ -149,7 +281,14 @@ export default function OmnichannelFeaturePage() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-orange-800">
       <MarketingHeader />
 
-      <main className="flex-1 w-full overflow-x-hidden">
+            <main className="flex-1 w-full overflow-x-hidden">
+        {/* Enterprise Demo Transparency Banner */}
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-900 text-center font-medium">
+          <span>
+            ⚠️ <strong>Bản trình bày mô phỏng quy trình xử lý đơn hàng đa kênh &amp; Vận chuyển (Demo Simulation)</strong> — 
+            Phục vụ trải nghiệm kiến trúc tích hợp Open API Shopee, TikTok Shop, Lazada và Đơn vị vận chuyển theo đặc tả kỹ thuật Phase 4B.
+          </span>
+        </div>
         {/* =========================================================================
             1. OMNICHANNEL HERO SECTION
             ========================================================================= */}
@@ -192,15 +331,15 @@ export default function OmnichannelFeaturePage() {
                 <div className="grid grid-cols-3 gap-4 py-2 border-y border-slate-100">
                   <div>
                     <div className="text-2xl font-bold text-orange-600">&lt; 50ms</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Tốc độ đồng bộ tồn kho</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Đồng bộ (Mục tiêu kiến trúc)</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-slate-900">0 Đơn</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Bán âm (Out of Stock)</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Bán âm (Mục tiêu thiết kế)</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-emerald-600">1 Click</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">In 500 vận đơn hàng loạt</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">In vận đơn (Khả năng thiết kế)</div>
                   </div>
                 </div>
 
@@ -444,6 +583,29 @@ export default function OmnichannelFeaturePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        
+        {/* =========================================================================
+            2.5. INTERACTIVE PLATFORM FEE & NET SETTLEMENT CALCULATOR
+            ========================================================================= */}
+        <section className="py-16 bg-white border-y border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold mb-3">
+                <DollarSign className="w-3.5 h-3.5" />
+                <span>Mô Phỏng Tài Chính Sàn TMĐT</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Bộ Ước Tính Biểu Phí Sàn &amp; Doanh Thu Thực Nhận (Net Payout)
+              </h2>
+              <p className="text-slate-600 text-sm sm:text-base mt-2">
+                Minh bạch từng dòng biểu phí sàn Shopee, TikTok Shop, Lazada (Phí thanh toán, Phí cố định, Phí Freeship Xtra) trước khi đối soát kế toán.
+              </p>
+            </div>
+
+            <PlatformFeeSimulator />
           </div>
         </section>
 
