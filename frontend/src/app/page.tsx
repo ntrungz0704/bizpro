@@ -29,6 +29,8 @@ import {
   Layers,
   Clock,
   Coins,
+  Receipt,
+  Globe,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -67,7 +69,7 @@ export default function HomePage() {
               {/* Punchy Subtitle */}
               <FadeReveal direction="up" delay={0.3}>
                 <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-                  Hợp nhất liền mạch <strong>CRM</strong>, <strong>Kho vận Atomic</strong>, <strong>Đơn hàng Shopee/TikTok</strong> và <strong>Chấm công GPS</strong>. Triệt tiêu 100% lỗi bán âm, cắt giảm 70% nhập liệu thủ công.
+                  Hợp nhất liền mạch <strong>CRM</strong>, <strong>Kho vận Atomic</strong>, <strong>Đơn hàng Đa sàn TMĐT</strong>, <strong>Kế toán TT 200</strong>, <strong>Vận chuyển</strong> và <strong>Chấm công GPS</strong>. Triệt tiêu 100% lỗi bán âm, cắt giảm 70% thao tác thủ công.
                 </p>
               </FadeReveal>
 
@@ -88,7 +90,7 @@ export default function HomePage() {
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-500">
                   <span className="flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Trọn bộ 4 Module cốt lõi
+                    Hệ sinh thái 6 Phân hệ Toàn diện
                   </span>
                   <span>•</span>
                   <span className="flex items-center gap-1.5">
@@ -139,8 +141,8 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* 4 Connected Blocks Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* 6 Connected Blocks Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* 1. CRM */}
                 <SpotlightCard className="p-6 flex flex-col justify-between">
                   <div>
@@ -207,24 +209,68 @@ export default function HomePage() {
                   </div>
                 </SpotlightCard>
 
-                {/* 4. HRM */}
+                {/* 4. Accounting */}
+                <SpotlightCard className="p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+                      <Receipt className="w-6 h-6" />
+                    </div>
+                    <span className="text-[11px] font-black uppercase text-amber-600 tracking-wider">
+                      Phân hệ 04
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900 mt-1">
+                      Kế toán & Thuế TT 200
+                    </h3>
+                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                      Định khoản Nợ/Có kép tự động từ đơn hàng và kho. Giảm thuế GTGT 8% (Nghị định 174/2025/NĐ-CP &amp; NQ 204/2025/QH15).
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
+                    <span>Sổ cái &amp; Hóa đơn TT 78</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </SpotlightCard>
+
+                {/* 5. Omnichannel & Logistics */}
+                <SpotlightCard className="p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+                      <Globe className="w-6 h-6" />
+                    </div>
+                    <span className="text-[11px] font-black uppercase text-purple-600 tracking-wider">
+                      Phân hệ 05
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900 mt-1">
+                      Đa kênh &amp; Vận chuyển
+                    </h3>
+                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                      Đồng bộ Shopee, TikTok Shop, Lazada. Tự động so sánh cước 6 hãng vận chuyển và đối soát COD minh bạch.
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-600">
+                    <span>Kết nối 6 Hãng Ship</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </SpotlightCard>
+
+                {/* 6. HRM */}
                 <SpotlightCard className="p-6 flex flex-col justify-between">
                   <div>
                     <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
                       <UserCheck className="w-6 h-6" />
                     </div>
                     <span className="text-[11px] font-black uppercase text-indigo-600 tracking-wider">
-                      Phân hệ 04
+                      Phân hệ 06
                     </span>
                     <h3 className="text-base font-bold text-slate-900 mt-1">
-                      Nhân sự & Lương thưởng
+                      Nhân sự &amp; Lương thưởng
                     </h3>
                     <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                       Điểm danh định vị GPS 1 chạm, tính hoa hồng theo đơn thực thu, tự động kết toán bảng lương cuối tháng.
                     </p>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
-                    <span>Kết toán KPI & Chi phí</span>
+                    <span>Kết toán KPI &amp; Chi phí</span>
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   </div>
                 </SpotlightCard>
@@ -237,7 +283,7 @@ export default function HomePage() {
                     <Zap className="w-4 h-4" />
                   </div>
                   <span className="text-xs sm:text-sm font-bold text-slate-800">
-                    Đường truyền dữ liệu đồng bộ độ trễ dưới <strong>250ms</strong> giữa 4 phân hệ
+                    Đường truyền dữ liệu đồng bộ độ trễ dưới <strong>250ms</strong> giữa 6 phân hệ cốt lõi
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -511,19 +557,19 @@ export default function HomePage() {
           </section>
 
           {/* =========================================================================
-              SECTION 7: REAL OPERATIONAL SCENARIOS (VERIFIED SOCIAL PROOF)
+              SECTION 7: REAL OPERATIONAL SCENARIOS (ILLUSTRATIVE DEMO PERSONAS)
               ========================================================================= */}
           <section className="w-full bg-surface py-16 lg:py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-2xl mx-auto mb-12">
                 <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                  DOANH NGHIỆP VIỆT NAM TIN DÙNG
+                  KỊCH BẢN VẬN HÀNH THỰC TẾ
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1.5 tracking-tight">
-                  Hiệu quả thực tế được chứng thực
+                  Hiệu quả đo lường được theo từng ngành hàng
                 </h2>
                 <p className="text-sm text-slate-600 mt-2">
-                  Xem cách các doanh nghiệp Việt Nam chuyển đổi vận hành và gặt hái kết quả đo lường được.
+                  Các kịch bản mô phỏng minh họa bài toán vận hành đặc thù của doanh nghiệp Việt Nam khi chuyển đổi số cùng BizPro+.
                 </p>
               </div>
 
@@ -537,7 +583,7 @@ export default function HomePage() {
                       </div>
                       <div>
                         <div className="text-sm font-bold text-slate-900">Chuỗi Thời Trang V-Style</div>
-                        <div className="text-xs text-slate-500">18 chi nhánh tại Hà Nội & Hải Phòng</div>
+                        <div className="text-xs text-slate-500">Mô phỏng chuỗi 18 chi nhánh bán lẻ</div>
                       </div>
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed italic">
@@ -545,7 +591,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Kết quả sau 3 tháng:</span>
+                    <span className="text-slate-500">Mục tiêu giải phóng:</span>
                     <span className="text-emerald-700 font-extrabold">Tiết kiệm 80tr/tháng chi phí kho</span>
                   </div>
                 </div>
@@ -559,7 +605,7 @@ export default function HomePage() {
                       </div>
                       <div>
                         <div className="text-sm font-bold text-slate-900">Phân Phối Phụ Tùng AutoCore</div>
-                        <div className="text-xs text-slate-500">Hơn 300 đại lý khu vực miền Nam</div>
+                        <div className="text-xs text-slate-500">Mô phỏng mạng lưới 300 đại lý phân phối</div>
                       </div>
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed italic">
@@ -567,7 +613,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Kết quả sau 6 tháng:</span>
+                    <span className="text-slate-500">Mục tiêu giải phóng:</span>
                     <span className="text-emerald-700 font-extrabold">Thu hồi công nợ nhanh hơn 45%</span>
                   </div>
                 </div>
@@ -580,8 +626,8 @@ export default function HomePage() {
                         OF
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-slate-900">Nội Thất & Thiết Bị OfficePro</div>
-                        <div className="text-xs text-slate-500">Doanh nghiệp B2B với 65 nhân sự</div>
+                        <div className="text-sm font-bold text-slate-900">Nội Thất &amp; Thiết Bị OfficePro</div>
+                        <div className="text-xs text-slate-500">Mô phỏng doanh nghiệp B2B 65 nhân sự</div>
                       </div>
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed italic">
@@ -589,7 +635,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Kết quả sau 4 tháng:</span>
+                    <span className="text-slate-500">Mục tiêu giải phóng:</span>
                     <span className="text-emerald-700 font-extrabold">Năng suất bán hàng tăng +35%</span>
                   </div>
                 </div>

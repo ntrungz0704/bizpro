@@ -24,8 +24,8 @@ export default function FeaturesPage() {
           Tất cả công cụ quản trị doanh nghiệp trên một nền tảng duy nhất
         </h1>
 <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-space-xl">
-          Quản lý khách hàng, kho hàng, đơn hàng và nhân sự trong một hệ thống thống nhất. Không còn phân mảnh dữ liệu, không cần tích hợp phức tạp.
-        </p>
+  Quản lý khách hàng, kho hàng, đơn hàng, kế toán tài chính, đa kênh vận chuyển và nhân sự trong một hệ sinh thái thống nhất. Không còn phân mảnh dữ liệu, không cần tích hợp phức tạp.
+</p>
 <div className="flex flex-wrap items-center justify-center gap-space-md">
 <a className="px-space-xl py-space-md rounded-lg bg-primary-container text-on-primary font-body-lg-medium text-body-lg-medium shadow-md hover:bg-primary transition-all flex items-center gap-space-xs" href="#phan-he">
 <span>Khám phá chi tiết các phân hệ</span>

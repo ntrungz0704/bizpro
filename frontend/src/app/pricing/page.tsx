@@ -181,7 +181,7 @@ export default function PricingPage() {
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">check_circle</span>
-<span>Trọn bộ 4 module cốt lõi tích hợp</span>
+<span>Trọn bộ 4 phân hệ cốt lõi tích hợp (CRM, Kho, Đơn hàng, HRM)</span>
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">check_circle</span>
@@ -240,6 +240,14 @@ export default function PricingPage() {
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<span>Kết nối <strong>Đa sàn TMĐT</strong> (Shopee, TikTok Shop, Lazada) &amp; 6 Hãng Ship</span>
+</div>
+<div className="flex items-start gap-space-sm">
+<span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<span>Kế toán bán hàng &amp; Đối soát COD tự động</span>
+</div>
+<div className="flex items-start gap-space-sm">
+<span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
 <span>Phân tích dữ liệu điều hành Executive BI</span>
 </div>
 <div className="flex items-start gap-space-sm">
@@ -280,6 +288,10 @@ export default function PricingPage() {
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-sky-400 text-[18px] shrink-0 mt-0.5">verified_user</span>
 <span><strong>Không giới hạn người dùng &amp; điểm bán</strong></span>
+</div>
+<div className="flex items-start gap-space-sm">
+<span className="material-symbols-outlined text-sky-400 text-[18px] shrink-0 mt-0.5">verified_user</span>
+<span>Kế toán Doanh nghiệp Chuẩn TT 200/133 &amp; Hóa đơn TT 78</span>
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-sky-400 text-[18px] shrink-0 mt-0.5">verified_user</span>

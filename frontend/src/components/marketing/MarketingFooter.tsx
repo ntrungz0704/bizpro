@@ -50,28 +50,33 @@ export default function MarketingFooter() {
             </h4>
             <ul className="space-y-space-sm font-body-md text-body-md text-[#94A3B8]">
               <li>
-                <Link href="/features#crm" className="hover:text-surface-container-lowest transition-colors">
+                <Link href="/features/crm" className="hover:text-surface-container-lowest transition-colors">
                   Quản lý CRM
                 </Link>
               </li>
               <li>
-                <Link href="/features#inventory" className="hover:text-surface-container-lowest transition-colors">
-                  Kho hàng & Tồn kho
+                <Link href="/features/inventory" className="hover:text-surface-container-lowest transition-colors">
+                  Kho hàng Atomic
                 </Link>
               </li>
               <li>
-                <Link href="/features#orders" className="hover:text-surface-container-lowest transition-colors">
+                <Link href="/features/sales-order" className="hover:text-surface-container-lowest transition-colors">
                   Quản lý Đơn hàng
                 </Link>
               </li>
               <li>
-                <Link href="/features#hrm" className="hover:text-surface-container-lowest transition-colors">
-                  Nhân sự & Tiền lương
+                <Link href="/features/accounting" className="hover:text-surface-container-lowest transition-colors">
+                  Kế toán & Thuế TT 200
                 </Link>
               </li>
               <li>
-                <Link href="/features#bi" className="hover:text-surface-container-lowest transition-colors">
-                  Báo cáo phân tích BI
+                <Link href="/features/omnichannel" className="hover:text-surface-container-lowest transition-colors">
+                  Đa kênh & Vận chuyển
+                </Link>
+              </li>
+              <li>
+                <Link href="/features/hrm" className="hover:text-surface-container-lowest transition-colors">
+                  Nhân sự & Điểm danh GPS
                 </Link>
               </li>
             </ul>
