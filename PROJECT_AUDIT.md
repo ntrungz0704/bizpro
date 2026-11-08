@@ -125,19 +125,19 @@ bizpro/
 
 | Entity / Domain | Backend Prisma Model | Backend NestJS DTO / Entity | Frontend TypeScript Interface | Frontend Page Route | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Authentication** | `User`, `Tenant`, `TenantUser` | `LoginDto`, `RegisterDto`, `JwtPayload` | `User`, `LoginCredentials` in `api-client.ts` | `/login`, `/signup` | **VERIFIED** |
-| **CRM Leads** | `Lead`, `LeadActivity` | `CreateLeadDto`, `UpdateLeadDto` | `Lead` interface | `/crm/leads` | **VERIFIED** |
-| **CRM Deals** | `Deal`, `DealStageHistory` | `CreateDealDto`, `UpdateDealStageDto` | `Deal` interface | `/crm/deals` | **VERIFIED** |
-| **CRM Customers** | `Customer`, `ContactPerson` | `CreateCustomerDto`, `CustomerResponseDto` | `Customer` interface | `/crm/customers` | **VERIFIED** |
-| **Sales Orders** | `Order`, `OrderItem` | `CreateOrderDto`, `UpdateOrderStatusDto` | `Order` interface | `/sales/orders` | **VERIFIED** |
-| **WMS Products** | `Product`, `ProductCategory` | `CreateProductDto`, `StockLevelDto` | `Product` interface | `/inventory/products` | **VERIFIED** |
-| **WMS Stock Receipts**| `InventoryReceipt`, `ReceiptItem`| `CreateReceiptDto` | `Receipt` interface | `/inventory/receipts-issues` | **VERIFIED** |
-| **WMS Stocktakes** | `Stocktake`, `StocktakeItem` | `CreateStocktakeDto` | `Stocktake` interface | `/inventory/stocktakes` | **VERIFIED** |
-| **HRM Employees** | `Employee`, `Department` | `CreateEmployeeDto`, `EmployeeDto` | `Employee` interface | `/hrm/employees` | **VERIFIED** |
-| **HRM Attendance** | `AttendanceRecord` | `CheckInDto`, `CheckOutDto` | `Attendance` interface | `/hrm/attendance` | **VERIFIED** |
-| **HRM Leave Requests**| `LeaveRequest` | `CreateLeaveRequestDto`, `ApproveLeaveDto`| `LeaveRequest` interface | `/hrm/leave` | **VERIFIED** |
-| **RBAC Roles** | `Role`, `Permission`, `RolePermission`| `RoleDto`, `PermissionDto` | `Role` interface | `/admin/system` | **VERIFIED** |
-| **Tenants** | `Tenant`, `TenantSetting` | `TenantDto`, `UpdateTenantDto` | `Tenant` interface | `/admin/tenants` | **VERIFIED** |
+| **Authentication** | `User`, `Organization`, `UserRole` | `LoginDto`, `RegisterDto`, `JwtPayload` | `User`, `LoginCredentials` in `api-client.ts` | `/login`, `/signup` | **VERIFIED** |
+| **CRM Leads** | `Lead`, `LeadActivity` | `CreateLeadDto`, `UpdateLeadDto` | `Lead` interface | `/crm/leads` | **VERIFIED (Guarded)** |
+| **CRM Deals** | `Deal`, `DealStageHistory` | `CreateDealDto`, `UpdateDealStageDto` | `Deal` interface | `/crm/deals` | **VERIFIED (Guarded)** |
+| **CRM Customers** | `Customer`, `ContactPerson` | `CreateCustomerDto`, `CustomerResponseDto` | `Customer` interface | `/crm/customers` | **VERIFIED (Guarded)** |
+| **Sales Orders** | `Order`, `OrderItem` | `CreateOrderDto`, `UpdateOrderStatusDto` | `Order` interface | `/sales/orders` | **VERIFIED (Guarded)** |
+| **WMS Products** | `Product`, `ProductCategory` | `CreateProductDto`, `StockLevelDto` | `Product` interface | `/inventory/products` | **VERIFIED (Guarded)** |
+| **WMS Stock Receipts**| `InventoryReceipt`, `ReceiptItem`| `CreateReceiptDto` | `Receipt` interface | `/inventory/receipts-issues` | **VERIFIED (Guarded)** |
+| **WMS Stocktakes** | `Stocktake`, `StocktakeItem` | `CreateStocktakeDto` | `Stocktake` interface | `/inventory/stocktakes` | **VERIFIED (Guarded)** |
+| **HRM Employees** | `Employee`, `Department` | `CreateEmployeeDto`, `EmployeeDto` | `Employee` interface | `/hrm/employees` | **VERIFIED (Guarded)** |
+| **HRM Attendance** | `AttendanceRecord` | `CheckInDto`, `CheckOutDto` | `Attendance` interface | `/hrm/attendance` | **VERIFIED (Guarded)** |
+| **HRM Leave Requests**| `LeaveRequest` | `CreateLeaveRequestDto`, `ApproveLeaveDto`| `LeaveRequest` interface | `/hrm/leave` | **VERIFIED (Guarded)** |
+| **RBAC Roles** | `Role`, `Permission`, `RolePermission`| `RoleDto`, `PermissionDto` | `Role` interface | `/admin/system` | **VERIFIED (Guarded)** |
+| **Organizations** | `Organization`, `OrganizationSetting` | `OrganizationDto`, `UpdateOrganizationDto` | `Organization` interface | `/admin/tenants` | **VERIFIED (Guarded)** |
 | **Phase 4A Accounting**| *Not yet migrated* | *Specifications only* | *Mock view only* | `/reports` | **PARTIAL** |
 
 ---
@@ -191,10 +191,22 @@ bizpro/
 - **Tokens:** Short-lived JWT Access Tokens (15m) paired with Refresh Tokens (7d) stored in HTTP-only cookies with `SameSite=Strict`.
 - **Tenant Context Verification:** On every authenticated request, `JwtStrategy` validates that the user is actively assigned to the claimed `tenant_id` via `TenantUser` table, preventing token replay across organizations.
 
-### 2. Security Vulnerability Identified: Client-Side Fallback Credentials
-- **Finding (P1 - High Priority):** In `frontend/src/lib/api-client.ts` (lines 63–64 and 151–152), fallback demo credentials (`admin@bizpro.vn` / `Admin@123456`) are present in the frontend token refresh catch block.
-- **Risk Assessment:** While useful during rapid offline prototyping, embedding hardcoded credentials in client bundles creates an information disclosure vector.
-- **Remediation:** Remove fallback auto-login from `api-client.ts` and redirect unauthenticated requests directly to `/login`.
+### 2. Security Vulnerabilities Identified & Resolved (Đợt 1 Remediation)
+- **P0 - Controller Auth Bypass & Insecure Fallback (RESOLVED):**
+  - *Identified:* `crm.controller.ts`, `inventory.controller.ts`, `department.controller.ts`, `organization.controller.ts`, `user.controller.ts`, and `rbac.controller.ts` lacked `@UseGuards(JwtAuthGuard)`. Additionally, `getContext()` in CRM, Inventory, Sales, HRM, and Reports executed an insecure fallback to the first Organization/User in the database if authentication was absent.
+  - *Resolution:* Added `@UseGuards(JwtAuthGuard)` to all domain controllers. Hardened `getContext()` across all controllers to strictly require authenticated context and immediately throw `UnauthorizedException` if missing.
+- **P1 - Client-Side Auto-Login & Fallback Credentials (RESOLVED):**
+  - *Identified:* `frontend/src/lib/api-client.ts` contained hardcoded `admin@bizpro.vn` / `Admin@123456` in both `ensureAuthToken()` and the 401 token refresh fallback interceptor.
+  - *Resolution:* Removed hardcoded credentials and auto-login logic entirely. Unauthenticated requests strictly receive 401 and redirect to `/login`.
+- **P1 - Duplicate JWT Secret Hardcoded Fallbacks (RESOLVED):**
+  - *Identified:* `auth.module.ts` and `jwt.strategy.ts` duplicated the hardcoded fallback secret string.
+  - *Resolution:* Updated to `configService.getOrThrow<string>('auth.accessSecret')`, ensuring fail-fast startup behavior if configuration is absent.
+- **P2 - Hydration Error Monkey-Patching (RESOLVED):**
+  - *Identified:* `frontend/src/app/layout.tsx` contained an unsafe script monkey-patching `Element.prototype.setAttribute`, overriding `console.error`, and removing `nextjs-portal`.
+  - *Resolution:* Purged the monkey-patch script completely, using native Next.js `suppressHydrationWarning`.
+- **P2 - Backend Lint Auto-Fix Separation (RESOLVED):**
+  - *Identified:* `backend/package.json` had `"lint": "... --fix"`, modifying code during verification gates.
+  - *Resolution:* Separated into `"lint"` (read-only audit gate) and `"lint:fix"` (developer convenience).
 
 ### 3. Network & Transport Security
 - Production stack runs inside an isolated Docker bridge network (`bizpro_network`).

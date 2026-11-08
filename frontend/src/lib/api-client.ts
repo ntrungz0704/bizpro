@@ -50,35 +50,8 @@ export const getAccessToken = (): string | null => {
   return null;
 };
 
-let authInFlightPromise: Promise<string | null> | null = null;
-
 export const ensureAuthToken = async (): Promise<string | null> => {
-  const existing = getAccessToken();
-  if (existing) return existing;
-
-  if (!authInFlightPromise) {
-    authInFlightPromise = (async () => {
-      try {
-        const res = await axios.post(`${API_BASE_URL}/auth/login`, {
-          email: 'admin@bizpro.vn',
-          password: 'Admin@123456',
-        });
-        const payload = res.data?.data || res.data;
-        const token = payload?.accessToken;
-        if (token) {
-          setAccessToken(token);
-          return token;
-        }
-      } catch (err) {
-        console.error('ensureAuthToken auto-login error:', err);
-      }
-      return null;
-    })().finally(() => {
-      authInFlightPromise = null;
-    });
-  }
-
-  return authInFlightPromise;
+  return getAccessToken();
 };
 
 export const apiClient = axios.create({
@@ -136,7 +109,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Try refresh token first, or auto-login with admin credentials
+        // Try refresh token via HTTP-only cookie
         let newAccessToken: string | null = null;
         try {
           const refreshRes = await axios.post(
@@ -146,13 +119,7 @@ apiClient.interceptors.response.use(
           );
           newAccessToken = refreshRes.data?.data?.accessToken || refreshRes.data?.accessToken;
         } catch {
-          // Fallback to auto-login
-          const loginRes = await axios.post(`${API_BASE_URL}/auth/login`, {
-            email: 'admin@bizpro.vn',
-            password: 'Admin@123456',
-          });
-          const payload = loginRes.data?.data || loginRes.data;
-          newAccessToken = payload?.accessToken || null;
+          newAccessToken = null;
         }
 
         if (newAccessToken) {

@@ -18,9 +18,7 @@ import { RefreshTokenService } from './refresh-token.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret:
-          config.get<string>('auth.accessSecret') ||
-          'bizpro_access_secret_super_secure_key_change_in_production',
+        secret: config.getOrThrow<string>('auth.accessSecret'),
         signOptions: {
           expiresIn: '15m',
         },

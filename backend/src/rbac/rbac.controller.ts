@@ -11,6 +11,7 @@ import {
   Req,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 import {
@@ -20,8 +21,10 @@ import {
   UpdateRolePermissionsDto,
 } from './dto/rbac.dto';
 import { RbacService } from './rbac.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('rbac')
+@UseGuards(JwtAuthGuard)
 export class RbacController {
   constructor(private readonly rbacService: RbacService) {}
 

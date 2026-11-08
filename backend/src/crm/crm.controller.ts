@@ -8,6 +8,8 @@ import {
   Post,
   Query,
   Req,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { CrmService } from './crm.service';
 import {
@@ -26,27 +28,24 @@ import {
 } from './dto/crm.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ActivityStatus, CommonStatus, CustomerType, DealStatus, LeadStatus } from '@prisma/client';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('crm')
+@UseGuards(JwtAuthGuard)
 export class CrmController {
   constructor(
     private readonly crmService: CrmService,
     private readonly prisma: PrismaService,
   ) {}
 
-  private async getContext(req: any) {
-    let orgId = req.user?.organizationId;
-    let userId = req.user?.id;
+  private getContext(req: any) {
+    const orgId = req.user?.organizationId || req.user?.orgId;
+    const userId = req.user?.id || req.user?.userId;
 
     if (!orgId || !userId) {
-      const org = await this.prisma.runInSystemContext((tx) =>
-        tx.organization.findFirst({ select: { id: true } }),
+      throw new UnauthorizedException(
+        'Yêu cầu xác thực: Không tìm thấy thông tin tổ chức hoặc người dùng hợp lệ trong phiên đăng nhập',
       );
-      const user = await this.prisma.runInSystemContext((tx) =>
-        tx.user.findFirst({ select: { id: true } }),
-      );
-      orgId = orgId || org?.id;
-      userId = userId || user?.id;
     }
 
     return { orgId, userId };

@@ -7,6 +7,7 @@ import {
   Body,
   Query,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
@@ -23,8 +24,10 @@ import {
 } from './dto/inventory.dto';
 import { CommonStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('inventory')
+@UseGuards(JwtAuthGuard)
 export class InventoryController {
   constructor(
     private readonly inventoryService: InventoryService,
@@ -34,30 +37,14 @@ export class InventoryController {
   /**
    * Helper to resolve active organization and user context
    */
-  private async getContext(req: any) {
-    let orgId = req.user?.organizationId || (req.headers && req.headers['x-organization-id']);
-    let userId = req.user?.id || (req.headers && req.headers['x-user-id']);
+  private getContext(req: any) {
+    const orgId = req.user?.organizationId || req.user?.orgId;
+    const userId = req.user?.id || req.user?.userId;
 
     if (!orgId || !userId) {
-      const org = (await this.prisma.runInSystemContext((tx) =>
-        tx.organization.findFirst({
-          where: { code: 'BIZPRO-CORP' },
-          select: { id: true },
-        }),
-      )) || (await this.prisma.runInSystemContext((tx) =>
-        tx.organization.findFirst({ select: { id: true } }),
-      ));
-      orgId = orgId || org?.id;
-
-      if (orgId && !userId) {
-        const user = await this.prisma.runInSystemContext((tx) =>
-          tx.user.findFirst({
-            where: { organizationId: orgId },
-            select: { id: true },
-          }),
-        );
-        userId = user?.id;
-      }
+      throw new UnauthorizedException(
+        'Yêu cầu xác thực: Không tìm thấy thông tin tổ chức hoặc người dùng hợp lệ trong phiên đăng nhập',
+      );
     }
 
     return { orgId, userId };
