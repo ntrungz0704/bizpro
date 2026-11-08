@@ -125,61 +125,70 @@ export class BootstrapService implements OnApplicationBootstrap {
         });
       }
 
-      // 4. Ensure Default Admin User exists
+      // 4. Ensure Default Admin User exists (Dev / Staging, or when explicitly configured in production)
       let adminUser = await tx.user.findFirst({
         where: { email: 'admin@bizpro.vn' },
       });
 
       if (!adminUser) {
-        const passwordHash = await this.cryptoService.hashPassword('Admin@123456');
-        adminUser = await tx.user.create({
-          data: {
-            id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
-            organizationId: org.id,
-            email: 'admin@bizpro.vn',
-            fullName: 'Nguyễn Văn Admin',
-            passwordHash,
-            phone: '0988889999',
-            status: 'ACTIVE',
-            authVersion: 1,
-          },
-        });
+        if (process.env.NODE_ENV === 'production' && !process.env.INITIAL_ADMIN_PASSWORD) {
+          this.logger.warn(
+            'Production security guard: INITIAL_ADMIN_PASSWORD is not set. Skipping automatic admin provisioning.',
+          );
+        } else {
+          const initialPassword = process.env.INITIAL_ADMIN_PASSWORD || 'Admin@123456';
+          const passwordHash = await this.cryptoService.hashPassword(initialPassword);
+          adminUser = await tx.user.create({
+            data: {
+              id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+              organizationId: org.id,
+              email: 'admin@bizpro.vn',
+              fullName: 'Nguyễn Văn Admin',
+              passwordHash,
+              phone: '0988889999',
+              status: 'ACTIVE',
+              authVersion: 1,
+            },
+          });
 
-        await tx.userRole.create({
-          data: {
-            userId: adminUser.id,
-            roleId: adminRole.id,
-          },
-        });
-        this.logger.log(`Created default Admin user: ${adminUser.email}`);
+          await tx.userRole.create({
+            data: {
+              userId: adminUser.id,
+              roleId: adminRole.id,
+            },
+          });
+          this.logger.log(`Created default Admin user: ${adminUser.email}`);
+        }
       }
 
-      // 5. Ensure Standard User exists for testing
-      let standardUser = await tx.user.findFirst({
-        where: { email: 'user@bizpro.vn' },
-      });
-
-      if (!standardUser) {
-        const passwordHash = await this.cryptoService.hashPassword('User@123456');
-        standardUser = await tx.user.create({
-          data: {
-            organizationId: org.id,
-            email: 'user@bizpro.vn',
-            fullName: 'Trần Thị Nhân Viên',
-            passwordHash,
-            phone: '0977778888',
-            status: 'ACTIVE',
-            authVersion: 1,
-          },
+      // 5. Ensure Standard User exists for development / testing only
+      if (process.env.NODE_ENV !== 'production') {
+        let standardUser = await tx.user.findFirst({
+          where: { email: 'user@bizpro.vn' },
         });
 
-        await tx.userRole.create({
-          data: {
-            userId: standardUser.id,
-            roleId: userRole.id,
-          },
-        });
-        this.logger.log(`Created standard user: ${standardUser.email}`);
+        if (!standardUser) {
+          const passwordHash = await this.cryptoService.hashPassword('User@123456');
+          standardUser = await tx.user.create({
+            data: {
+              organizationId: org.id,
+              email: 'user@bizpro.vn',
+              fullName: 'Trần Thị Nhân Viên',
+              passwordHash,
+              phone: '0977778888',
+              status: 'ACTIVE',
+              authVersion: 1,
+            },
+          });
+
+          await tx.userRole.create({
+            data: {
+              userId: standardUser.id,
+              roleId: userRole.id,
+            },
+          });
+          this.logger.log(`Created standard user: ${standardUser.email}`);
+        }
       }
     });
 

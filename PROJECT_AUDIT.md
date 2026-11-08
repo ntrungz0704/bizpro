@@ -248,9 +248,14 @@ bizpro/
   - `src/app/solutions/page.tsx`: Fixed lowercase `onsubmit` and `required=""` to React synthetic `onSubmit` handler and boolean `required`.
   - Result: `npx tsc --noEmit` and `npm run build` now pass with **0 errors**.
 
-### 2. Remaining Technical Debt & Cleanup Proposals
-- **Prisma Schema Redundancy:** Root `prisma/` folder is obsolete and should be purged.
-- **Stitch Design Assets:** Static mockup directories (`stitch_designs/`, `stitch_export/`) should be moved to an archive branch or documentation assets directory to minimize repository clone weight.
+### 2. Resolved Technical Debt & Organization Cleanup (Đợt 2 & 3 Remediation)
+- **Prisma Schema Redundancy (RESOLVED):** Purged duplicate root `prisma/` directory (`schema.prisma` and superseded migrations). `backend/prisma/schema.prisma` is now unambiguously established as the single canonical schema for development, testing, and Docker runtime.
+- **Root SQL Migration Scripts (RESOLVED):** Consolidated loose root SQL scripts (`harden_security_definer_owner.sql`, `remediate_rls.sql`, `rollback_security_definer_owner.sql`, `update_child_rls.sql`) into structured directory `backend/prisma/migrations/sql_patches/`.
+- **Design Assets Clarification (RESOLVED):** Added `stitch_designs/README.md` defining `stitch_designs/` and `stitch_export/` as static reference mockups without runtime or production Docker dependencies.
+- **Docker Compose Production Healthcheck & URL Harmonization (RESOLVED):**
+  - Updated backend healthcheck from `/api/health/live` to `/api/health/ready` (ensuring active PostgreSQL connection ping).
+  - Harmonized `NEXT_PUBLIC_API_URL` to `/api` across Dockerfile, Docker Compose, and Nginx reverse proxy.
+- **Bootstrap Production Guard (RESOLVED):** Updated `backend/src/auth/bootstrap.service.ts` to require explicit `INITIAL_ADMIN_PASSWORD` in production, disabling automatic default admin creation and skipping standard test users.
 
 ---
 
