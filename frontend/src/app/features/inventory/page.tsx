@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Package,
@@ -25,11 +25,26 @@ import {
   Clock,
   TrendingDown,
   TrendingUp,
+  Scan,
+  Smartphone,
+  WifiOff,
+  Database,
 } from "lucide-react";
 import MarketingHeader from "@/components/marketing/MarketingHeader";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 
 export default function InventoryFeaturePage() {
+  const [activeBarcodeType, setActiveBarcodeType] = useState<"standard" | "gs1" | "location">("gs1");
+  const [scannedCount, setScannedCount] = useState(12);
+  const [isSimulatingScan, setIsSimulatingScan] = useState(false);
+
+  const handleSimulateScan = () => {
+    setIsSimulatingScan(true);
+    setTimeout(() => {
+      setScannedCount((prev) => prev + 1);
+      setIsSimulatingScan(false);
+    }, 400);
+  };
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-emerald-100 selection:text-emerald-800">
       <MarketingHeader />
@@ -63,7 +78,7 @@ export default function InventoryFeaturePage() {
 
                 <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
                   Kiểm soát chính xác từng mã SKU trên toàn chuỗi phân phối. 
-                  Tự động giữ hàng theo đơn bán, triệt tiêu 100% tình trạng bán âm và cảnh báo chạm ngưỡng an toàn.
+                  Tự động giữ hàng theo đơn bán, hạn chế tối đa rủi ro bán âm bằng cơ chế khóa tồn nguyên tử và cảnh báo chạm ngưỡng an toàn (Mục tiêu thiết kế).
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -87,21 +102,27 @@ export default function InventoryFeaturePage() {
                 <div className="pt-6 border-t border-slate-200/70 grid grid-cols-3 gap-4">
                   <div>
                     <div className="text-xl sm:text-2xl font-black text-slate-900">0%</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Tỷ lệ bán âm hàng</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Bán âm (Mục tiêu thiết kế)</div>
                   </div>
                   <div>
                     <div className="text-xl sm:text-2xl font-black text-slate-900">100%</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Khớp số liệu thẻ kho</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Khớp thẻ kho (Thời gian thực)</div>
                   </div>
                   <div>
                     <div className="text-xl sm:text-2xl font-black text-slate-900">&lt; 1 Phút</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Thời gian xuất phiếu</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Xuất phiếu (Thao tác mẫu)</div>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Visual Warehouse Mockup Card */}
               <div className="lg:col-span-6 relative">
+                {/* Simulation Disclaimer Badge */}
+                <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 px-3 py-1.5 rounded-lg mb-3 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span>MÔ PHỎNG MINH HỌA — Dữ liệu kho giả lập demo, không kết nối hệ thống runtime.</span>
+                </div>
+
                 <div className="relative mx-auto max-w-[640px] rounded-2xl bg-white p-4 sm:p-6 shadow-[0_20px_50px_rgba(16,185,129,0.08)] border border-emerald-100 transition-all">
                   
                   <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100">
@@ -218,6 +239,199 @@ export default function InventoryFeaturePage() {
                   <span className="font-bold text-amber-600">Phiếu chuyển kho 2 chiều</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            2B. PHASE 4E: MOBILE PWA, BARCODE SCANNER & OFFLINE-FIRST DEMO
+            ========================================================================= */}
+        <section className="py-20 bg-[#0B1519] text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 blur-3xl pointer-events-none -z-10" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto space-y-3 mb-10">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/20 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                <Smartphone className="w-3.5 h-3.5" />
+                Kiến Trúc Mobile PWA & Quét Mã Vạch (Phase 4E)
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Quét Mã GS1-128, Gợi Ý Vị Trí Ô Kệ & Kiểm Kê Ngoại Tuyến
+              </h2>
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Hoạt động trơn tru trong góc chết sóng Wi-Fi nhờ bộ lưu trữ IndexedDB cục bộ. Tự động nhận diện chuỗi GS1-128 bóc tách đồng thời Lô, Hạn dùng và Sê-ri.
+              </p>
+            </div>
+
+            {/* Simulation Disclaimer Banner */}
+            <div className="max-w-4xl mx-auto mb-8 flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-medium">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>MÔ PHỎNG MINH HỌA — Dữ liệu giả lập demo theo đặc tả kỹ thuật Phase 4E (SPEC-ONLY).</span>
+              </div>
+              <span className="text-[10px] text-amber-400/80 uppercase font-bold tracking-wider hidden sm:inline">Interactive Simulation</span>
+            </div>
+
+            {/* Selector Tabs */}
+            <div className="max-w-2xl mx-auto flex p-1.5 rounded-2xl bg-white/5 border border-white/10 mb-8">
+              <button
+                type="button"
+                onClick={() => setActiveBarcodeType("gs1")}
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                  activeBarcodeType === "gs1"
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                GS1-128 (Đa Trường AIs)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveBarcodeType("standard")}
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                  activeBarcodeType === "standard"
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                EAN-13 / Code-128 Chuẩn
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveBarcodeType("location")}
+                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                  activeBarcodeType === "location"
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Vị Trí Ô Kệ (Bin / Rack)
+              </button>
+            </div>
+
+            {/* Interactive Demo Grid */}
+            <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              
+              {/* Phone Scanner Mockup */}
+              <div className="lg:col-span-5 bg-black/60 border border-white/10 rounded-3xl p-6 backdrop-blur-md relative shadow-2xl">
+                <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Scan className="w-4 h-4 text-emerald-400" />
+                    <span className="font-bold text-white">Camera Scanner (WASM / WebAPI)</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    60 FPS Active
+                  </span>
+                </div>
+
+                {/* Viewfinder Window */}
+                <div className="relative w-full aspect-[4/3] rounded-2xl bg-slate-900 border-2 border-dashed border-emerald-500/40 flex flex-col items-center justify-center overflow-hidden mb-4 p-4 text-center">
+                  <div className={`w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent absolute top-1/2 -translate-y-1/2 ${isSimulatingScan ? "animate-ping" : "animate-pulse"}`} />
+                  
+                  <Barcode className="w-16 h-16 text-slate-500 mb-2" />
+                  <div className="font-mono text-xs text-emerald-300 font-bold tracking-widest break-all">
+                    {activeBarcodeType === "gs1" && "(01)08935001234567(10)LOT202611(17)271108(21)SN8921"}
+                    {activeBarcodeType === "standard" && "8935001234567 • SKU: COF-ARA-500"}
+                    {activeBarcodeType === "location" && "LOC-BIN-A02-04-03-01 (Khu A)"}
+                  </div>
+                </div>
+
+                {/* Simulate Button */}
+                <button
+                  type="button"
+                  onClick={handleSimulateScan}
+                  disabled={isSimulatingScan}
+                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2"
+                >
+                  <Scan className="w-4 h-4" />
+                  <span>{isSimulatingScan ? "Đang giải mã chuỗi mã vạch..." : "Bấm Thử Nghiệm Quét Mã"}</span>
+                </button>
+              </div>
+
+              {/* Data Breakdown & Offline Queue Status */}
+              <div className="lg:col-span-7 space-y-4">
+                
+                {/* Result Card */}
+                <div className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                    Kết Quả Bóc Tách Tự Động (Parser Engine)
+                  </div>
+
+                  {activeBarcodeType === "gs1" && (
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-[10px] text-slate-400 block font-mono">AI (01) — Mã GTIN / SKU</span>
+                        <span className="text-white font-bold block mt-0.5">08935001234567</span>
+                        <span className="text-[10px] text-emerald-400 block mt-0.5">Cà phê Arabica Cầu Đất 500g</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-[10px] text-slate-400 block font-mono">AI (10) — Số Lô Hàng</span>
+                        <span className="text-white font-bold block mt-0.5">LOT202611</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">Lô sản xuất T11/2026</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-[10px] text-slate-400 block font-mono">AI (17) — Hạn Sử Dụng (FEFO)</span>
+                        <span className="text-amber-300 font-bold block mt-0.5">08/11/2027</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">Còn 365 ngày lưu hành</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-[10px] text-slate-400 block font-mono">AI (21) — Số Sê-ri</span>
+                        <span className="text-sky-300 font-bold block mt-0.5">SN-8921</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">Theo dõi lịch sử bảo hành</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeBarcodeType === "standard" && (
+                    <div className="space-y-3 text-xs">
+                      <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                        <div>
+                          <div className="text-white font-bold">Mã SKU: COF-ARA-500</div>
+                          <div className="text-slate-400 text-[11px] mt-0.5">Cà phê Arabica Cầu Đất 500g • Thùng 24 gói</div>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                          Đã quét: {scannedCount} kiện
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        Cơ chế Blind Receiving: Tự động so sánh số lượng đơn đặt hàng PO và cảnh báo âm thanh khi phát hiện sai lệch.
+                      </div>
+                    </div>
+                  )}
+
+                  {activeBarcodeType === "location" && (
+                    <div className="space-y-3 text-xs">
+                      <div className="p-3.5 rounded-xl bg-white/5 border border-white/5">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold text-white">Vị trí ô kệ: A-02-04-03-01</span>
+                          <span className="text-emerald-400 font-bold">Sức chứa còn trống 65%</span>
+                        </div>
+                        <div className="text-[11px] text-slate-300">
+                          Khu vực A (Khô ráo) • Dãy 02 • Kệ 04 • Tầng 03 • Ô 01 (Directed Putaway)
+                        </div>
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        Thủ kho quét mã ô kệ để khóa vị trí lưu trữ thực tế, ngăn ngừa thất lạc hàng hóa.
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Offline PWA Indicator Panel */}
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <Database className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-white">Hàng Đợi Ngoại Tuyến (Offline IndexedDB Queue)</div>
+                      <div className="text-[11px] text-slate-400">Đã lưu trữ {scannedCount} lượt quét trong bộ đệm thiết bị</div>
+                    </div>
+                  </div>
+                  <span className="text-emerald-400 font-mono text-[11px] font-bold">Idempotency Protected</span>
+                </div>
+
+              </div>
+
             </div>
           </div>
         </section>
@@ -359,7 +573,7 @@ export default function InventoryFeaturePage() {
                   Công Nghệ Độc Quyền
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                  Cơ chế khóa giữ tồn kho tự động (Tránh bán âm 100%)
+                  Cơ chế khóa giữ tồn kho tự động (Hạn chế tối đa rủi ro bán âm)
                 </h2>
                 <p className="text-slate-600 text-base leading-relaxed">
                   Khi khách đặt hàng online hoặc nhân viên kinh doanh tạo đơn, hệ thống sẽ tự động khóa số lượng đó lại. 
