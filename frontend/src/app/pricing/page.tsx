@@ -5,6 +5,39 @@ import Link from "next/link";
 import MarketingHeader from "@/components/marketing/MarketingHeader";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 
+const FAQ_ITEMS = [
+  {
+    id: 1,
+    question: "1. Tôi có thể thay đổi gói dịch vụ trong quá trình sử dụng không?",
+    answer: "Có, hoàn toàn linh hoạt. Bạn có thể nâng cấp lên gói cao hơn bất kỳ lúc nào để đáp ứng tốc độ tăng trưởng. Số tiền đã thanh toán của chu kỳ cũ sẽ được khấu trừ tự động theo số ngày sử dụng thực tế. Khi hạ cấp, thay đổi sẽ có hiệu lực từ kỳ thanh toán kế tiếp.",
+  },
+  {
+    id: 2,
+    question: "2. Gói dùng thử 14 ngày có bị giới hạn tính năng nào không?",
+    answer: "Gói dùng thử 14 ngày cung cấp gần như toàn bộ tính năng cốt lõi của gói Professional để doanh nghiệp có cái nhìn toàn diện nhất về cách phần mềm vận hành. Giới hạn duy nhất là số lượng đơn hàng thử nghiệm (200 đơn) và tối đa 3 tài khoản trải nghiệm đồng thời.",
+  },
+  {
+    id: 3,
+    question: "3. Doanh nghiệp cần thanh toán theo hình thức nào? Có xuất hóa đơn VAT không?",
+    answer: "BizPro+ hỗ trợ thanh toán qua chuyển khoản ngân hàng doanh nghiệp, cổng VNPAY/MoMo hoặc thẻ tín dụng quốc tế (Visa/Mastercard). Chúng tôi ký hợp đồng dịch vụ công nghệ số và xuất hóa đơn điện tử VAT hợp pháp theo quy định của Tổng cục Thuế ngay trong 24 giờ sau khi thanh toán.",
+  },
+  {
+    id: 4,
+    question: "4. Chi phí cho các chi nhánh hoặc kho hàng phát sinh được tính như thế nào?",
+    answer: "Với gói Professional, bạn đã được bao gồm sẵn tới 5 chi nhánh và kho hàng. Nếu quy mô vượt quá, chi phí thêm mới là 150.000₫/chi nhánh/tháng. Đối với gói Enterprise, số lượng kho bãi và chi nhánh là không giới hạn theo thiết kế hạ tầng riêng biệt.",
+  },
+  {
+    id: 5,
+    question: "5. Dữ liệu của công ty tôi có được bảo mật và an toàn không?",
+    answer: "Dữ liệu của bạn được mã hóa hai lớp bằng giao thức TLS 1.3 trong khi truyền và chuẩn AES-256 khi lưu trữ. Hạ tầng máy chủ đặt tại Datacenter chuẩn Tier III tại Hà Nội và TP.HCM, tự động sao lưu dữ liệu mỗi 6 giờ và tuân thủ chứng nhận bảo mật an toàn thông tin ISO 27001:2022.",
+  },
+  {
+    id: 6,
+    question: "6. BizPro+ có hỗ trợ đào tạo nhân viên và chuyển đổi dữ liệu từ file Excel cũ không?",
+    answer: "Hoàn toàn có. Đội ngũ kỹ thuật Customer Success của BizPro+ sẽ hỗ trợ bạn chuẩn hóa cấu trúc dữ liệu khách hàng, sản phẩm và tồn kho từ file Excel sẵn có để nhập vào hệ thống mà không lo thất thoát số liệu. Các khóa hướng dẫn 1-on-1 và tài liệu video luôn sẵn sàng cho đội ngũ của bạn.",
+  },
+];
+
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -62,7 +95,7 @@ export default function PricingPage() {
 </div>
 </section>
 {/* 4 PRICING TIERS GRID */}
-<section className="w-full max-w-7xl mx-auto px-margin pt-6 pb-20">
+<section className="w-full max-w-7xl mx-auto px-margin pt-12 pb-20">
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
 {/* PLAN 1: Free Trial */}
 <div className="flex flex-col justify-between rounded-2xl bg-surface-container-lowest p-6 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200/80 h-full">
@@ -72,17 +105,17 @@ export default function PricingPage() {
 <span className="font-caption text-caption text-on-surface-variant font-medium">14 Ngày</span>
 </div>
 <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold mb-space-xs">Dùng thử</h2>
-<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg min-h-[48px]">
+<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg min-h-[52px] flex items-center">
             Đánh giá mức độ tương thích và tính năng thực tế trước khi cam kết.
           </p>
-<div className="py-space-md mb-space-lg rounded-xl bg-surface-container-low px-space-md">
+<div className="py-space-md mb-space-lg rounded-xl bg-surface-container-low px-space-md min-h-[104px] flex flex-col justify-center">
 <div className="flex items-baseline gap-space-xs">
 <span className="font-headline-lg text-headline-lg font-black text-on-surface">0₫</span>
 <span className="font-label-md text-label-md text-on-surface-variant">/ 14 ngày</span>
 </div>
 <p className="mt-space-xs font-caption text-caption text-on-surface-variant font-medium">Truy cập đầy đủ tính năng tiêu chuẩn</p>
 </div>
-<div className="space-y-space-sm mb-space-xl font-body-md text-body-md text-on-surface">
+<div className="flex-1 space-y-space-sm mb-space-xl font-body-md text-body-md text-on-surface">
 <div className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Quy mô gói:</div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">check_circle</span>
@@ -106,7 +139,7 @@ export default function PricingPage() {
 </div>
 </div>
 </div>
-<div className="mt-auto pt-4">
+<div className="mt-auto pt-6">
 <a className="w-full block text-center px-space-lg py-space-sm rounded-xl bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-body-md-medium text-body-md-medium transition-colors shadow-sm cursor-pointer" href="/signup">
           Bắt đầu dùng thử miễn phí
         </a>
@@ -120,10 +153,10 @@ export default function PricingPage() {
 <span className="font-caption text-caption text-on-surface-variant font-medium">3 - 10 nhân sự</span>
 </div>
 <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold mb-space-xs">Starter (Khởi tạo)</h2>
-<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg min-h-[48px]">
+<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg min-h-[52px] flex items-center">
             Hộ kinh doanh cá thể, SME tinh gọn cần số hóa và chuẩn mực quy trình.
           </p>
-<div className="py-space-md mb-space-lg rounded-xl bg-surface-container-low px-space-md">
+<div className="py-space-md mb-space-lg rounded-xl bg-surface-container-low px-space-md min-h-[104px] flex flex-col justify-center">
 <div className="flex items-baseline gap-space-xs">
 <span className="font-headline-lg text-headline-lg font-black text-on-surface" id="starterPrice">{isYearly ? "712.000₫" : "890.000₫"}</span>
 <span className="font-label-md text-label-md text-on-surface-variant">/ tháng</span>
@@ -132,7 +165,7 @@ export default function PricingPage() {
               {isYearly ? "Thanh toán năm: 8.544.000₫ (Tiết kiệm 20%)" : "Thanh toán linh hoạt theo từng tháng"}
             </p>
 </div>
-<div className="space-y-space-sm mb-space-xl font-body-md text-body-md text-on-surface">
+<div className="flex-1 space-y-space-sm mb-space-xl font-body-md text-body-md text-on-surface">
 <div className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Quy mô gói:</div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">check_circle</span>
@@ -160,7 +193,7 @@ export default function PricingPage() {
 </div>
 </div>
 </div>
-<div className="mt-auto pt-4">
+<div className="mt-auto pt-6">
 <a className="w-full block text-center px-space-lg py-space-sm rounded-xl bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-body-md-medium text-body-md-medium transition-colors shadow-sm cursor-pointer" href="/signup">
           Chọn gói Starter
         </a>
@@ -169,7 +202,7 @@ export default function PricingPage() {
 {/* PLAN 3: Professional (Most Popular - Highlighted) */}
 <div className="relative flex flex-col justify-between rounded-2xl bg-white p-6 sm:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-primary ring-4 ring-primary/10 h-full">
 {/* Brand Highlight Badge */}
-<div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-1 rounded-full bg-primary text-on-primary font-caption text-caption uppercase tracking-wider font-bold shadow-md z-10 flex items-center gap-1">
+<div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-1.5 rounded-full bg-primary text-on-primary font-caption text-caption uppercase tracking-wider font-extrabold shadow-md border border-white/20 z-10 flex items-center gap-1.5">
 <span className="material-symbols-outlined text-[14px]">star</span>
 <span>PHỔ BIẾN NHẤT — TĂNG TRƯỞNG</span>
 </div>
@@ -179,10 +212,10 @@ export default function PricingPage() {
 <span className="font-caption text-caption text-primary font-bold">10 - 50 nhân sự</span>
 </div>
 <h2 className="font-headline-sm text-headline-sm text-on-surface font-black mb-space-xs">Professional</h2>
-<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg min-h-[48px]">
+<p className="font-body-md text-body-md text-on-surface-variant mb-space-lg min-h-[52px] flex items-center">
             Lựa chọn hàng đầu cho chuỗi bán lẻ, phân phối đa kênh đang tăng tốc.
           </p>
-<div className="py-space-md mb-space-lg rounded-xl bg-primary-fixed/40 px-space-md border border-primary/20">
+<div className="py-space-md mb-space-lg rounded-xl bg-primary-fixed/40 px-space-md border border-primary/20 min-h-[104px] flex flex-col justify-center">
 <div className="flex items-baseline gap-space-xs">
 <span className="font-headline-lg text-headline-lg font-black text-primary" id="proPrice">{isYearly ? "1.590.000₫" : "1.990.000₫"}</span>
 <span className="font-label-md text-label-md text-on-surface-variant">/ tháng</span>
@@ -191,7 +224,7 @@ export default function PricingPage() {
               {isYearly ? "Thanh toán năm: 19.080.000₫ (Tiết kiệm 4.800.000₫)" : "Thanh toán theo tháng linh hoạt"}
             </p>
 </div>
-<div className="space-y-space-sm mb-space-xl font-body-md text-body-md text-on-surface">
+<div className="flex-1 space-y-space-sm mb-space-xl font-body-md text-body-md text-on-surface">
 <div className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Mọi quyền lợi Starter, cộng thêm:</div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
@@ -219,7 +252,7 @@ export default function PricingPage() {
 </div>
 </div>
 </div>
-<div className="mt-auto pt-4">
+<div className="mt-auto pt-6">
 <a className="w-full block text-center px-space-lg py-space-sm rounded-xl bg-primary-container hover:bg-primary text-on-primary font-body-md-medium text-body-md-medium transition-all shadow-md hover:shadow-lg cursor-pointer" href="/signup">
           Bắt đầu với gói Pro
         </a>
@@ -233,16 +266,16 @@ export default function PricingPage() {
 <span className="font-caption text-caption text-slate-300 font-medium">&gt; 50 nhân sự</span>
 </div>
 <h2 className="font-headline-sm text-headline-sm text-white font-bold mb-space-xs">Enterprise</h2>
-<p className="font-body-md text-body-md text-slate-300 mb-space-lg min-h-[48px]">
+<p className="font-body-md text-body-md text-slate-300 mb-space-lg min-h-[52px] flex items-center">
             Tập đoàn đa pháp nhân, chuỗi quy mô lớn cần hạ tầng &amp; tùy biến chuyên sâu.
           </p>
-<div className="py-space-md mb-space-lg rounded-xl bg-white/[0.06] px-space-md border border-white/10">
+<div className="py-space-md mb-space-lg rounded-xl bg-white/[0.06] px-space-md border border-white/10 min-h-[104px] flex flex-col justify-center">
 <div className="flex items-baseline gap-space-xs">
 <span className="font-headline-lg text-headline-lg font-black text-white">Tùy chỉnh</span>
 </div>
 <p className="mt-space-xs font-caption text-caption text-slate-300">Khảo sát &amp; tư vấn theo thực trạng vận hành</p>
 </div>
-<div className="space-y-space-sm mb-space-xl font-body-md text-body-md text-slate-200">
+<div className="flex-1 space-y-space-sm mb-space-xl font-body-md text-body-md text-slate-200">
 <div className="font-label-sm text-label-sm uppercase tracking-wider text-sky-400 font-bold">Đặc quyền hạ tầng cao cấp:</div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-sky-400 text-[18px] shrink-0 mt-0.5">verified_user</span>
@@ -270,7 +303,7 @@ export default function PricingPage() {
 </div>
 </div>
 </div>
-<div className="mt-auto pt-4">
+<div className="mt-auto pt-6">
 <a className="w-full block text-center px-space-lg py-space-sm rounded-xl bg-white text-slate-900 hover:bg-slate-100 transition-colors font-body-md-medium text-body-md-medium shadow-md cursor-pointer font-bold" href="/signup">
           Liên hệ tư vấn Enterprise
         </a>
@@ -646,79 +679,45 @@ export default function PricingPage() {
 <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold mt-space-xs">Câu hỏi thường gặp về bảng giá</h2>
 <p className="font-body-md text-body-md text-on-surface-variant mt-space-xs">Tất cả những gì bạn cần biết trước khi lựa chọn đồng hành cùng nền tảng quản trị BizPro+.</p>
 </div>
-<div className="space-y-space-md" id="faqAccordion">
-{/* FAQ 1 */}
-<div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-slate-200/80 overflow-hidden transition-all">
-<button onClick={() => toggleFaq(1)} className="w-full p-space-lg text-left flex items-center justify-between gap-space-md font-title-md text-title-md font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer" type="button">
-<span>1. Tôi có thể thay đổi gói dịch vụ trong quá trình sử dụng không?</span>
-<span className={`material-symbols-outlined transform transition-transform duration-200 ${openFaq === 1 ? "rotate-180 text-primary" : "text-slate-400"}`}>expand_more</span>
-</button>
-{openFaq === 1 && (
-<div className="px-space-lg pb-space-lg font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-slate-100 pt-3 animate-in fade-in duration-200">
-          Có, hoàn toàn linh hoạt. Bạn có thể nâng cấp lên gói cao hơn bất kỳ lúc nào để đáp ứng tốc độ tăng trưởng. Số tiền đã thanh toán của chu kỳ cũ sẽ được khấu trừ tự động theo số ngày sử dụng thực tế. Khi hạ cấp, thay đổi sẽ có hiệu lực từ kỳ thanh toán kế tiếp.
+<div className="space-y-4" id="faqAccordion">
+  {FAQ_ITEMS.map((item) => {
+    const isOpen = openFaq === item.id;
+    return (
+      <div
+        key={item.id}
+        className={`rounded-2xl bg-surface-container-lowest shadow-xs border transition-all duration-200 overflow-hidden ${
+          isOpen ? "border-primary/50 shadow-md ring-2 ring-primary/10" : "border-slate-200/80 hover:border-slate-300"
+        }`}
+      >
+        <button
+          onClick={() => toggleFaq(item.id)}
+          className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-title-md text-title-md font-bold text-on-surface hover:text-primary transition-colors cursor-pointer select-none"
+          type="button"
+          aria-expanded={isOpen}
+        >
+          <span className="leading-snug">{item.question}</span>
+          <span
+            className={`material-symbols-outlined shrink-0 transform transition-transform duration-300 ${
+              isOpen ? "rotate-180 text-primary" : "text-slate-400"
+            }`}
+          >
+            expand_more
+          </span>
+        </button>
+        <div
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+            isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="px-5 sm:px-6 pb-6 pt-2 font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-slate-100/90">
+              {item.answer}
+            </div>
+          </div>
         </div>
-)}
-</div>
-{/* FAQ 2 */}
-<div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-slate-200/80 overflow-hidden transition-all">
-<button onClick={() => toggleFaq(2)} className="w-full p-space-lg text-left flex items-center justify-between gap-space-md font-title-md text-title-md font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer" type="button">
-<span>2. Gói dùng thử 14 ngày có bị giới hạn tính năng nào không?</span>
-<span className={`material-symbols-outlined transform transition-transform duration-200 ${openFaq === 2 ? "rotate-180 text-primary" : "text-slate-400"}`}>expand_more</span>
-</button>
-{openFaq === 2 && (
-<div className="px-space-lg pb-space-lg font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-slate-100 pt-3 animate-in fade-in duration-200">
-          Gói dùng thử 14 ngày cung cấp gần như toàn bộ tính năng cốt lõi của gói Professional để doanh nghiệp có cái nhìn toàn diện nhất về cách phần mềm vận hành. Giới hạn duy nhất là số lượng đơn hàng thử nghiệm (200 đơn) và tối đa 3 tài khoản trải nghiệm đồng thời.
-        </div>
-)}
-</div>
-{/* FAQ 3 */}
-<div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-slate-200/80 overflow-hidden transition-all">
-<button onClick={() => toggleFaq(3)} className="w-full p-space-lg text-left flex items-center justify-between gap-space-md font-title-md text-title-md font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer" type="button">
-<span>3. Doanh nghiệp cần thanh toán theo hình thức nào? Có xuất hóa đơn VAT không?</span>
-<span className={`material-symbols-outlined transform transition-transform duration-200 ${openFaq === 3 ? "rotate-180 text-primary" : "text-slate-400"}`}>expand_more</span>
-</button>
-{openFaq === 3 && (
-<div className="px-space-lg pb-space-lg font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-slate-100 pt-3 animate-in fade-in duration-200">
-          BizPro+ hỗ trợ thanh toán qua chuyển khoản ngân hàng doanh nghiệp, cổng VNPAY/MoMo hoặc thẻ tín dụng quốc tế (Visa/Mastercard). Chúng tôi ký hợp đồng dịch vụ công nghệ số và xuất hóa đơn điện tử VAT hợp pháp theo quy định của Tổng cục Thuế ngay trong 24 giờ sau khi thanh toán.
-        </div>
-)}
-</div>
-{/* FAQ 4 */}
-<div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-slate-200/80 overflow-hidden transition-all">
-<button onClick={() => toggleFaq(4)} className="w-full p-space-lg text-left flex items-center justify-between gap-space-md font-title-md text-title-md font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer" type="button">
-<span>4. Chi phí cho các chi nhánh hoặc kho hàng phát sinh được tính như thế nào?</span>
-<span className={`material-symbols-outlined transform transition-transform duration-200 ${openFaq === 4 ? "rotate-180 text-primary" : "text-slate-400"}`}>expand_more</span>
-</button>
-{openFaq === 4 && (
-<div className="px-space-lg pb-space-lg font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-slate-100 pt-3 animate-in fade-in duration-200">
-          Với gói Professional, bạn đã được bao gồm sẵn tới 5 chi nhánh và kho hàng. Nếu quy mô vượt quá, chi phí thêm mới là 150.000₫/chi nhánh/tháng. Đối với gói Enterprise, số lượng kho bãi và chi nhánh là không giới hạn theo thiết kế hạ tầng riêng biệt.
-        </div>
-)}
-</div>
-{/* FAQ 5 */}
-<div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-slate-200/80 overflow-hidden transition-all">
-<button onClick={() => toggleFaq(5)} className="w-full p-space-lg text-left flex items-center justify-between gap-space-md font-title-md text-title-md font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer" type="button">
-<span>5. Dữ liệu của công ty tôi có được bảo mật và an toàn không?</span>
-<span className={`material-symbols-outlined transform transition-transform duration-200 ${openFaq === 5 ? "rotate-180 text-primary" : "text-slate-400"}`}>expand_more</span>
-</button>
-{openFaq === 5 && (
-<div className="px-space-lg pb-space-lg font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-slate-100 pt-3 animate-in fade-in duration-200">
-          Dữ liệu của bạn được mã hóa hai lớp bằng giao thức TLS 1.3 trong khi truyền và chuẩn AES-256 khi lưu trữ. Hạ tầng máy chủ đặt tại Datacenter chuẩn Tier III tại Hà Nội và TP.HCM, tự động sao lưu dữ liệu mỗi 6 giờ và tuân thủ chứng nhận bảo mật an toàn thông tin ISO 27001:2022.
-        </div>
-)}
-</div>
-{/* FAQ 6 */}
-<div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-slate-200/80 overflow-hidden transition-all">
-<button onClick={() => toggleFaq(6)} className="w-full p-space-lg text-left flex items-center justify-between gap-space-md font-title-md text-title-md font-semibold text-on-surface hover:text-primary transition-colors cursor-pointer" type="button">
-<span>6. BizPro+ có hỗ trợ đào tạo nhân viên và chuyển đổi dữ liệu từ file Excel cũ không?</span>
-<span className={`material-symbols-outlined transform transition-transform duration-200 ${openFaq === 6 ? "rotate-180 text-primary" : "text-slate-400"}`}>expand_more</span>
-</button>
-{openFaq === 6 && (
-<div className="px-space-lg pb-space-lg font-body-md text-body-md text-on-surface-variant leading-relaxed border-t border-slate-100 pt-3 animate-in fade-in duration-200">
-          Hoàn toàn có. Đội ngũ kỹ thuật Customer Success của BizPro+ sẽ hỗ trợ bạn chuẩn hóa cấu trúc dữ liệu khách hàng, sản phẩm và tồn kho từ file Excel sẵn có để nhập vào hệ thống mà không lo thất thoát số liệu. Các khóa hướng dẫn 1-on-1 và tài liệu video luôn sẵn sàng cho đội ngũ của bạn.
-        </div>
-)}
-</div>
+      </div>
+    );
+  })}
 </div>
 </section>
 {/* ENTERPRISE HIGH-CONVERTING CTA BANNER (ELEVATED FLOATING CARD WITH SAFE SPACING) */}

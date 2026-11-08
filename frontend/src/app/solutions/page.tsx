@@ -8,17 +8,38 @@ import MarketingFooter from "@/components/marketing/MarketingFooter";
 export default function SolutionsPage() {
   const [activeTab, setActiveTab] = useState<string>("retail-ecommerce");
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = (id: string, updateUrl = true) => {
     setActiveTab(id);
+    if (updateUrl && typeof window !== "undefined") {
+      window.history.replaceState(null, "", `#${id}`);
+    }
     const element = document.getElementById(id);
     if (element) {
       const yOffset = -90; // account for sticky header & tabs
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
+    // Auto-center the active tab button in horizontal scroll container
+    if (typeof document !== "undefined") {
+      const tabBtn = document.getElementById(`tab-btn-${id}`);
+      if (tabBtn) {
+        tabBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }
   };
 
   useEffect(() => {
+    // Deep linking on mount
+    if (typeof window !== "undefined" && window.location.hash) {
+      const hash = window.location.hash.replace("#", "");
+      const validSections = ["retail-ecommerce", "wholesale-dist", "sme-growth", "multi-branch", "operations-services"];
+      if (validSections.includes(hash)) {
+        setTimeout(() => {
+          scrollToSection(hash, false);
+        }, 150);
+      }
+    }
+
     const handleScroll = () => {
       const sections = ["retail-ecommerce", "wholesale-dist", "sme-growth", "multi-branch", "operations-services"];
       const scrollPos = window.scrollY + 200;
@@ -159,26 +180,26 @@ export default function SolutionsPage() {
 </div>
 </section>
 {/* SECTION 2: INDUSTRY NAVIGATION TABS */}
-<section className="sticky top-20 z-40 bg-surface-container-lowest shadow-md py-space-sm border-b border-surface-container">
+<section className="sticky top-20 z-40 bg-surface-container-lowest/95 backdrop-blur-md shadow-md py-space-sm border-b border-surface-container">
 <div className="max-w-7xl mx-auto px-margin">
 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="solution-tabs">
-<button onClick={() => scrollToSection("retail-ecommerce")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${activeTab === "retail-ecommerce" ? "bg-primary text-on-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
+<button id="tab-btn-retail-ecommerce" onClick={() => scrollToSection("retail-ecommerce")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeTab === "retail-ecommerce" ? "bg-primary text-on-primary shadow-md scale-[1.02] ring-2 ring-primary/20" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
 <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
           Bán lẻ & Thương mại điện tử
         </button>
-<button onClick={() => scrollToSection("wholesale-dist")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${activeTab === "wholesale-dist" ? "bg-primary text-on-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
+<button id="tab-btn-wholesale-dist" onClick={() => scrollToSection("wholesale-dist")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeTab === "wholesale-dist" ? "bg-primary text-on-primary shadow-md scale-[1.02] ring-2 ring-primary/20" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
 <span className="material-symbols-outlined text-[18px]">inventory</span>
           Phân phối & Bán buôn
         </button>
-<button onClick={() => scrollToSection("sme-growth")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${activeTab === "sme-growth" ? "bg-primary text-on-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
+<button id="tab-btn-sme-growth" onClick={() => scrollToSection("sme-growth")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeTab === "sme-growth" ? "bg-primary text-on-primary shadow-md scale-[1.02] ring-2 ring-primary/20" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
 <span className="material-symbols-outlined text-[18px]">domain</span>
           SME Thương mại & Dịch vụ
         </button>
-<button onClick={() => scrollToSection("multi-branch")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${activeTab === "multi-branch" ? "bg-primary text-on-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
+<button id="tab-btn-multi-branch" onClick={() => scrollToSection("multi-branch")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeTab === "multi-branch" ? "bg-primary text-on-primary shadow-md scale-[1.02] ring-2 ring-primary/20" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
 <span className="material-symbols-outlined text-[18px]">store</span>
           Doanh nghiệp Đa chi nhánh
         </button>
-<button onClick={() => scrollToSection("operations-services")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${activeTab === "operations-services" ? "bg-primary text-on-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
+<button id="tab-btn-operations-services" onClick={() => scrollToSection("operations-services")} className={`industry-tab px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-2 cursor-pointer ${activeTab === "operations-services" ? "bg-primary text-on-primary shadow-md scale-[1.02] ring-2 ring-primary/20" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface"}`} type="button">
 <span className="material-symbols-outlined text-[18px]">support_agent</span>
           Dịch vụ & Vận hành
         </button>

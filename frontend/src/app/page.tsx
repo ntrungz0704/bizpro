@@ -7,6 +7,7 @@ import MarketingFooter from "@/components/marketing/MarketingFooter";
 import AppPreviewCanvas from "@/components/marketing/AppPreviewCanvas";
 import InteractiveComparison from "@/components/marketing/InteractiveComparison";
 import InteractiveModuleShowcase from "@/components/marketing/InteractiveModuleShowcase";
+import PartnerLogos from "@/components/marketing/PartnerLogos";
 import ShinyButton from "@/components/animation/ShinyButton";
 import SpotlightCard from "@/components/animation/SpotlightCard";
 import FadeReveal from "@/components/animation/FadeReveal";
@@ -113,6 +114,11 @@ export default function HomePage() {
               </FadeReveal>
             </div>
           </section>
+
+          {/* =========================================================================
+              ENTERPRISE CLIENT BRANDS & ECOSYSTEM INTEGRATION SECTION
+              ========================================================================= */}
+          <PartnerLogos />
 
           {/* =========================================================================
               SECTION 2: 4 CONNECTED BLOCKS & REAL-TIME DATA HIGHWAY
