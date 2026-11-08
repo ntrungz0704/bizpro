@@ -91,6 +91,18 @@ const ACCOUNTING_SCENARIOS: AccountingScenario[] = [
       { accountCode: "3383", accountName: "Bảo hiểm xã hội (25.5%)", debit: 0, credit: 10800000, note: "Trích BHXH DN + NLĐ" },
     ],
   },
+  {
+    id: "cit-tax-expense",
+    title: "5. Tạm tính & Nộp Thuế TNDN (20% - TT 78/2014 & TT 200)",
+    event: "Tạm tính chi phí thuế Thu nhập Doanh nghiệp quý 4 trên lợi nhuận chịu thuế 150.000.000 đ (Thuế suất 20%) và nộp qua Ngân hàng",
+    standardNote: "Ghi nhận chi phí thuế TNDN hiện hành TK 8211 đối ứng nghĩa vụ thuế TK 3334, thực hiện nộp thuế điện tử vào Ngân sách Nhà nước.",
+    lines: [
+      { accountCode: "8211", accountName: "Chi phí thuế TNDN hiện hành", debit: 30000000, credit: 0, note: "Tạm tính thuế TNDN Quý 4 (20% x 150 Tr)" },
+      { accountCode: "3334", accountName: "Thuế thu nhập doanh nghiệp phải nộp", debit: 0, credit: 30000000, note: "Nghĩa vụ thuế TNDN phát sinh" },
+      { accountCode: "3334", accountName: "Thuế thu nhập doanh nghiệp phải nộp", debit: 30000000, credit: 0, note: "Nộp thuế điện tử vào KBNN qua Vietcombank" },
+      { accountCode: "1121", accountName: "Tiền gửi Ngân hàng (VCB VNĐ)", debit: 0, credit: 30000000, note: "Ủy nhiệm chi nộp thuế điện tử eTax" },
+    ],
+  },
 ];
 
 export default function AccountingFeaturePage() {
@@ -106,7 +118,14 @@ export default function AccountingFeaturePage() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-indigo-100 selection:text-indigo-800">
       <MarketingHeader />
 
-      <main className="flex-1 w-full overflow-x-hidden">
+            <main className="flex-1 w-full overflow-x-hidden">
+        {/* Enterprise Demo Transparency Banner */}
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-900 text-center font-medium">
+          <span>
+            ⚠️ <strong>Bản trình bày mô phỏng nghiệp vụ Định khoản Kép &amp; Báo cáo Tài chính (Demo Simulation)</strong> — 
+            Phục vụ trải nghiệm kiến trúc Kế toán Doanh nghiệp theo chuẩn Thông tư 200/2014/TT-BTC, VAS 14 và đặc tả kỹ thuật Phase 4C.
+          </span>
+        </div>
         {/* =========================================================================
             1. ACCOUNTING HERO SECTION
             ========================================================================= */}
@@ -149,15 +168,15 @@ export default function AccountingFeaturePage() {
                 <div className="grid grid-cols-3 gap-4 py-2 border-y border-slate-100">
                   <div>
                     <div className="text-2xl font-bold text-indigo-600">0%</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Lệch sổ Nợ / Có</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Lệch sổ (Bất biến Kế toán kép)</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-slate-900">100%</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Khớp Hóa đơn TT78</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Khớp Hóa đơn TT78 (Mục tiêu thiết kế)</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-emerald-600">3 Giây</div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">Kết chuyển kỳ kế toán</div>
+                    <div className="text-xs text-slate-500 font-medium mt-0.5">Kết chuyển kỳ (Mục tiêu hiệu năng)</div>
                   </div>
                 </div>
 

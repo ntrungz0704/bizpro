@@ -9,7 +9,14 @@ export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-surface flex flex-col font-body-md text-on-surface antialiased">
       <MarketingHeader />
-      <main className="w-full pt-20 bg-surface">
+            <main className="w-full pt-20 bg-surface">
+        {/* Enterprise Demo Transparency Banner */}
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-900 text-center font-medium">
+          <span>
+            ⚠️ <strong>Bản trình bày danh mục tính năng tổng quan (Demo Simulation)</strong> — 
+            Minh họa toàn bộ kiến trúc 6 phân hệ cốt lõi và các đặc tả mở rộng Enterprise Phase 4A–4H.
+          </span>
+        </div>
         <div className="flex flex-col w-full">
 {/* SECTION 1: HERO & ARCHITECTURE ENGINE */}
 <section className="relative overflow-hidden bg-surface py-20 lg:py-28">
@@ -53,9 +60,9 @@ export default function FeaturesPage() {
 </div>
 </div>
 <div className="flex items-center gap-space-lg text-outline-variant font-caption text-caption">
-<span className="flex items-center gap-space-xs"><span className="w-2 h-2 rounded-full bg-emerald-400"></span> Multi-master Replication</span>
-<span className="flex items-center gap-space-xs"><span className="w-2 h-2 rounded-full bg-primary-fixed"></span> 0.04ms Internal Bus</span>
-<span className="flex items-center gap-space-xs"><span className="w-2 h-2 rounded-full bg-tertiary-fixed"></span> ISO 27001 Encrypted</span>
+<span className="flex items-center gap-space-xs"><span className="w-2 h-2 rounded-full bg-emerald-400"></span> Multi-master HA (Mục tiêu thiết kế)</span>
+<span className="flex items-center gap-space-xs"><span className="w-2 h-2 rounded-full bg-primary-fixed"></span> In-Memory Event Bus (Độ trễ thấp)</span>
+<span className="flex items-center gap-space-xs"><span className="w-2 h-2 rounded-full bg-tertiary-fixed"></span> AES-256 / SHA-256 (Mã hóa bảo mật)</span>
 </div>
 </div>
 {/* Architecture Visual Matrix */}
