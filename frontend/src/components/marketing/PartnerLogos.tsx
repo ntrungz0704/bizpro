@@ -141,7 +141,7 @@ export default function PartnerLogos() {
           {PRIMARY_CLIENT_BRANDS.map((brand) => (
             <div
               key={brand.name}
-              className={`flex flex-col justify-between p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer group ${brand.accentColor}`}
+              className={`flex flex-col justify-between p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 select-none group ${brand.accentColor}`}
             >
               <div className="flex items-center gap-3">
                 <div
@@ -176,7 +176,7 @@ export default function PartnerLogos() {
               {ECOSYSTEM_PARTNERS.map((partner) => (
                 <div
                   key={partner.name}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-white border border-slate-200/70 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer group"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-white border border-slate-200/70 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all duration-150 select-none group"
                 >
                   <span
                     className="w-2 h-2 rounded-full shrink-0"

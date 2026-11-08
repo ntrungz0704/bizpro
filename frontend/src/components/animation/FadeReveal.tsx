@@ -19,14 +19,23 @@ export default function FadeReveal({
   duration = 0.5,
 }: FadeRevealProps) {
   const [isDesktop, setIsDesktop] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     setIsDesktop(window.matchMedia("(min-width: 768px)").matches);
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(motionQuery.matches);
+
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+    motionQuery.addEventListener("change", handleMotionChange);
+    return () => motionQuery.removeEventListener("change", handleMotionChange);
   }, []);
 
-  if (!mounted) {
+  if (!mounted || prefersReducedMotion) {
     return <div className={className}>{children}</div>;
   }
 

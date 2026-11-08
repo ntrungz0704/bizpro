@@ -118,7 +118,9 @@ export default function HomePage() {
           {/* =========================================================================
               ENTERPRISE CLIENT BRANDS & ECOSYSTEM INTEGRATION SECTION
               ========================================================================= */}
-          <PartnerLogos />
+          <FadeReveal direction="up" delay={0.1}>
+            <PartnerLogos />
+          </FadeReveal>
 
           {/* =========================================================================
               SECTION 2: 4 CONNECTED BLOCKS & REAL-TIME DATA HIGHWAY
