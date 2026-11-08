@@ -142,7 +142,7 @@ bizpro/
 ## E. BUSINESS LOGIC & TRANSACTION FLOW ANALYSIS
 
 ### 1. Lead-to-Cash Pipeline
-- **Lead Capture & Qualification:** Leads enter via `/api/crm/leads`, validated via `CreateLeadDto`. Conversion to `Customer` and `Deal` creates relational records linked by `tenant_id`.
+- **Lead Capture & Qualification:** Leads enter via `/api/crm/leads`, validated via `CreateLeadDto`. Conversion to `Customer` and `Deal` creates relational records linked by `organizationId`.
 - **Deal Progression:** Kanban stages (`LEAD`, `CONTACTED`, `PROPOSAL`, `NEGOTIATION`, `WON`, `LOST`) enforce sequential state validation in `backend/src/crm/deals.service.ts`.
 - **Order Generation:** Transition to `WON` triggers Sales Order generation. Lines are validated against `Product` pricing and credit limits.
 
@@ -256,7 +256,7 @@ bizpro/
 
 ### 2. Resolved Technical Debt & Organization Cleanup (Đợt 2 & 3 Remediation)
 - **Prisma Schema Redundancy (RESOLVED):** Purged duplicate root `prisma/` directory (`schema.prisma` and superseded migrations). `backend/prisma/schema.prisma` is now unambiguously established as the single canonical schema for development, testing, and Docker runtime.
-- **Root SQL Migration Scripts (RESOLVED):** Consolidated loose root SQL scripts (`harden_security_definer_owner.sql`, `remediate_rls.sql`, `rollback_security_definer_owner.sql`, `update_child_rls.sql`) into structured directory `backend/prisma/migrations/sql_patches/`.
+- **Root SQL Migration Scripts (RESOLVED):** Consolidated loose root SQL scripts (`harden_security_definer_owner.sql`, `remediate_rls.sql`, `rollback_security_definer_owner.sql`, `update_child_rls.sql`) into structured directory `backend/prisma/sql_patches/` (strictly outside `migrations/` to guarantee Prisma CLI migration compatibility).
 - **Design Assets Clarification (RESOLVED):** Added `stitch_designs/README.md` defining `stitch_designs/` and `stitch_export/` as static reference mockups without runtime or production Docker dependencies.
 - **Docker Compose Production Healthcheck & URL Harmonization (RESOLVED):**
   - Updated backend healthcheck from `/api/health/live` to `/api/health/ready` (ensuring active PostgreSQL connection ping).
@@ -268,19 +268,36 @@ bizpro/
 ## J. TESTING & VERIFICATION EVIDENCE
 
 ### 1. Test Suite Coverage & Automated Security Evidence
-The backend includes extensive integration, E2E, and targeted security test suites:
-- `src/common/security-isolation.spec.ts`: **16/16 TESTS PASSING (100%)**
+The backend includes extensive integration, E2E, and targeted security test suites (Total: 64/64 tests passing, 100%):
+- `src/common/security-isolation.spec.ts`: **26/26 TESTS PASSING (100%)**
   - Negative Cross-Tenant User Lookup (rejects Org B caller for Org A user with 404).
-  - Negative Cross-Tenant User Update (rejects cross-organization modification with 404).
+  - Negative Cross-Tenant User Update & Status (rejects cross-organization modification with 404).
   - Cross-Tenant Role Assignment Rejection (rejects assigning role from Org B to Org A user with 400).
-  - Negative Cross-Tenant Department Deletion (rejects deleting Org A department by Org B caller with 404).
-  - Negative Cross-Tenant RBAC Modification (rejects updating permissions/roles across organizations).
-  - PermissionsGuard Authorization (rejects unauthenticated requests with 403, rejects users lacking required permissions with 403, permits authorized callers).
-- `auth.e2e-spec.ts`: Authentication, registration, JWT refresh cycles.
-- `database-invariants.e2e-spec.ts`: Foreign key cascades, schema constraints, unique indices.
-- `rls.e2e-spec.ts` & `rls-system-context.e2e-spec.ts`: Multi-tenant isolation verification.
-- `phase2b.e2e-spec.ts` through `phase2g.e2e-spec.ts`: Full CRM, WMS, and HRM business workflows.
-- `phase3b.e2e-spec.ts`: Security hardening regression suite.
+  - Negative Cross-Tenant Department Deletion & Update (rejects deleting or updating Org A department by Org B caller with 404).
+  - Negative Cross-Tenant RBAC Modification (rejects updating permissions/roles across organizations with 400).
+  - PermissionsGuard Authorization & Fail-Closed Scoping:
+    - Rejects unauthenticated request with ForbiddenException at guard level (HTTP pipeline filters return 401).
+    - Rejects authenticated users lacking required permissions with 403 Forbidden.
+    - System-wide bypass for `user.isSuperAdmin === true` without requiring organization context.
+    - Denies database role `SUPER_ADMIN` / `ORG_ADMIN` bypass when role belongs to a different organization (403).
+    - Denies database role `SUPER_ADMIN` / `ORG_ADMIN` bypass when role organizationId or caller organizationId is missing/null (fail-closed check).
+    - Allows database role `SUPER_ADMIN` / `ORG_ADMIN` bypass when role belongs to caller organization.
+- `src/auth/bootstrap.service.spec.ts`: **5/5 TESTS PASSING (100%)**
+  - Scenario 1: Production + Default Password + Missing `INITIAL_ADMIN_PASSWORD` -> Fail-closed account deactivation (`status: 'INACTIVE'`).
+  - Scenario 2: Production + Default Password + Provided `INITIAL_ADMIN_PASSWORD` -> Password hash rotated with Argon2id & status remains `ACTIVE`.
+  - Scenario 3: Production + Non-Default Password -> Existing admin credentials preserved, no deactivation.
+  - Scenario 4: Development Environment -> Default credentials permitted without deactivation.
+  - Scenario 5: Missing Admin in Production without `INITIAL_ADMIN_PASSWORD` -> Aborts default admin creation, no default credential seeded.
+- `test/security-http-pipeline.e2e-spec.ts`: **15/15 TESTS PASSING (100%)**
+  - 10 Unauthenticated requests across CRM, Inventory, Users, Departments, RBAC, Organization controllers return HTTP 401 Unauthorized.
+  - 5 Authenticated requests lacking explicit permissions return HTTP 403 Forbidden.
+- Total Backend Unit Test Suite (`npm test`): **49/49 PASSING across 6 suites** (`security-isolation`, `bootstrap.service`, `crypto.service`, `env.validation`, `http-exception.filter`, `transform-response.interceptor`).
+- Integration & E2E Suites:
+  - `auth.e2e-spec.ts`: Authentication, registration, JWT refresh cycles.
+  - `database-invariants.e2e-spec.ts`: Foreign key cascades, schema constraints, unique indices.
+  - `rls.e2e-spec.ts` & `rls-system-context.e2e-spec.ts`: Multi-tenant isolation verification.
+  - `phase2b.e2e-spec.ts` through `phase2g.e2e-spec.ts`: Full CRM, WMS, and HRM business workflows.
+  - `phase3b.e2e-spec.ts`: Security hardening regression suite.
 
 ### 2. Compilation Verification
 ```powershell
@@ -392,8 +409,8 @@ The BizPro+ codebase has successfully resolved all verified security blockers, t
 - **Tenant Isolation & RBAC Hardening:** Enforced at both database RLS and NestJS application service/controller layers with zero cross-tenant leakage. `PermissionsGuard` enforces fail-closed organization-scoped admin access (`callerOrgId === role.organizationId`).
 - **Production Admin Bootstrap Security:** Fail-closed account deactivation (`status: 'INACTIVE'`) if default password is used without `INITIAL_ADMIN_PASSWORD`; safe hash rotation when provided.
 - **Build Verification:** Backend `nest build` PASS (Exit Code 0); Frontend `next build` PASS (Exit Code 0, 46 static pages generated); `tsc --noEmit` PASS (0 errors).
-- **Test Evidence (59/59 Tests PASS):**
-  - Backend Unit Tests: 44/44 PASS across 6 suites (including 22 Security Isolation tests and 4 Bootstrap regression tests).
+- **Test Evidence (64/64 Tests PASS):**
+  - Backend Unit Tests: 49/49 PASS across 6 suites (including 26 Security Isolation tests and 5 Bootstrap regression tests).
   - Backend E2E Tests: 15/15 PASS (10 endpoints returning 401 for unauthenticated requests, 5 endpoints returning 403 for unauthorized requests).
 - **Governance Integrity:** All frozen deliverables (Phase 1A–3F, OPS-01/02/03) and Phase 4A spec-only boundaries preserved intact.
 

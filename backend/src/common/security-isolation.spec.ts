@@ -405,5 +405,110 @@ describe('Security & Tenant Isolation Unit Tests', () => {
 
       await expect(permissionsGuard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
     });
+
+    it('allows system-wide bypass for user.isSuperAdmin === true without organization context', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'super-admin-user', isSuperAdmin: true, organizationId: null } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      const allowed = await permissionsGuard.canActivate(mockContext);
+      expect(allowed).toBe(true);
+    });
+
+    it('denies database role SUPER_ADMIN bypass when role belongs to a different organization', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'admin-attacker', isSuperAdmin: false, organizationId: orgA } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      mockPrisma.runInSystemContext = jest.fn(async (cb) => {
+        const tx = {
+          userRole: {
+            findMany: jest.fn(async () => [
+              {
+                role: {
+                  code: 'SUPER_ADMIN',
+                  organizationId: orgB, // Different organization!
+                  rolePermissions: [],
+                },
+              },
+            ]),
+          },
+        };
+        return cb(tx);
+      });
+
+      await expect(permissionsGuard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('denies database role SUPER_ADMIN bypass when role organizationId is null (fail-closed check)', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'admin-attacker', isSuperAdmin: false, organizationId: orgA } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      mockPrisma.runInSystemContext = jest.fn(async (cb) => {
+        const tx = {
+          userRole: {
+            findMany: jest.fn(async () => [
+              {
+                role: {
+                  code: 'SUPER_ADMIN',
+                  organizationId: null, // Null organizationId!
+                  rolePermissions: [],
+                },
+              },
+            ]),
+          },
+        };
+        return cb(tx);
+      });
+
+      await expect(permissionsGuard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('allows database role SUPER_ADMIN bypass when role belongs to caller organization', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'admin-legit', isSuperAdmin: false, organizationId: orgA } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      mockPrisma.runInSystemContext = jest.fn(async (cb) => {
+        const tx = {
+          userRole: {
+            findMany: jest.fn(async () => [
+              {
+                role: {
+                  code: 'SUPER_ADMIN',
+                  organizationId: orgA, // Matching organization!
+                  rolePermissions: [],
+                },
+              },
+            ]),
+          },
+        };
+        return cb(tx);
+      });
+
+      const allowed = await permissionsGuard.canActivate(mockContext);
+      expect(allowed).toBe(true);
+    });
   });
 });

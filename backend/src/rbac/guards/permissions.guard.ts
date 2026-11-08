@@ -52,14 +52,11 @@ export class PermissionsGuard implements CanActivate {
 
       const userPermissionCodes = new Set<string>();
       for (const ur of userRoles) {
-        // System-wide SUPER_ADMIN bypass
-        if (ur.role.code === 'SUPER_ADMIN') {
-          return true;
-        }
-
-        // ORG_ADMIN or ADMIN: Strict Fail-Closed organization scoping
-        // Requires both callerOrgId and role organizationId to be present and identical
-        if (ur.role.code === 'ORG_ADMIN' || ur.role.code === 'ADMIN') {
+        // Database roles: SUPER_ADMIN, ORG_ADMIN, ADMIN
+        // Strict Fail-Closed organization scoping:
+        // Database roles do NOT have automatic system-wide bypass. Only user.isSuperAdmin === true bypasses globally.
+        // For organization-level bypass, requires both callerOrgId and role organizationId to be present and identical.
+        if (ur.role.code === 'SUPER_ADMIN' || ur.role.code === 'ORG_ADMIN' || ur.role.code === 'ADMIN') {
           if (callerOrgId && ur.role.organizationId && ur.role.organizationId === callerOrgId) {
             return true; // Authorized Admin of the caller's organization has full access
           }
