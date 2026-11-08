@@ -69,7 +69,7 @@ export default function HomePage() {
               {/* Punchy Subtitle */}
               <FadeReveal direction="up" delay={0.3}>
                 <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-                  Hợp nhất liền mạch <strong>CRM</strong>, <strong>Kho vận Atomic</strong>, <strong>Đơn hàng Đa sàn TMĐT</strong>, <strong>Kế toán TT 200</strong>, <strong>Vận chuyển</strong> và <strong>Chấm công GPS</strong>. Triệt tiêu 100% lỗi bán âm, cắt giảm 70% thao tác thủ công.
+                  Hợp nhất liền mạch <strong>CRM</strong>, <strong>Kho vận Atomic</strong>, <strong>Đơn hàng Đa sàn TMĐT</strong>, <strong>Kế toán TT 200</strong>, <strong>Vận chuyển</strong> và <strong>Chấm công GPS</strong>. Hướng tới mục tiêu tối ưu hóa vận hành, giảm thiểu sai sót bán âm và tự động hóa các khâu nhập liệu thủ công.
                 </p>
               </FadeReveal>
 
@@ -200,7 +200,7 @@ export default function HomePage() {
                       Kho vận Atomic
                     </h3>
                     <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                      Kiểm soát xuất - nhập - tồn đa điểm. Khóa giữ tồn tức thời theo mili-giây, triệt tiêu 100% bán âm.
+                      Kiểm soát xuất - nhập - tồn đa điểm. Khóa giữ tồn tức thời theo mili-giây, kiểm soát tồn kho chặt chẽ nhằm hạn chế tối đa rủi ro bán âm.
                     </p>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600">
@@ -283,16 +283,16 @@ export default function HomePage() {
                     <Zap className="w-4 h-4" />
                   </div>
                   <span className="text-xs sm:text-sm font-bold text-slate-800">
-                    Đường truyền dữ liệu đồng bộ độ trễ dưới <strong>250ms</strong> giữa 6 phân hệ cốt lõi
+                    Kiến trúc luồng dữ liệu hợp nhất 6 phân hệ nghiệp vụ — Thiết kế theo tiêu chuẩn giảm thiểu độ trễ và đồng bộ tức thời (Mục tiêu thiết kế kiến trúc)
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                    Tự động hóa 100%
+                  <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-extrabold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                    Mục tiêu thiết kế
                   </span>
                   <span className="text-xs text-slate-500 hidden md:inline">
-                    Không cần tải lại trang hay xuất file thủ công
+                    Hướng tới tự động hóa liền mạch giữa các luồng chứng từ
                   </span>
                 </div>
               </div>

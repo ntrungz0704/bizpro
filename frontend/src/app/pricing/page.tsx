@@ -240,11 +240,11 @@ export default function PricingPage() {
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
-<span>Kết nối <strong>Đa sàn TMĐT</strong> (Shopee, TikTok Shop, Lazada) &amp; 6 Hãng Ship</span>
+<span>Kết nối <strong>Đa sàn TMĐT</strong> (Shopee, TikTok, Lazada) &amp; Hãng Ship <span className="text-[11px] text-amber-700 font-semibold">(Đang đặc tả Phase 4B &amp; Demo)</span></span>
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
-<span>Kế toán bán hàng &amp; Đối soát COD tự động</span>
+<span>Kế toán bán hàng &amp; Đối soát COD <span className="text-[11px] text-amber-700 font-semibold">(Đang đặc tả Phase 4C &amp; Demo)</span></span>
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
@@ -291,11 +291,11 @@ export default function PricingPage() {
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-sky-400 text-[18px] shrink-0 mt-0.5">verified_user</span>
-<span>Kế toán Doanh nghiệp Chuẩn TT 200/133 &amp; Hóa đơn TT 78</span>
+<span>Kế toán Chuẩn TT 200/133 &amp; Hóa đơn TT 78 <span className="text-[11px] text-sky-300 font-normal">(Lộ trình kiến trúc Phase 4C — SPEC-ONLY)</span></span>
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-sky-400 text-[18px] shrink-0 mt-0.5">verified_user</span>
-<span>Quản trị Đa pháp nhân &amp; Holding Company</span>
+<span>Hợp nhất Đa pháp nhân &amp; Holding <span className="text-[11px] text-sky-300 font-normal">(Lộ trình kiến trúc Phase 4D — SPEC-ONLY)</span></span>
 </div>
 <div className="flex items-start gap-space-sm">
 <span className="material-symbols-outlined text-sky-400 text-[18px] shrink-0 mt-0.5">verified_user</span>

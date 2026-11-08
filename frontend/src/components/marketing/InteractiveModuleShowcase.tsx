@@ -14,6 +14,7 @@ import {
   Zap,
   Sparkles,
   MapPin,
+  Info,
 } from "lucide-react";
 
 export default function InteractiveModuleShowcase() {
@@ -34,7 +35,7 @@ export default function InteractiveModuleShowcase() {
       id: "kho" as const,
       name: "Kho vận Atomic",
       icon: Warehouse,
-      badge: "Khóa tồn 1.2s",
+      badge: "Mô phỏng 1.2s",
       highlightColor: "text-emerald-600 bg-emerald-50 border-emerald-200",
     },
     {
@@ -48,7 +49,7 @@ export default function InteractiveModuleShowcase() {
       id: "accounting" as const,
       name: "Kế toán TT 200",
       icon: Receipt,
-      badge: "Báo cáo Tự động",
+      badge: "Báo cáo Mô phỏng",
       highlightColor: "text-amber-600 bg-amber-50 border-amber-200",
     },
     {
@@ -69,6 +70,19 @@ export default function InteractiveModuleShowcase() {
 
   return (
     <div className="w-full">
+      {/* Universal Demo Transparency Banner */}
+      <div className="mb-6 px-4 py-3 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-800 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shadow-xs">
+        <div className="flex items-center gap-2">
+          <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
+          <span className="font-extrabold uppercase tracking-wide">
+            MÔ PHỎNG MINH HỌA — Dữ liệu giả lập demo, không kết nối hệ thống runtime thực tế.
+          </span>
+        </div>
+        <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 font-bold uppercase tracking-wider shrink-0">
+          Giao diện mô phỏng
+        </span>
+      </div>
+
       {/* Tab Selectors */}
       <div className="flex items-center justify-start lg:justify-center gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar">
         {modules.map((m) => {
@@ -107,14 +121,14 @@ export default function InteractiveModuleShowcase() {
             <div className="lg:col-span-5 space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" />
-                Phân hệ Quản trị Quan hệ Khách hàng 360°
+                Phân hệ Quản trị Quan hệ Khách hàng 360° (Mô phỏng)
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
                 Nuôi dưỡng khách hàng, <br />
                 <span className="text-blue-600">bứt phá tỷ lệ chốt sales.</span>
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Tự động thu thập Lead từ Zalo OA, Facebook Ads, Website và phân bổ thông minh cho nhân viên kinh doanh.
+                Thiết kế quy trình thu thập Lead từ Zalo OA, Facebook Ads, Website và phân bổ thông minh cho nhân viên kinh doanh.
               </p>
 
               <div className="space-y-2.5 pt-2">
@@ -128,7 +142,7 @@ export default function InteractiveModuleShowcase() {
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Dự báo doanh số (Sales Forecast) bằng AI</span>
+                  <span>Dự báo doanh số (Sales Forecast) bằng mô hình thống kê</span>
                 </div>
               </div>
 
@@ -148,29 +162,29 @@ export default function InteractiveModuleShowcase() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Phễu Cơ Hội Kinh Doanh (Tháng này)
+                    Phễu Cơ Hội Kinh Doanh (Dữ liệu mô phỏng minh họa)
                   </h4>
                   <div className="text-lg font-black text-slate-900 mt-0.5">
-                    Tổng giá trị: 4.200.000.000₫
+                    Tổng giá trị mô phỏng: 4.200.000.000₫
                   </div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
-                  24 Cơ hội mở
+                  24 Cơ hội mẫu
                 </span>
               </div>
 
               {/* 3 Funnel Steps */}
               <div className="grid grid-cols-3 gap-3 mb-4 text-center">
                 <div className="p-3 rounded-xl bg-white border border-slate-200/70 shadow-xs">
-                  <span className="text-[11px] text-slate-500 font-medium block">Tiếp cận mới (12)</span>
+                  <span className="text-[11px] text-slate-500 font-medium block">Tiếp cận mới (12 mẫu)</span>
                   <span className="text-sm font-bold text-slate-900 mt-0.5 block">1.25 Tỷ ₫</span>
                 </div>
                 <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200/70 shadow-xs">
-                  <span className="text-[11px] text-blue-700 font-medium block">Đàm phán báo giá (8)</span>
+                  <span className="text-[11px] text-blue-700 font-medium block">Đàm phán báo giá (8 mẫu)</span>
                   <span className="text-sm font-bold text-blue-700 mt-0.5 block">2.10 Tỷ ₫</span>
                 </div>
                 <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200/70 shadow-xs">
-                  <span className="text-[11px] text-emerald-700 font-medium block">Đã chốt ký (4)</span>
+                  <span className="text-[11px] text-emerald-700 font-medium block">Đã chốt ký (4 mẫu)</span>
                   <span className="text-sm font-bold text-emerald-700 mt-0.5 block">850 Tr ₫</span>
                 </div>
               </div>
@@ -180,28 +194,28 @@ export default function InteractiveModuleShowcase() {
                 <div className="p-3 rounded-xl bg-white border-l-4 border-l-blue-600 border border-slate-200/80 flex items-center justify-between shadow-xs">
                   <div>
                     <div className="text-xs font-bold text-slate-900">
-                      Công ty CP V-Style (Mô phỏng minh họa)
+                      Công ty CP V-Style (Chân dung mô phỏng minh họa)
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Gói Enterprise 18 chi nhánh • Phụ trách: Hoàng Việt
+                      Gói Enterprise 18 chi nhánh • Phụ trách: Hoàng Việt (Nhân sự mẫu)
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[11px] font-bold">
-                    Chờ duyệt hợp đồng
+                    Trạng thái mẫu: Chờ duyệt
                   </span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-white border-l-4 border-l-emerald-500 border border-slate-200/80 flex items-center justify-between shadow-xs">
                   <div>
                     <div className="text-xs font-bold text-slate-900">
-                      Tập đoàn Dược phẩm PharmaGroup (Mô phỏng minh họa)
+                      Tập đoàn Dược phẩm PharmaGroup (Chân dung mô phỏng minh họa)
                     </div>
                     <div className="text-[11px] text-slate-500">
-                      Dự án Quản trị Kho Đa Điểm • Phụ trách: Lê Hoàng Mai
+                      Dự án Quản trị Kho Đa Điểm • Phụ trách: Lê Hoàng Mai (Nhân sự mẫu)
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[11px] font-bold">
-                    Ký thành công (Won)
+                    Trạng thái mẫu: Đã ký
                   </span>
                 </div>
               </div>
@@ -215,14 +229,14 @@ export default function InteractiveModuleShowcase() {
             <div className="lg:col-span-5 space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold uppercase tracking-wider">
                 <Warehouse className="w-3.5 h-3.5" />
-                Quản Trị Kho Vận &amp; Khóa Tồn Atomic
+                Quản Trị Kho Vận &amp; Khóa Tồn Atomic (Mô phỏng)
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
                 Kiểm soát tồn kho đa điểm, <br />
-                <span className="text-emerald-600">triệt tiêu hoàn toàn bán âm.</span>
+                <span className="text-emerald-600">hạn chế tối đa rủi ro bán âm.</span>
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Cơ chế Double-entry ledger giữ hàng theo mili-giây. Đồng bộ số lượng tồn chính xác lên Shopee, TikTok Shop và điểm bán lẻ POS.
+                Mô hình Double-entry ledger giữ hàng theo mili-giây. Thiết kế luồng đồng bộ số lượng tồn chính xác lên Shopee, TikTok Shop và điểm bán lẻ POS.
               </p>
 
               <div className="space-y-2.5 pt-2">
@@ -256,15 +270,15 @@ export default function InteractiveModuleShowcase() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Bảng Cân Đối Kho Hàng Đa Điểm
+                    Bảng Cân Đối Kho Hàng Đa Điểm (Dữ liệu mô phỏng)
                   </h4>
                   <div className="text-lg font-black text-slate-900 mt-0.5">
-                    Tổng 4.520 SKU • 18 Chi nhánh
+                    Mô phỏng 4.520 SKU • 18 Chi nhánh
                   </div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  Live Sync 1.2s
+                  Mô phỏng chu kỳ 1.2s
                 </span>
               </div>
 
@@ -273,16 +287,16 @@ export default function InteractiveModuleShowcase() {
                 <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-xs">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="font-bold text-slate-900">
-                      Áo Polo Pique Pro (Size L - Navy)
+                      Áo Polo Pique Pro (Size L - Navy) (SKU mẫu)
                     </span>
-                    <span className="font-extrabold text-emerald-700">Khả dụng: 420 cái</span>
+                    <span className="font-extrabold text-emerald-700">Khả dụng mẫu: 420 cái</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
                     <div className="bg-emerald-500 h-full w-[85%]" title="Khả dụng: 85%" />
                     <div className="bg-amber-400 h-full w-[15%]" title="Đang giữ đơn: 15%" />
                   </div>
                   <div className="flex justify-between items-center text-[11px] text-slate-500 mt-1.5">
-                    <span>Mã: SKU-88210 • Kho Tổng Tân Bình</span>
+                    <span>Mã: SKU-88210 (Mẫu) • Kho Tổng Tân Bình</span>
                     <span>Đã giữ chỗ: 35 cái</span>
                   </div>
                 </div>
@@ -290,9 +304,9 @@ export default function InteractiveModuleShowcase() {
                 <div className="p-3.5 rounded-xl bg-white border border-rose-200/90 shadow-xs">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="font-bold text-slate-900">
-                      Bàn phím cơ Silent Office V2
+                      Bàn phím cơ Silent Office V2 (SKU mẫu)
                     </span>
-                    <span className="font-extrabold text-rose-600">Khả dụng: 12 cái (Thấp)</span>
+                    <span className="font-extrabold text-rose-600">Khả dụng mẫu: 12 cái (Thấp)</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
                     <div className="bg-rose-500 h-full w-[12%]" />
@@ -301,10 +315,10 @@ export default function InteractiveModuleShowcase() {
                     <span className="text-rose-600 font-semibold">Chạm ngưỡng an toàn Min = 20</span>
                     <button
                       type="button"
-                      onClick={() => alert("Đã tự động tạo Đơn đề xuất nhập hàng (RFQ) cho nhà cung cấp!")}
+                      onClick={() => alert("Mô phỏng thao tác: Đã tạo bản ghi Đơn đề xuất nhập hàng (RFQ) mẫu!")}
                       className="px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer transition-colors"
                     >
-                      + Tạo lệnh nhập 150 cái
+                      + Mô phỏng tạo RFQ 150 cái
                     </button>
                   </div>
                 </div>
@@ -319,28 +333,28 @@ export default function InteractiveModuleShowcase() {
             <div className="lg:col-span-5 space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold uppercase tracking-wider">
                 <ShoppingCart className="w-3.5 h-3.5" />
-                Hội Tụ Đơn Hàng Đa Kênh (OMS)
+                Hội Tụ Đơn Hàng Đa Kênh OMS (Mô phỏng)
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
                 Đồng bộ Shopee, TikTok, <br />
-                <span className="text-sky-600">in mã vận chuyển trong 2 giây.</span>
+                <span className="text-sky-600">in mã vận chuyển nhanh chóng.</span>
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Tự động gom đơn từ các sàn TMĐT về 1 màn hình duy nhất. Kết nối API trực tiếp với 6 hãng vận chuyển hàng đầu Việt Nam.
+                Thiết kế gom đơn từ các sàn TMĐT về 1 màn hình duy nhất. Kết nối API với các hãng vận chuyển phổ biến tại Việt Nam.
               </p>
 
               <div className="space-y-2.5 pt-2">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
-                  <span>Đồng bộ tức thời không độ trễ từ Shopee Mall, TikTok Shop</span>
+                  <span>Mô hình đồng bộ đơn từ Shopee Mall, TikTok Shop</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
-                  <span>Tự động chọn bưu cục tối ưu cước và khoảng cách giao hàng</span>
+                  <span>Hỗ trợ chọn bưu cục theo cước phí và khoảng cách giao hàng</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
-                  <span>Đối soát COD tự động, triệt tiêu thất thoát tiền hàng</span>
+                  <span>Mô hình đối soát COD tự động, minh bạch dòng tiền hàng</span>
                 </div>
               </div>
 
@@ -360,14 +374,14 @@ export default function InteractiveModuleShowcase() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Hàng Đợi Xử Lý Đơn Hàng Hôm Nay
+                    Hàng Đợi Xử Lý Đơn Hàng (Dữ liệu mô phỏng)
                   </h4>
                   <div className="text-lg font-black text-slate-900 mt-0.5">
-                    248 Đơn hoàn tất • 0 Đơn lỗi
+                    248 Đơn mẫu hoàn tất • 0 Đơn lỗi
                   </div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-bold">
-                  Auto-fulfillment ON
+                  Kịch bản điều phối mẫu
                 </span>
               </div>
 
@@ -380,15 +394,15 @@ export default function InteractiveModuleShowcase() {
                     </span>
                     <div>
                       <div className="text-xs font-bold text-slate-900">
-                        #ORD-9021 • Shopee Mall
+                        #ORD-9021 (Đơn mẫu) • Shopee Mall
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Khách: Trần Thị Bích • Mã GHN: <span className="font-mono text-blue-600">GHN-8842109</span>
+                        Khách: Trần Thị Bích (Mô phỏng) • Mã GHN mẫu: <span className="font-mono text-blue-600">GHN-8842109</span>
                       </div>
                     </div>
                   </div>
                   <span className="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                    Đang giao hàng
+                    Trạng thái: Đang giao
                   </span>
                 </div>
 
@@ -399,15 +413,15 @@ export default function InteractiveModuleShowcase() {
                     </span>
                     <div>
                       <div className="text-xs font-bold text-slate-900">
-                        #ORD-9022 • TikTok Shop
+                        #ORD-9022 (Đơn mẫu) • TikTok Shop
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Khách: Hoàng Minh • Giao Hỏa Tốc AhaMove
+                        Khách: Hoàng Minh (Mô phỏng) • Giao Hỏa Tốc AhaMove
                       </div>
                     </div>
                   </div>
                   <span className="px-2.5 py-1 rounded-md bg-sky-100 text-sky-800 text-[11px] font-bold">
-                    Đã in phiếu gửi
+                    Trạng thái: Đã in phiếu
                   </span>
                 </div>
               </div>
@@ -421,28 +435,28 @@ export default function InteractiveModuleShowcase() {
             <div className="lg:col-span-5 space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold uppercase tracking-wider">
                 <Receipt className="w-3.5 h-3.5" />
-                Kế Toán Chuẩn Mực TT 200/133 &amp; Thuế
+                Kế Toán Chuẩn Mực TT 200/133 &amp; Thuế (Mô phỏng)
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
                 Định khoản tự động, <br />
                 <span className="text-amber-600">báo cáo tài chính tức thì.</span>
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Tự động ghi nhận doanh thu theo VAS 14 / IFRS 15 từ đơn hàng đã hoàn tất. Hạch toán thuế GTGT 8% theo Nghị định 174/2025/NĐ-CP &amp; Nghị quyết 204/2025/QH15.
+                Mô phỏng hạch toán kế toán theo nguyên tắc VAS 14 &amp; IFRS 15 (khi các nghĩa vụ thực hiện đã thỏa mãn và quyền kiểm soát hàng hóa/dịch vụ đã chuyển giao cho khách hàng). Áp dụng thuế suất GTGT 8% mô phỏng theo Nghị định 174/2025/NĐ-CP &amp; Nghị quyết 204/2025/QH15 cho hàng hóa đủ điều kiện (loại trừ các nhóm ngành không được giảm thuế theo quy định).
               </p>
 
               <div className="space-y-2.5 pt-2">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Sổ nhật ký chung &amp; Sổ cái định khoản kép Nợ/Có tự động</span>
+                  <span>Sổ nhật ký chung &amp; Sổ cái định khoản kép Nợ/Có mẫu</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Hóa đơn điện tử khởi tạo từ máy tính tiền (Thông tư 78/2021)</span>
+                  <span>Mô phỏng định dạng hóa đơn điện tử máy tính tiền (Thông tư 78/2021)</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Báo cáo Kết quả KD (P&amp;L) và Lưu chuyển tiền tệ theo ngày</span>
+                  <span>Báo cáo Kết quả KD (P&amp;L) và Lưu chuyển tiền tệ mô phỏng</span>
                 </div>
               </div>
 
@@ -462,15 +476,15 @@ export default function InteractiveModuleShowcase() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Sổ Nhật Ký Chung (Bút toán tự động)
+                    Sổ Nhật Ký Chung (Mô phỏng bút toán tự động)
                   </h4>
                   <div className="text-lg font-black text-slate-900 mt-0.5">
-                    Cân đối Nợ = Có: 1.080.000₫
+                    Cân đối Nợ = Có: 1.080.000₫ (Số liệu mẫu)
                   </div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
-                  Audit-Ready TT 200
+                  Mô phỏng định khoản TT 200
                 </span>
               </div>
 
@@ -485,19 +499,19 @@ export default function InteractiveModuleShowcase() {
                 <div className="divide-y divide-slate-100 text-xs font-medium">
                   <div className="px-3 py-2.5 grid grid-cols-12 items-center">
                     <span className="col-span-3 font-mono font-bold text-blue-700">TK 131</span>
-                    <span className="col-span-5 text-slate-700">Phải thu KH (Đơn #ORD-9021)</span>
+                    <span className="col-span-5 text-slate-700">Phải thu KH (Đơn mẫu #ORD-9021)</span>
                     <span className="col-span-2 text-right font-mono font-bold text-slate-900">1.080.000₫</span>
                     <span className="col-span-2 text-right font-mono text-slate-400">-</span>
                   </div>
                   <div className="px-3 py-2.5 grid grid-cols-12 items-center">
                     <span className="col-span-3 font-mono font-bold text-emerald-700">TK 5111</span>
-                    <span className="col-span-5 text-slate-700">Doanh thu bán lẻ</span>
+                    <span className="col-span-5 text-slate-700">Doanh thu bán lẻ hàng hóa</span>
                     <span className="col-span-2 text-right font-mono text-slate-400">-</span>
                     <span className="col-span-2 text-right font-mono font-bold text-slate-900">1.000.000₫</span>
                   </div>
                   <div className="px-3 py-2.5 grid grid-cols-12 items-center bg-amber-50/40">
                     <span className="col-span-3 font-mono font-bold text-amber-700">TK 33311</span>
-                    <span className="col-span-5 text-slate-700">Thuế GTGT 8% (NĐ 174/2025)</span>
+                    <span className="col-span-5 text-slate-700">Thuế GTGT 8% (NĐ 174/2025 đủ ĐK)</span>
                     <span className="col-span-2 text-right font-mono text-slate-400">-</span>
                     <span className="col-span-2 text-right font-mono font-bold text-amber-700">80.000₫</span>
                   </div>
@@ -513,9 +527,9 @@ export default function InteractiveModuleShowcase() {
               <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
                 <span className="flex items-center gap-1 text-emerald-700 font-semibold">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  Hóa đơn điện tử e-Invoice #HD-2026-8802 đã ký số an toàn
+                  Mô phỏng định dạng hóa đơn điện tử e-Invoice &amp; chữ ký số mẫu
                 </span>
-                <span className="font-mono text-slate-400">Timestamp: 15:45:00</span>
+                <span className="font-mono text-slate-400">Timestamp mô phỏng: 15:45:00</span>
               </div>
             </div>
           </div>
@@ -527,28 +541,28 @@ export default function InteractiveModuleShowcase() {
             <div className="lg:col-span-5 space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold uppercase tracking-wider">
                 <Globe className="w-3.5 h-3.5" />
-                Kết Nối Đa Sàn TMĐT &amp; 6 Hãng Vận Chuyển
+                Kết Nối Đa Sàn TMĐT &amp; 6 Hãng Vận Chuyển (Mô phỏng)
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
                 Hội tụ sàn thương mại, <br />
                 <span className="text-purple-600">tối ưu cước ship trong 1 click.</span>
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Đồng bộ Shopee, TikTok Shop, Lazada tức thì. Thuật toán so sánh cước tự động chọn hãng giao hàng nhanh nhất và chi phí thấp nhất cho từng tuyến đường.
+                Thiết kế đồng bộ Shopee, TikTok Shop, Lazada. Thuật toán so sánh cước tự động chọn hãng giao hàng dự kiến nhanh nhất và chi phí thấp nhất cho từng tuyến đường.
               </p>
 
               <div className="space-y-2.5 pt-2">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
-                  <span>Webhook HMAC SHA-256 an toàn, giữ tồn kho mili-giây</span>
+                  <span>Mô hình Webhook HMAC SHA-256 an toàn, giữ tồn kho theo mili-giây</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
-                  <span>Tích hợp 6 hãng: GHN, GHTK, Viettel Post, SPX, AhaMove, Grab</span>
+                  <span>Kết nối 6 hãng: GHN, GHTK, Viettel Post, SPX, AhaMove, Grab</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                   <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
-                  <span>Đối soát COD tự động 3 bên: Hãng ship - Sàn TMĐT - Ngân hàng</span>
+                  <span>Quy trình đối soát COD 3 bên: Hãng ship - Sàn TMĐT - Ngân hàng</span>
                 </div>
               </div>
 
@@ -568,15 +582,15 @@ export default function InteractiveModuleShowcase() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Công Cụ So Sánh Cước &amp; Điều Phối Đơn (Tuyến HN ➔ HCM)
+                    Mô Phỏng Công Cụ So Sánh Cước &amp; Điều Phối Tuyến
                   </h4>
                   <div className="text-lg font-black text-slate-900 mt-0.5">
-                    Gói hàng 1.2kg • Đơn #ORD-9025
+                    Gói hàng mô phỏng 1.2kg • Tuyến HN ➔ HCM
                   </div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold flex items-center gap-1">
                   <Zap className="w-3.5 h-3.5 text-purple-600" />
-                  Best-Rate AI
+                  Mô phỏng so sánh cước
                 </span>
               </div>
 
@@ -591,17 +605,17 @@ export default function InteractiveModuleShowcase() {
                       <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         <span>Giao Hàng Nhanh (Express)</span>
                         <span className="px-2 py-0.5 rounded-full bg-purple-600 text-white text-[10px] font-bold">
-                          Đã chọn tự động (Rẻ nhất)
+                          Ước tính thấp nhất
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Thời gian giao: 36h • Bưu cục lấy hàng: 14:30 hôm nay
+                        Thời gian giao dự kiến: 36h • Bưu cục lấy hàng: 14:30
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-black text-purple-700 block">28.000₫</span>
-                    <span className="text-[10px] text-emerald-600 font-bold block">Tiết kiệm 22%</span>
+                    <span className="text-[10px] text-emerald-600 font-bold block">Ước tính tiết kiệm 22%</span>
                   </div>
                 </div>
 
@@ -615,7 +629,7 @@ export default function InteractiveModuleShowcase() {
                         Giao Hàng Tiết Kiệm (Chuẩn)
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Thời gian giao: 40h • Bưu cục lấy hàng: 16:00
+                        Thời gian giao dự kiến: 40h • Bưu cục lấy hàng: 16:00
                       </div>
                     </div>
                   </div>
@@ -632,10 +646,10 @@ export default function InteractiveModuleShowcase() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900">
-                        Viettel Post (Hỏa tốc bay)
+                        Viettel Post (Hỏa tốc)
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Thời gian giao: 24h • Bưu cục lấy hàng: 15:00
+                        Thời gian giao dự kiến: 24h • Bưu cục lấy hàng: 15:00
                       </div>
                     </div>
                   </div>
@@ -655,14 +669,14 @@ export default function InteractiveModuleShowcase() {
             <div className="lg:col-span-5 space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold uppercase tracking-wider">
                 <UserCheck className="w-3.5 h-3.5" />
-                Quản Trị Nhân Sự &amp; Điểm Danh GPS
+                Quản Trị Nhân Sự &amp; Điểm Danh GPS (Mô phỏng)
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
                 Điểm danh 1 chạm, <br />
                 <span className="text-indigo-600">tính hoa hồng KPI tức thì.</span>
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Chấm công chính xác bằng GPS Geofencing và Wifi văn phòng. Doanh số thực thu liên kết trực tiếp vào bảng lương của nhân sự.
+                Mô hình chấm công bằng GPS Geofencing và Wifi văn phòng. Doanh số thực thu liên kết vào bảng lương của nhân sự.
               </p>
 
               <div className="space-y-2.5 pt-2">
@@ -696,10 +710,10 @@ export default function InteractiveModuleShowcase() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Bảng Chấm Công Hôm Nay (Trực tiếp)
+                    Mô Phỏng Bảng Chấm Công Thời Gian Thực
                   </h4>
                   <div className="text-lg font-black text-slate-900 mt-0.5">
-                    48 / 50 Nhân sự có mặt đúng giờ
+                    48 / 50 Nhân sự mẫu có mặt đúng giờ
                   </div>
                 </div>
                 <button
@@ -712,7 +726,7 @@ export default function InteractiveModuleShowcase() {
                   }`}
                 >
                   <MapPin className="w-3.5 h-3.5" />
-                  <span>{checkedIn ? "✓ Đã Check-in (07:58)" : "Chấm công GPS thử"}</span>
+                  <span>{checkedIn ? "✓ Đã Check-in mẫu (07:58)" : "Thử nghiệm GPS (Mô phỏng)"}</span>
                 </button>
               </div>
 
@@ -725,11 +739,11 @@ export default function InteractiveModuleShowcase() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900">
-                        Nguyễn Văn An • Trưởng phòng Bán lẻ
+                        Nguyễn Văn An (Nhân sự mô phỏng) • Trưởng phòng Bán lẻ
                       </div>
                       <div className="text-[11px] text-slate-500 flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-emerald-600" />
-                        Check-in 07:58 • Văn phòng Keangnam HN (Hợp lệ)
+                        Check-in mẫu 07:58 • Văn phòng Keangnam HN (Hợp lệ)
                       </div>
                     </div>
                   </div>
@@ -745,11 +759,11 @@ export default function InteractiveModuleShowcase() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900">
-                        Trần Hương • Quản lý Kho Vận Tân Bình
+                        Trần Hương (Nhân sự mô phỏng) • Quản lý Kho Vận Tân Bình
                       </div>
                       <div className="text-[11px] text-slate-500 flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-emerald-600" />
-                        Check-in 08:02 • Kho Vận Tân Bình (Hợp lệ)
+                        Check-in mẫu 08:02 • Kho Vận Tân Bình (Hợp lệ)
                       </div>
                     </div>
                   </div>
