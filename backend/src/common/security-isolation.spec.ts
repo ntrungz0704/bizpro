@@ -345,5 +345,65 @@ describe('Security & Tenant Isolation Unit Tests', () => {
       const allowed = await permissionsGuard.canActivate(mockContext);
       expect(allowed).toBe(true);
     });
+
+    it('denies ORG_ADMIN bypass when role organizationId is null (fail-closed check)', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'admin-attacker', organizationId: orgA } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      mockPrisma.runInSystemContext = jest.fn(async (cb) => {
+        const tx = {
+          userRole: {
+            findMany: jest.fn(async () => [
+              {
+                role: {
+                  code: 'ORG_ADMIN',
+                  organizationId: null, // Null role orgId!
+                  rolePermissions: [],
+                },
+              },
+            ]),
+          },
+        };
+        return cb(tx);
+      });
+
+      await expect(permissionsGuard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('denies ORG_ADMIN bypass when caller organizationId is missing (fail-closed check)', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'admin-attacker', organizationId: null } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      mockPrisma.runInSystemContext = jest.fn(async (cb) => {
+        const tx = {
+          userRole: {
+            findMany: jest.fn(async () => [
+              {
+                role: {
+                  code: 'ORG_ADMIN',
+                  organizationId: orgA,
+                  rolePermissions: [],
+                },
+              },
+            ]),
+          },
+        };
+        return cb(tx);
+      });
+
+      await expect(permissionsGuard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
+    });
   });
 });

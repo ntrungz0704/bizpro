@@ -52,15 +52,26 @@ export class PermissionsGuard implements CanActivate {
 
       const userPermissionCodes = new Set<string>();
       for (const ur of userRoles) {
-        // Enforce organization scoping: skip roles belonging to a different organization
-        if (callerOrgId && ur.role.organizationId && ur.role.organizationId !== callerOrgId) {
+        // System-wide SUPER_ADMIN bypass
+        if (ur.role.code === 'SUPER_ADMIN') {
+          return true;
+        }
+
+        // ORG_ADMIN or ADMIN: Strict Fail-Closed organization scoping
+        // Requires both callerOrgId and role organizationId to be present and identical
+        if (ur.role.code === 'ORG_ADMIN' || ur.role.code === 'ADMIN') {
+          if (callerOrgId && ur.role.organizationId && ur.role.organizationId === callerOrgId) {
+            return true; // Authorized Admin of the caller's organization has full access
+          }
+          // Fail-closed: Missing organization context or cross-organization admin strictly cannot bypass
           continue;
         }
-        if (ur.role.code === 'SUPER_ADMIN' || ur.role.code === 'ORG_ADMIN' || ur.role.code === 'ADMIN') {
-          return true; // Authorized Admin of the current organization has full access
-        }
-        for (const rp of ur.role.rolePermissions) {
-          userPermissionCodes.add(rp.permission.code);
+
+        // Regular roles: accumulate permissions only if role belongs to caller organization or is system template
+        if (!ur.role.organizationId || (callerOrgId && ur.role.organizationId === callerOrgId)) {
+          for (const rp of ur.role.rolePermissions) {
+            userPermissionCodes.add(rp.permission.code);
+          }
         }
       }
 
