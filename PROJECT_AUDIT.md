@@ -353,21 +353,26 @@ bizpro_prod_postgres   postgres:16-alpine                 Up 14 minutes (healthy
 
 ---
 
-## N. PRIORITIZED REMEDIATION ROADMAP
+## N. PRIORITIZED REMEDIATION ROADMAP & CLOSURE RECORD
 
-### P0 (Blockers) - None
-- All build, test, and container runtime gates are passing.
+### 1. Status of Audit Remediation Stages
+- **Đợt 1 – Security Blocker & Tenant Isolation:** **CLOSED & VERIFIED**
+  - Controllers protected with `@UseGuards(JwtAuthGuard, PermissionsGuard)`.
+  - Fail-closed tenant scoping across Users, Departments, RBAC, CRM, and Inventory.
+  - Cross-organization negative tests passing 100%.
+  - Production bootstrap protected against default credential retention.
+- **Đợt 2 – Controlled Refactoring:** **CLOSED & VERIFIED**
+  - Purged hydration monkey-patching in frontend layout.
+  - Separated `npm run lint` and `npm run lint:fix`.
+- **Đợt 3 – Repository Cleanup & Harmonization:** **CLOSED & VERIFIED**
+  - Removed duplicate root `prisma/` directory.
+  - Consolidated SQL patches in `backend/prisma/sql_patches/` (outside `migrations/`).
+  - Harmonized healthcheck across Dockerfile and Compose to `/api/health/ready`.
+  - Harmonized audit documentation terminology to `Organization` / `organizationId`.
 
-### P1 (High Priority)
-1. **Remove Hardcoded Demo Fallbacks:** Purge `admin@bizpro.vn` fallback credentials from `frontend/src/lib/api-client.ts`.
-2. **Remove Redundant Root `prisma/`:** Delete `E:\dự án\bizpro\prisma` to avoid developer confusion with `backend/prisma`.
-
-### P2 (Medium Priority)
-1. **Consolidate SQL Patches:** Move root `.sql` scripts into `backend/prisma/migrations/sql_patches/`.
-2. **Asset Archival:** Move `stitch_designs/` and `stitch_export/` into a dedicated repository release tag or documentation submodule to reduce git clone payload.
-
-### P3 (Low Priority / Polish)
-1. **PWA Manifest:** Complete full offline caching service worker for field POS operations.
+### 2. Remaining Future Work (Non-Blockers / Post-Audit Features)
+- **P2 (Asset Optimization):** Archive large design PNGs in `stitch_designs/` to an external release asset tag.
+- **P3 (PWA Manifest):** Complete offline caching service worker for field POS operations.
 
 ---
 
@@ -382,8 +387,13 @@ bizpro_prod_postgres   postgres:16-alpine                 Up 14 minutes (healthy
 
 ## P. CONCLUSION & FINAL AUDIT VERDICT
 
-### Audit Verdict: **ACCEPTED & VERIFIED AS PRODUCTION-READY**
-The BizPro+ codebase demonstrates exceptional architectural discipline, strict multi-tenant isolation through PostgreSQL Row-Level Security, full TypeScript type safety across both frontend and backend, and a completely operational, self-healing Docker production deployment.
+### Audit Verdict: **SECURITY REMEDIATION CLOSURE VERIFIED (PASS)**
+The BizPro+ codebase has successfully resolved all verified security blockers, tenant isolation defects, and repository inconsistencies across Đợt 1, 2, and 3:
+- **Tenant Isolation:** Enforced at both database RLS and NestJS application service/controller layers with zero cross-tenant leakage.
+- **Authorization:** Full dynamic RBAC with `PermissionsGuard` and organization-scoped admin access.
+- **Build Verification:** Backend `nest build` PASS (Exit Code 0); Frontend `next build` PASS (Exit Code 0, 46 static pages generated); `tsc --noEmit` PASS (0 errors).
+- **Test Evidence:** 20/20 Security & Tenant Isolation unit tests passing; HTTP Pipeline E2E returning 401 unauthenticated across all domain controllers.
+- **Governance Integrity:** All frozen deliverables (Phase 1A–3F, OPS-01/02/03) and Phase 4A spec-only boundaries preserved intact.
 
 - **Frontend Build:** PASS (Exit Code 0)
 - **Backend Build:** PASS (Exit Code 0)

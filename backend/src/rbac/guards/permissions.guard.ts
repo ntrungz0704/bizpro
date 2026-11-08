@@ -24,12 +24,13 @@ export class PermissionsGuard implements CanActivate {
     const user = request.user;
 
     const currentUserId = user?.id || user?.userId;
+    const callerOrgId = user?.organizationId || user?.orgId;
     if (!user || !currentUserId) {
       throw new ForbiddenException('User is not authenticated');
     }
 
-    // Super admin bypass
-    if (user.role === 'SUPER_ADMIN' || user.isSuperAdmin) {
+    // System-wide Super admin bypass only
+    if (user.isSuperAdmin === true) {
       return true;
     }
 
@@ -51,8 +52,12 @@ export class PermissionsGuard implements CanActivate {
 
       const userPermissionCodes = new Set<string>();
       for (const ur of userRoles) {
-        if (ur.role.code === 'SUPER_ADMIN' || ur.role.code === 'ORG_ADMIN') {
-          return true; // Admin has full access
+        // Enforce organization scoping: skip roles belonging to a different organization
+        if (callerOrgId && ur.role.organizationId && ur.role.organizationId !== callerOrgId) {
+          continue;
+        }
+        if (ur.role.code === 'SUPER_ADMIN' || ur.role.code === 'ORG_ADMIN' || ur.role.code === 'ADMIN') {
+          return true; // Authorized Admin of the current organization has full access
         }
         for (const rp of ur.role.rolePermissions) {
           userPermissionCodes.add(rp.permission.code);

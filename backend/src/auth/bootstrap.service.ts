@@ -167,12 +167,17 @@ export class BootstrapService implements OnApplicationBootstrap {
             const newHash = await this.cryptoService.hashPassword(process.env.INITIAL_ADMIN_PASSWORD);
             await tx.user.update({
               where: { id: adminUser.id },
-              data: { passwordHash: newHash },
+              data: { passwordHash: newHash, status: 'ACTIVE' },
             });
             this.logger.log('Production security: Rotated default admin password using INITIAL_ADMIN_PASSWORD.');
           } else {
+            // Strict fail-closed: deactivate default admin account to prevent exploitation of default credentials
+            await tx.user.update({
+              where: { id: adminUser.id },
+              data: { status: 'INACTIVE' },
+            });
             this.logger.error(
-              'CRITICAL PRODUCTION WARNING: Admin account admin@bizpro.vn is retaining known default credentials! Set INITIAL_ADMIN_PASSWORD immediately.',
+              'CRITICAL PRODUCTION FAIL-CLOSED: Default admin account admin@bizpro.vn retained known default credentials without INITIAL_ADMIN_PASSWORD. Account has been automatically deactivated (INACTIVE).',
             );
           }
         }

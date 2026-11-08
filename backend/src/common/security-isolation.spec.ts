@@ -158,6 +158,17 @@ describe('Security & Tenant Isolation Unit Tests', () => {
       const res = await departmentService.deleteDepartment(orgA, deptOrgA.id);
       expect(res.id).toBe(deptOrgA.id);
     });
+
+    it('updateDepartment: rejects cross-organization update when target belongs to Org A but caller is Org B', async () => {
+      await expect(
+        departmentService.updateDepartment(orgB, deptOrgA.id, { name: 'Renamed Dept' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('updateDepartment: succeeds when orgId matches department organization', async () => {
+      const res = await departmentService.updateDepartment(orgA, deptOrgA.id, { name: 'Tech Department' });
+      expect(res.name).toBe('Tech Department');
+    });
   });
 
   describe('RBAC Role Assignment & Cross-Tenant Protection', () => {
@@ -260,6 +271,69 @@ describe('Security & Tenant Isolation Unit Tests', () => {
                   rolePermissions: [
                     { permission: { code: 'crm.leads.write' } },
                   ],
+                },
+              },
+            ]),
+          },
+        };
+        return cb(tx);
+      });
+
+      const allowed = await permissionsGuard.canActivate(mockContext);
+      expect(allowed).toBe(true);
+    });
+
+    it('denies ORG_ADMIN bypass when role belongs to a different organization (cross-tenant admin escalation prevention)', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'admin-attacker', organizationId: orgA } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      // User holds ORG_ADMIN role, but for Org B
+      mockPrisma.runInSystemContext = jest.fn(async (cb) => {
+        const tx = {
+          userRole: {
+            findMany: jest.fn(async () => [
+              {
+                role: {
+                  code: 'ORG_ADMIN',
+                  organizationId: orgB, // Different organization!
+                  rolePermissions: [],
+                },
+              },
+            ]),
+          },
+        };
+        return cb(tx);
+      });
+
+      await expect(permissionsGuard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('allows ORG_ADMIN bypass when role belongs to caller organization', async () => {
+      (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['crm.leads.write']);
+      const mockContext = {
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { id: 'admin-legit', organizationId: orgA } }),
+        }),
+      } as unknown as ExecutionContext;
+
+      // User holds ORG_ADMIN role for Org A
+      mockPrisma.runInSystemContext = jest.fn(async (cb) => {
+        const tx = {
+          userRole: {
+            findMany: jest.fn(async () => [
+              {
+                role: {
+                  code: 'ORG_ADMIN',
+                  organizationId: orgA, // Matching organization!
+                  rolePermissions: [],
                 },
               },
             ]),
