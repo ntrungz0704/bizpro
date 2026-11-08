@@ -271,7 +271,7 @@ bizpro/
 ## J. TESTING & VERIFICATION EVIDENCE
 
 ### 1. Test Suite Coverage & Automated Security Evidence
-The backend includes extensive integration, E2E, and targeted security test suites (Total: 64/64 tests passing, 100%):
+The backend includes extensive integration, E2E, and targeted security test suites (Total: 65/65 tests passing, 100%):
 - `src/common/security-isolation.spec.ts`: **26/26 TESTS PASSING (100%)**
   - Negative Cross-Tenant User Lookup (rejects Org B caller for Org A user with 404).
   - Negative Cross-Tenant User Update & Status (rejects cross-organization modification with 404).
