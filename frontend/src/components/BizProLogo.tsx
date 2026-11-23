@@ -4,11 +4,12 @@ import React from "react";
 import Link from "next/link";
 
 interface BizProLogoProps {
-  variant?: "full" | "icon";
+  variant?: "full" | "icon" | "with-tagline";
   size?: "sm" | "md" | "lg" | "xl";
   theme?: "dark" | "light";
   className?: string;
   href?: string;
+  showTagline?: boolean;
 }
 
 export default function BizProLogo({
@@ -17,6 +18,7 @@ export default function BizProLogo({
   theme = "light",
   className = "",
   href,
+  showTagline = false,
 }: BizProLogoProps) {
   const isLight = theme === "light";
 
@@ -28,56 +30,76 @@ export default function BizProLogo({
   };
 
   const textSizes = {
-    sm: "text-lg",
+    sm: "text-base",
     md: "text-xl",
     lg: "text-2xl",
     xl: "text-3xl",
   };
 
+  const taglineSizes = {
+    sm: "text-[7px]",
+    md: "text-[9px]",
+    lg: "text-[10px]",
+    xl: "text-[12px]",
+  };
+
+  // Modern Stylized B with Growth Bars & Upward Growth Arrow (↗)
   const logoEmblem = (
     <div
-      className={`${iconSizes[size]} relative flex items-center justify-center shrink-0 drop-shadow-[0_4px_14px_rgba(37,99,235,0.3)] transition-transform duration-200 group-hover:scale-105`}
+      className={`${iconSizes[size]} relative flex items-center justify-center shrink-0 drop-shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-transform duration-200 group-hover:scale-105`}
     >
       <svg
-        viewBox="0 0 48 48"
+        viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full"
       >
         <defs>
-          <linearGradient id={`bp-bg-${theme}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2563EB" />
-            <stop offset="45%" stopColor="#1D4ED8" />
-            <stop offset="100%" stopColor="#0F172A" />
+          <linearGradient id={`bpGrad_${theme}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#06B6D4" />
+            <stop offset="45%" stopColor="#2563EB" />
+            <stop offset="100%" stopColor="#7C3AED" />
           </linearGradient>
-          <linearGradient id={`bp-cyan-${theme}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#38BDF8" />
-            <stop offset="100%" stopColor="#06B6D4" />
+          <linearGradient id={`arrowGrad_${theme}`} x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06B6D4" />
+            <stop offset="100%" stopColor="#00F0FF" />
           </linearGradient>
         </defs>
 
-        {/* Outer Squircle Shield */}
-        <rect x="2" y="2" width="44" height="44" rx="12" fill={`url(#bp-bg-${theme})`} />
+        {/* Outer Dark Squircle Container as in official identity badge */}
+        <rect width="100" height="100" rx="22" fill={isLight ? "#0B1530" : "#0F172A"} />
 
-        {/* Precision Modern Capital 'B' Monogram using Fill-Rule Evenodd */}
+        {/* Stylized 'B' Body with Gradient */}
         <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M 12 10 C 12 8.895 12.895 8 14 8 L 26 8 C 29.866 8 33 11.134 33 15 C 33 17.55 31.63 19.78 29.58 21 C 32.22 22.28 34 24.97 34 28 C 34 32.418 30.418 36 26 36 L 14 36 C 12.895 36 12 35.105 12 34 L 12 10 Z M 17 13 L 17 19 L 25 19 C 26.657 19 28 17.657 28 16 C 28 14.343 26.657 13 25 13 L 17 13 Z M 17 24 L 17 31 L 26 31 C 27.933 31 29.5 29.433 29.5 27.5 C 29.5 25.567 27.933 24 26 24 L 17 24 Z"
-          fill="white"
+          d="M20 25C20 18.37 25.37 13 32 13H58C71.25 13 82 23.75 82 37C82 44.5 78.5 51.2 73 55.5C80 59.8 84 67.2 84 76C84 89.25 73.25 99 60 99H32C25.37 99 20 93.63 20 87V25Z"
+          fill={`url(#bpGrad_${theme})`}
         />
 
-        {/* Dynamic Glowing Cyan Accent pill inside the lower loop of 'B' */}
-        <circle cx="23.5" cy="27.5" r="2.2" fill={`url(#bp-cyan-${theme})`} />
+        {/* Top Inner Cutout Chamber */}
+        <path d="M34 25H56C61.5 25 66 29.5 66 35C66 40.5 61.5 45 56 45H34V25Z" fill={isLight ? "#0B1530" : "#0F172A"} />
 
-        {/* Integrated Plus '+' Super-Badge Top Right */}
-        <g transform="translate(32, 2)">
-          <circle cx="7" cy="7" r="6.5" fill="#0B132B" stroke="#38BDF8" strokeWidth="1.8" />
-          <path d="M7 4.2V9.8M4.2 7H9.8" stroke="#38BDF8" strokeWidth="1.8" strokeLinecap="round" />
-        </g>
+        {/* Bottom Inner Cutout Chamber */}
+        <path d="M34 57H58C63.5 57 68 61.5 68 67C68 72.5 63.5 77 58 77H34V57Z" fill={isLight ? "#0B1530" : "#0F172A"} />
+
+        {/* 3 Ascending Growth Bar Chart Columns */}
+        <rect x="38" y="68" width="5" height="7" rx="1.5" fill={`url(#bpGrad_${theme})`} />
+        <rect x="46" y="64" width="5" height="11" rx="1.5" fill={`url(#bpGrad_${theme})`} />
+        <rect x="54" y="59" width="5" height="16" rx="1.5" fill={`url(#bpGrad_${theme})`} />
+
+        {/* Upward Growth Arrow (↗) */}
+        <path
+          d="M46 45L68 23M68 23H56M68 23V35"
+          stroke={`url(#arrowGrad_${theme})`}
+          strokeWidth="4.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </div>
   );
+
+  const isFull = variant === "full" || variant === "with-tagline";
+  const shouldDisplayTagline = showTagline || variant === "with-tagline";
 
   const content = (
     <div
@@ -85,26 +107,32 @@ export default function BizProLogo({
     >
       {logoEmblem}
 
-      {/* Typography: Wordmark with high-contrast theme support */}
-      {variant === "full" && (
-        <div className="flex items-center tracking-tight leading-none whitespace-nowrap">
-          <span
-            className={`${textSizes[size]} font-black tracking-tight ${
-              isLight ? "text-[#0F172A]" : "text-white"
-            }`}
-          >
-            Biz
-          </span>
-          <span
-            className={`${textSizes[size]} font-black tracking-tight ml-0.5 ${
-              isLight ? "text-primary-container" : "text-[#38BDF8]"
-            }`}
-          >
-            Pro
-          </span>
-          <span className="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 rounded-md bg-primary-container text-white text-[11px] font-black uppercase tracking-wider shadow-sm">
-            +
-          </span>
+      {/* Typography: Wordmark with High Contrast & Gradient Pro */}
+      {isFull && (
+        <div className="flex flex-col justify-center tracking-tight leading-none">
+          <div className="flex items-center">
+            <span
+              className={`${textSizes[size]} font-extrabold tracking-tight ${
+                isLight ? "text-[#0B1530]" : "text-white"
+              }`}
+            >
+              Biz
+            </span>
+            <span
+              className={`${textSizes[size]} font-extrabold tracking-tight ml-0.5 bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent`}
+            >
+              Pro
+            </span>
+          </div>
+          {shouldDisplayTagline && (
+            <span
+              className={`${taglineSizes[size]} font-bold tracking-[0.16em] uppercase mt-0.5 ${
+                isLight ? "text-slate-500" : "text-slate-400"
+              }`}
+            >
+              Drive Business Forward
+            </span>
+          )}
         </div>
       )}
     </div>

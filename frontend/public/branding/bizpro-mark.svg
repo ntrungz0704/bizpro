@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="bizGrad_dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="45%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="arrowGrad_dark" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Stylized B Body -->
+  <path d="M18 24C18 17.4 23.4 12 30 12H58C71.3 12 82 22.7 82 36C82 43.5 78.5 50.2 73 54.5C80 58.8 84 66.2 84 75C84 88.3 73.3 98 60 98H30C23.4 98 18 92.6 18 86V24Z" fill="url(#bizGrad_dark)" />
+
+  <!-- Top Inner Cutout -->
+  <path d="M32 24H56C61.5 24 66 28.5 66 34C66 39.5 61.5 44 56 44H32V24Z" fill="#0B1530" />
+
+  <!-- Bottom Inner Cutout -->
+  <path d="M32 56H58C63.5 56 68 60.5 68 66C68 71.5 63.5 76 58 76H32V56Z" fill="#0B1530" />
+
+  <!-- 3 Growth Bar Columns -->
+  <rect x="36" y="67" width="5" height="7" rx="1.5" fill="url(#bizGrad_dark)" />
+  <rect x="44" y="63" width="5" height="11" rx="1.5" fill="url(#bizGrad_dark)" />
+  <rect x="52" y="58" width="5" height="16" rx="1.5" fill="url(#bizGrad_dark)" />
+
+  <!-- Upward Growth Arrow (↗) -->
+  <path d="M44 44L66 22M66 22H54M66 22V34" stroke="url(#arrowGrad_dark)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

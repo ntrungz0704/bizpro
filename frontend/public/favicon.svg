@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="favGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="50%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="#0B1530" />
+  <path d="M7 8C7 6.3 8.3 5 10 5H19C23 5 26 8 26 12C26 14.5 24.5 16.5 22.5 17.5C25 18.5 26.5 21 26.5 23.5C26.5 27.5 23.5 30 19.5 30H10C8.3 30 7 28.7 7 27V8Z" fill="url(#favGrad)" />
+  <path d="M11 8H18C20 8 21.5 9.5 21.5 11.5C21.5 13.5 20 15 18 15H11V8Z" fill="#0B1530" />
+  <path d="M11 18H18.5C20.5 18 22 19.5 22 21.5C22 23.5 20.5 25 18.5 25H11V18Z" fill="#0B1530" />
+  <!-- Arrow Head -->
+  <path d="M14 14L21 7M21 7H17M21 7V11" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

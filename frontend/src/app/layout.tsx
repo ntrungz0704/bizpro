@@ -4,11 +4,11 @@ import Shell from "@/components/Shell";
 import { AppProvider } from "@/context/AppContext";
 
 export const metadata: Metadata = {
-  title: "BizPro+ | Nền Tảng Quản Trị & Vận Hành Doanh Nghiệp Toàn Diện",
+  title: "BizPro | Nền Tảng Quản Trị & Vận Hành Doanh Nghiệp Toàn Diện",
   description: "Hệ thống quản trị doanh nghiệp thế hệ mới hợp nhất CRM, Kho hàng, Quy trình Bán hàng 5 bước và Chấm công Nhân sự",
   icons: {
-    icon: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/branding/favicon.svg",
+    apple: "/branding/favicon.svg",
   },
 };
 
